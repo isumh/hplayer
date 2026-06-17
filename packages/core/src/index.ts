@@ -2,6 +2,13 @@
 
 // api
 export * from './api/client';
+export * from './store/favorite';
+export * from './store/history';
+export * from './store/player';
+export * from './store/search-history';
+export * from './store/settings';
+// store
+export * from './store/source';
 export * from './types/favorite';
 export * from './types/history';
 export * from './types/search';
