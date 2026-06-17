@@ -1,0 +1,19 @@
+{
+  "name": "@hplayer/views",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@hplayer/core": "workspace:*",
+    "@hplayer/ui": "workspace:*",
+    "vant": "^4.9.0",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "vue-tsc": "^2.1.0"
+  }
+}
