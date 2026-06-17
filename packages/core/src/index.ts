@@ -1,5 +1,11 @@
 // types
 
+export * from './adapter/aggregate';
+export * from './adapter/index';
+export * from './adapter/t0-xml';
+export * from './adapter/t1-json';
+// adapter
+export * from './adapter/types';
 // api
 export * from './api/client';
 export * from './store/favorite';
