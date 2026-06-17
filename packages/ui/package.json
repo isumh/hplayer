@@ -10,7 +10,8 @@
   "dependencies": {
     "@hplayer/core": "workspace:*",
     "vant": "^4.9.0",
-    "vue": "^3.5.0"
+    "vue": "^3.5.0",
+    "vue-router": "^4.4.0"
   },
   "devDependencies": {
     "vue-tsc": "^2.1.0"
