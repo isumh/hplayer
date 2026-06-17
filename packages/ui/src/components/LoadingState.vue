@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { Skeleton } from 'vant';
+
 defineOptions({ name: 'HPlayerLoadingState' });
 </script>
 

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { showImagePreview } from 'vant';
 import type { VodItem } from '@hplayer/core';
+import { showImagePreview } from 'vant';
 
 const props = defineProps<{ item: VodItem; sourceName?: string }>();
-const emit = defineEmits<{ (e: 'click', item: VodItem): void }>();
+const emit = defineEmits<(e: 'click', item: VodItem) => void>();
 
 function previewImage(e: Event) {
   e.stopPropagation();

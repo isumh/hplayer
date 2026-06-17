@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { PullRefresh, List } from 'vant';
 import type { VodItem } from '@hplayer/core';
+import { List, PullRefresh } from 'vant';
+import { ref } from 'vue';
 import VodCard from './VodCard.vue';
 
 defineProps<{
@@ -19,8 +19,12 @@ const emit = defineEmits<{
 
 const refreshing = ref(false);
 
-function onLoad() { emit('load'); }
-function onRefresh() { emit('refresh'); }
+function onLoad() {
+  emit('load');
+}
+function onRefresh() {
+  emit('refresh');
+}
 </script>
 
 <template>

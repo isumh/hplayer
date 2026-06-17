@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { Tabbar, TabbarItem } from 'vant';
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 defineOptions({ name: 'HPlayerTabBar' });
