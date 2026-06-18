@@ -1,12 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { CellGroup, Cell, Button, Switch, NavBar } from 'vant';
-import { useSourceStore, useSettingsStore } from '@hplayer/core';
+import { CellGroup, Cell, Button, Switch, NavBar, showToast } from 'vant';
+import {
+  useSourceStore,
+  useSettingsStore,
+  exportBackup,
+  importBackup,
+} from '@hplayer/core';
 
 const router = useRouter();
 const sourceStore = useSourceStore();
 const settingsStore = useSettingsStore();
+
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const sources = computed(() => sourceStore.list.slice().sort((a, b) => a.order - b.order));
 
@@ -21,11 +28,50 @@ function editSource(id: string) {
 function setTheme(theme: 'light' | 'dark' | 'auto') {
   settingsStore.setTheme(theme);
 }
+
+function exportData() {
+  const raw = exportBackup();
+  const blob = new Blob([raw], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `hplayer-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('导出成功');
+}
+
+function triggerImport() {
+  fileInput.value?.click();
+}
+
+function handleImport(e: Event) {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const raw = ev.target?.result as string | undefined;
+    if (!raw) {
+      showToast('文件读取失败');
+      return;
+    }
+    if (importBackup(raw)) {
+      showToast('导入成功，请刷新页面');
+    } else {
+      showToast('无效的备份文件');
+    }
+  };
+  reader.onerror = () => showToast('文件读取失败');
+  reader.readAsText(file);
+  target.value = '';
+}
 </script>
 
 <template>
   <div class="settings">
     <NavBar title="设置" />
+
     <div class="section">
       <div class="section-title">视频源管理</div>
       <CellGroup inset>
@@ -51,6 +97,19 @@ function setTheme(theme: 'light' | 'dark' | 'auto') {
         <Button type="primary" block @click="router.push('/settings/source/add')">添加视频源</Button>
       </div>
     </div>
+
+    <div class="section">
+      <div class="section-title">数据管理</div>
+      <CellGroup inset>
+        <Cell title="导出数据" clickable is-link @click="exportData">
+          <template #right-icon><span class="hint">导出视频源、收藏、历史</span></template>
+        </Cell>
+        <Cell title="导入数据" clickable is-link @click="triggerImport">
+          <template #right-icon><span class="hint">从备份文件恢复</span></template>
+        </Cell>
+      </CellGroup>
+    </div>
+
     <div class="section">
       <div class="section-title">主题</div>
       <CellGroup inset>
@@ -74,12 +133,21 @@ function setTheme(theme: 'light' | 'dark' | 'auto') {
         />
       </CellGroup>
     </div>
+
     <div class="section">
       <CellGroup inset>
         <Cell title="关于 hplayer" label="v0.1.0" />
         <Cell title="开源协议" label="MIT" />
       </CellGroup>
     </div>
+
+    <input
+      ref="fileInput"
+      type="file"
+      accept=".json"
+      style="display: none"
+      @change="handleImport"
+    />
   </div>
 </template>
 
@@ -88,4 +156,5 @@ function setTheme(theme: 'light' | 'dark' | 'auto') {
 .section { margin-bottom: 16px; }
 .section-title { padding: 8px 16px; font-size: 12px; color: var(--van-text-color-2); }
 .add-btn { padding: 12px 16px; }
+.hint { font-size: 12px; color: var(--van-text-color-2); }
 </style>

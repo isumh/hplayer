@@ -19,5 +19,25 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     include: ['packages/**/*.{test,spec}.ts', 'apps/**/*.{test,spec}.ts'],
+    coverage: {
+      provider: 'v8',
+      include: ['packages/core/src/**/*.{ts,vue}'],
+      exclude: [
+        'packages/core/src/**/*.{test,spec}.ts',
+        'packages/core/src/types/**',
+        'packages/core/src/index.ts',
+        // V1.1 占位
+        'packages/core/src/adapter/aggregate.ts',
+        'packages/core/src/adapter/t0-xml.ts',
+        // 用户未要求补测的 store（P5 范围外）
+        'packages/core/src/store/favorite.ts',
+        'packages/core/src/store/player.ts',
+        'packages/core/src/store/preview.ts',
+        'packages/core/src/store/settings.ts',
+        // 迁移工具（V2 阶段）
+        'packages/core/src/utils/migrate.ts',
+      ],
+      reporter: ['text', 'json-summary'],
+    },
   },
 });

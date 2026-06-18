@@ -9,6 +9,7 @@ import {
   useHistoryStore,
   usePlayerStore,
   adapterProxy,
+  stripHtml,
   type VodDetail,
   type Episode,
 } from '@hplayer/core';
@@ -61,6 +62,9 @@ const isFav = computed(() =>
   detail.value ? favoriteStore.isFavorited(detail.value.id, sourceId) : false,
 );
 
+// 去除 HTML 标签 + 实体解码：抽离至 @hplayer/core/strip-html 便于测试
+const descText = computed(() => (detail.value?.desc ? stripHtml(detail.value.desc) : ''));
+
 function onBack() {
   if (window.history.length > 1) router.back();
   else router.replace('/home');
@@ -89,8 +93,8 @@ onMounted(load);
           </button>
         </div>
       </div>
-      <CellGroup inset v-if="detail.desc">
-        <Cell title="剧情" :label="detail.desc" />
+      <CellGroup inset v-if="descText">
+        <Cell title="剧情" :label="descText" />
       </CellGroup>
       <EpisodeList v-if="detail.playFrom.length" :detail="detail" @select="play" />
     </template>
