@@ -26,14 +26,7 @@ export default defineConfig({
         'packages/core/src/**/*.{test,spec}.ts',
         'packages/core/src/types/**',
         'packages/core/src/index.ts',
-        // V1.1 占位
         'packages/core/src/adapter/aggregate.ts',
-        'packages/core/src/adapter/t0-xml.ts',
-        // 用户未要求补测的 store（P5 范围外）
-        'packages/core/src/store/favorite.ts',
-        'packages/core/src/store/player.ts',
-        'packages/core/src/store/preview.ts',
-        'packages/core/src/store/settings.ts',
         // 迁移工具（V2 阶段）
         'packages/core/src/utils/migrate.ts',
       ],

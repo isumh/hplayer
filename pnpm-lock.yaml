@@ -127,7 +127,7 @@ importers:
         specifier: ^1.11.0
         version: 1.11.21
       fast-xml-parser:
-        specifier: ^4.5.0
+        specifier: ^4.5.6
         version: 4.5.6
       pinia:
         specifier: ^2.2.0
