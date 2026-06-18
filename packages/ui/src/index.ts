@@ -6,6 +6,7 @@ export { default as EpisodeList } from './business/EpisodeList.vue'
 export { default as ImagePreview } from './business/ImagePreview.vue'
 export { default as SearchBar } from './business/SearchBar.vue'
 export { default as SearchHistory } from './business/SearchHistory.vue'
+export { default as SearchResultList } from './business/SearchResultList.vue'
 export { default as SourceForm } from './business/SourceForm.vue'
 export { default as SourcePicker } from './business/SourcePicker.vue'
 // business

@@ -6,9 +6,10 @@ import {
   useSourceStore,
   type VodItem,
 } from '@hplayer/core'
-import { EmptyState, SearchBar, SearchHistory, VodList } from '@hplayer/ui'
+// biome-ignore lint/correctness/noUnusedImports: used in <template>
+import { EmptyState, SearchBar, SearchHistory, SearchResultList } from '@hplayer/ui'
 import { closeToast, showToast } from 'vant'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -23,6 +24,11 @@ const page = ref(1)
 const finished = ref(false)
 const loading = ref(false)
 const searched = ref(false)
+const VIRTUAL_LIST_THRESHOLD = 100
+// biome-ignore lint/correctness/noUnusedVariables: used in <template>
+const enableVirtual = computed(
+  () => mode.value === 'aggregate' && items.value.length > VIRTUAL_LIST_THRESHOLD,
+)
 
 async function doSearch(kw: string) {
   const trimmed = kw.trim()
@@ -73,6 +79,7 @@ function onHistorySelect(kw: string) {
   doSearch(kw)
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: used in <template>
 function goDetail(it: VodItem) {
   router.push({ path: `/detail/${it.id}`, query: { sourceId: it.sourceId } })
 }
@@ -86,12 +93,13 @@ watch(mode, () => {
   <div class="search-page">
     <SearchBar v-model="keyword" v-model:mode="mode" :source-name="sourceStore.activeSource?.name ?? ''" @search="doSearch" />
     <SearchHistory v-if="!searched" @select="onHistorySelect" />
-    <VodList
+    <SearchResultList
       v-else-if="items.length"
       :items="items"
       :source-name="(mode === 'single' ? sourceStore.activeSource?.name : '') ?? ''"
       :loading="loading"
       :finished="finished"
+      :enable-virtual="enableVirtual"
       @load="() => loadResults(keyword)"
       @refresh="() => loadResults(keyword, true)"
       @select="goDetail"

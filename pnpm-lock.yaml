@@ -11,6 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: 2.4.5
         version: 2.4.5
+      '@playwright/test':
+        specifier: 1.57.0
+        version: 1.57.0
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.43
@@ -26,6 +29,9 @@ importers:
       pinia:
         specifier: ^2.2.0
         version: 2.3.1(typescript@5.9.3)(vue@3.5.38(typescript@5.9.3))
+      playwright:
+        specifier: 1.57.0
+        version: 1.57.0
       typescript:
         specifier: ^5.6.0
         version: 5.9.3
@@ -165,6 +171,9 @@ importers:
       vue-router:
         specifier: ^4.4.0
         version: 4.6.4(vue@3.5.38(typescript@5.9.3))
+      vue-virtual-scroller:
+        specifier: '2'
+        version: 2.0.1(vue@3.5.38(typescript@5.9.3))
     devDependencies:
       vue-tsc:
         specifier: ^2.1.0
@@ -633,6 +642,11 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
+
+  '@playwright/test@1.57.0':
+    resolution: {integrity: sha512-6TyEnHgd6SArQO8UO2OMTxshln3QMWBtPGrOCgs3wVEmQmwyuNtB10IZMfmYDE0riwNR1cu4q+pPcxMVtaG3TA==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
@@ -1226,6 +1240,11 @@ packages:
   fraction.js@5.3.4:
     resolution: {integrity: sha512-1X1NTtiJphryn/uLQz3whtY6jK3fTqoE3ohKs0tT+Ujr1W59oopxmoEh7Lu5p6vBaPbgoM0bzveAW4Qi5RyWDQ==}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -1456,6 +1475,9 @@ packages:
     resolution: {integrity: sha512-tEBHqDnIoM/1rXME1zgka9g6Q2lcoCkxHLuc7ODJ5BxbP5d4c2Z5cGgtXAku59200Cx7diuHTOYfSBD8n6mm8A==}
     engines: {node: '>=16 || 14 >=14.17'}
 
+  mitt@2.1.0:
+    resolution: {integrity: sha512-ILj2TpLiysu2wkBbWjAmww7TkZb65aiQO+DkVdUTBpBXq+MHYiETENkKFMtsJZX1Lf4pe4QOrTSjIfUwN5lRdg==}
+
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
@@ -1521,6 +1543,16 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  playwright-core@1.57.0:
+    resolution: {integrity: sha512-agTcKlMw/mjBWOnD6kFZttAAGHgi/Nw0CZ2o6JqWSbMlI219lAFLZZCyqByTsvVAJq5XA5H8cA6PrvBRpBWEuQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.57.0:
+    resolution: {integrity: sha512-ilYQj1s8sr2ppEJ2YVadYBN0Mb3mdo9J0wQ+UuDhzYqURwSoW4n1Xs5vs7ORwgDGmyEh33tRMeS8KhdkMoLXQw==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
@@ -1807,6 +1839,11 @@ packages:
     hasBin: true
     peerDependencies:
       typescript: '>=5.0.0'
+
+  vue-virtual-scroller@2.0.1:
+    resolution: {integrity: sha512-3Drq8C61C4B3reSaZJr5nXBf/B7Beq1+h5/kYZB25MLYljTy97ISeUufRX9z6ZSZlFDXyafAOLK9XwajOWJY1A==}
+    peerDependencies:
+      vue: ^3.3.0
 
   vue@3.5.38:
     resolution: {integrity: sha512-vAMKHfImQlYSy0C+PBue4s3ERZ2xGKfgZg5GXAsLInq1dyh2H78ILVP5sK0KPFPVW4kv+OGCIvBEondcjpZp7A==}
@@ -2140,6 +2177,10 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
+
+  '@playwright/test@1.57.0':
+    dependencies:
+      playwright: 1.57.0
 
   '@rolldown/pluginutils@1.0.1': {}
 
@@ -2740,6 +2781,9 @@ snapshots:
 
   fraction.js@5.3.4: {}
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -2973,6 +3017,8 @@ snapshots:
 
   minipass@7.1.3: {}
 
+  mitt@2.1.0: {}
+
   ms@2.1.3: {}
 
   muggle-string@0.4.1: {}
@@ -3023,6 +3069,14 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@vue/composition-api'
+
+  playwright-core@1.57.0: {}
+
+  playwright@1.57.0:
+    dependencies:
+      playwright-core: 1.57.0
+    optionalDependencies:
+      fsevents: 2.3.2
 
   postcss-value-parser@4.2.0: {}
 
@@ -3275,6 +3329,11 @@ snapshots:
       '@volar/typescript': 2.4.15
       '@vue/language-core': 2.2.12(typescript@5.9.3)
       typescript: 5.9.3
+
+  vue-virtual-scroller@2.0.1(vue@3.5.38(typescript@5.9.3)):
+    dependencies:
+      mitt: 2.1.0
+      vue: 3.5.38(typescript@5.9.3)
 
   vue@3.5.38(typescript@5.9.3):
     dependencies:

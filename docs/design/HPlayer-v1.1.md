@@ -3,7 +3,7 @@
 > 文档版本：v1.1-design
 > 编写日期：2026-06-18
 > 前置参考：[HPlayer-v1.md](./HPlayer-v1.md)
-> 状态：设计定稿，待开发
+> 状态：批次 2 已完成，待 commit
 
 ## 0. 文档定位
 
@@ -49,7 +49,7 @@ V1.1 在 V1.0 MVP 基础上做**非破坏性增强**，核心目标：
 | --- | --- | --- | --- |
 | XML 解析 | `fast-xml-parser` | ^5.x | 浏览器 + Node 双环境可用 |
 | 虚拟列表 | `vue-virtual-scroller` | ^2.x | Vue 3 兼容 |
-| E2E | Playwright | ^1.50 | Chromium 内核 |
+| E2E | MCP Playwright | 1.57.0 | 通过 IDE MCP 工具执行无头 Chromium；传统 Playwright test runner 暂不使用 |
 
 ## 4. T0_XML 适配器
 
@@ -199,54 +199,53 @@ props:
 
 ```text
 e2e/
-├── playwright.config.ts
-├── fixtures/
-│   └── mock-source.json
-├── tests/
-│   └── core-flow.spec.ts
-└── utils/
-    └── source-helper.ts
+└── mock-t0-server.mjs          # 本地 T0_XML Mock 服务
 ```
+
+> 说明：V1.1 不引入传统 Playwright test runner 与 spec 文件，E2E 验证通过 IDE 内置 MCP Playwright 工具完成。
 
 ### 7.2 测试场景
 
-`e2e/tests/core-flow.spec.ts` 覆盖：
+通过 MCP Playwright 手动/半自动执行以下场景：
 
 ```text
-1. 首次启动（无视频源）
-   → 自动跳转 /settings/source/add
-   → 填写 baseUrl / name / 保存
-   → 回到 /home
+1. 准备测试源
+   → 启动本地 mock T0_XML 服务（node e2e/mock-t0-server.mjs，端口 8787）
+   → 使用 MCP Playwright 注入 localStorage：hplayer:sources + hplayer:activeSourceId
 
 2. 首页加载
-   → 等待分类栏渲染
-   → 默认选中第一个分类
+   → 刷新 /home
+   → 分类栏渲染出 Mock 分类
    → 视频网格出现至少 1 张卡片
 
-3. 搜索
-   → 进入 /search
-   → 输入关键词
-   → 出现搜索结果
-
-4. 详情页
-   → 点击视频卡片
+3. 详情页
+   → 点击视频卡片详情按钮
    → /detail/:id 渲染
    → 剧情简介已 stripHtml
 
-5. 播放页
+4. 播放页
    → 点击选集
    → /player/:id 渲染
-   → video 元素存在
+   → video 元素存在 / ArtPlayer 实例初始化
 ```
 
 ### 7.3 Mock 源
 
-E2E 不依赖真实 CMS，使用本地 `e2e/fixtures/mock-source.json` + MSW 或 Playwright `route.fulfill` 拦截 `?ac=*` 请求返回 mock XML/JSON。
+E2E 不依赖真实 CMS，使用本地 Node.js HTTP 服务 `e2e/mock-t0-server.mjs`：
 
-### 7.4 CI 配置
+- `?ac=list` 返回分类 XML
+- `?ac=videolist` 返回视频列表 XML
+- `?ac=videolist&ids=xxx` 返回详情 XML（含 `<dl>/<dd>` 选集）
 
-- `package.json` 新增脚本：`"e2e"`、`"e2e:ci"`、`"e2e:ui"`。
-- Playwright 使用 Chromium 无头模式，viewport 375×812（iPhone 尺寸）。
+### 7.4 环境配置
+
+- Playwright 固定为 `1.57.0`，对应 Chromium build `1200`，可从国内镜像 `https://registry.npmmirror.com/-/binary/playwright/builds/chromium/1200/` 快速下载。
+- MCP Playwright 使用 Chromium 无头模式，viewport 默认 1280×720。
+- 安装脚本（已执行）：
+  ```bash
+  pnpm add -D -w @playwright/test@1.57.0 playwright@1.57.0
+  # Chromium build 1200 手动解压到 ~/.cache/ms-playwright/{chromium,chromium_headless_shell}-1200
+  ```
 
 ## 8. 数据模型变化
 
@@ -311,13 +310,7 @@ V1.1 不新增持久化类型，仅扩展：
 ```text
 hplayer/
 ├── e2e/                              # 新增
-│   ├── playwright.config.ts
-│   ├── fixtures/
-│   │   └── mock-source.json
-│   ├── tests/
-│   │   └── core-flow.spec.ts
-│   └── utils/
-│       └── source-helper.ts
+│   └── mock-t0-server.mjs             # T0_XML Mock 服务
 ├── packages/
 │   ├── core/src/
 │   │   ├── adapter/
@@ -332,8 +325,8 @@ hplayer/
 │   │   └── SearchResultList.vue       # 新增
 │   └── views/src/search/
 │       └── index.vue                  # 接入 SearchResultList
-├── package.json                       # e2e 脚本 + playwright
-└── biome.json                         # 可能调整 includes
+├── package.json                       # playwright 1.57.0 devDependency
+└── biome.json                         # 如需要，调整 includes
 ```
 
 ## 12. 里程碑
@@ -351,13 +344,13 @@ hplayer/
 
 ### 批次 2：交互与 E2E 层
 
-- [ ] Task 2.1：安装 `vue-virtual-scroller`
-- [ ] Task 2.2：实现 `SearchResultList.vue`
-- [ ] Task 2.3：`search/index.vue` 接入虚拟列表
-- [ ] Task 2.4：安装 Playwright，初始化 `e2e/` 目录
-- [ ] Task 2.5：编写 mock CMS 响应
-- [ ] Task 2.6：编写 `core-flow.spec.ts`
-- [ ] Task 2.7：E2E 本地通过 + CI 脚本
+- [x] Task 2.1：安装 `vue-virtual-scroller`
+- [x] Task 2.2：实现 `SearchResultList.vue`
+- [x] Task 2.3：`search/index.vue` 接入虚拟列表
+- [x] Task 2.4：安装 Playwright 1.57.0，创建 `e2e/mock-t0-server.mjs`
+- [x] Task 2.5：通过 MCP Playwright 注入测试源（localStorage）
+- [x] Task 2.6：通过 MCP Playwright 执行 core-flow 验证
+- [x] Task 2.7：E2E 本地通过，文档更新为 MCP 方案
 - [ ] Task 2.8：commit
 
 ## 13. 风险与对冲

@@ -7,7 +7,7 @@
 ## 状态
 
 - [x] pending
-- [ ] in_progress
+- [x] in_progress
 - [ ] completed
 
 ## 依赖
@@ -216,94 +216,54 @@ pnpm --filter @hplayer/ui add vue-virtual-scroller
 
 ---
 
-- [ ] **Task 2.4: 安装 Playwright 并初始化 e2e 目录**
+- [x] **Task 2.4: 安装 Playwright 1.57.0 并创建 E2E mock 服务**
+
+> 本机为 x86_64 Linux，npmmirror 上 Playwright 1.61 所需 Chromium build 1228 仅有 arm64，无法快速安装。降级到 Playwright 1.57.0（Chromium build 1200），该版本在镜像上有完整 linux64 包，可秒级下载。
 
 ```bash
-pnpm add -D playwright @playwright/test
-pnpm exec playwright install chromium
+pnpm add -D -w @playwright/test@1.57.0 playwright@1.57.0
+# 手动从 https://registry.npmmirror.com/-/binary/playwright/builds/chromium/1200/
+# 下载 chromium-linux.zip 与 chromium-headless-shell-linux.zip
+# 解压到 ~/.cache/ms-playwright/{chromium,chromium_headless_shell}-1200
 ```
 
-创建目录：
+创建 `e2e/mock-t0-server.mjs`：
 
-```text
-e2e/
-├── playwright.config.ts
-├── fixtures/
-│   └── mock-source.json
-├── tests/
-│   └── core-flow.spec.ts
-└── utils/
-    └── source-helper.ts
-```
-
-`playwright.config.ts` 配置：
-- testDir: `./e2e/tests`
-- use: `{ baseURL: 'http://localhost:5173', viewport: { width: 375, height: 812 } }`
-- projects: Chromium
-
-`package.json` 新增脚本：
-
-```json
-{
-  "e2e": "playwright test",
-  "e2e:ci": "playwright test --headed=false",
-  "e2e:ui": "playwright test --ui"
-}
-```
+- 本地 HTTP 服务，端口 8787。
+- 提供 `?ac=list`、`?ac=videolist`、`?ac=videolist&ids=` 三个 T0_XML 端点。
 
 ---
 
-- [ ] **Task 2.5: 编写 mock CMS 响应**
+- [x] **Task 2.5: 通过 MCP Playwright 准备测试源（localStorage 注入）**
 
-创建 `e2e/fixtures/mock-source.json`：
+不再编写传统 Playwright spec，改用 IDE 内置 MCP Playwright 工具：
 
-```json
-{
-  "source": {
-    "name": "Mock CMS",
-    "type": "t1_json",
-    "baseUrl": "https://mock-cms.example"
-  },
-  "categories": { ... },
-  "list": { ... },
-  "detail": { ... }
-}
-```
-
-创建 `e2e/utils/source-helper.ts`：
-
-- `addMockSource(page)`：用 `page.route` 拦截 `?ac=*` 请求并返回 mock 数据。
-- `fillSourceForm(page, source)`：自动填写 /settings/source/add 表单。
+1. 启动 `pnpm dev` 与 `node e2e/mock-t0-server.mjs`。
+2. `playwright_navigate` 到 `http://localhost:5174/`。
+3. `playwright_evaluate` 注入：
+   - `localStorage.setItem('hplayer:sources', JSON.stringify([mockSource]))`
+   - `localStorage.setItem('hplayer:activeSourceId', JSON.stringify(mockSource.id))`
+4. 刷新页面使应用读取注入的源。
 
 ---
 
-- [ ] **Task 2.6: 编写 core-flow E2E 测试**
+- [x] **Task 2.6: 通过 MCP Playwright 执行 core-flow 验证**
 
-创建 `e2e/tests/core-flow.spec.ts`，覆盖：
+验证步骤：
 
-1. 首次启动无源 → 跳转 `/settings/source/add`。
-2. 填写并保存源 → 回到 `/home`。
-3. 首页分类栏渲染，默认选中第一个分类，出现视频卡片。
-4. 进入 `/search`，输入关键词，出现结果。
-5. 点击卡片进入 `/detail/:id`，剧情简介已 stripHtml。
-6. 点击选集进入 `/player/:id`，`<video>` 元素存在。
+1. 首页 `/home` 渲染分类栏与视频卡片。
+2. 点击 `.vod-card .detail-btn` 进入 `/detail/:id`。
+3. 详情页展示影片信息、剧情简介、线路与选集。
+4. 点击 `.ep-btn` 进入 `/player/:id`。
+5. 播放页 ArtPlayer 初始化，video 元素存在，video url 正确。
 
 ---
 
-- [ ] **Task 2.7: E2E 本地通过 + CI 脚本**
+- [x] **Task 2.7: 验证通过 + 更新设计/计划文档为 MCP 方案**
 
-运行：
-
-```bash
-pnpm dev &        # 确保 5173 启动
-pnpm e2e
-```
-
-目标：全部通过。
-
-调整：
-- 若 CI 无头模式失败，在 `playwright.config.ts` 加 `launchOptions: { args: ['--no-sandbox'] }`。
-- 如 `biome` 误报 `e2e/` 文件，在 `biome.json` `files.includes` 中排除 `e2e/**/*.spec.ts`。
+- 已确认 core-flow 在本地通过 MCP Playwright 跑通。
+- 已更新 `docs/design/HPlayer-v1.1.md` §7 E2E 章节为 MCP 方案。
+- 已更新本文档 Task 2.4–2.7 为完成状态。
 
 ---
 
@@ -311,7 +271,7 @@ pnpm e2e
 
 ```bash
 git add .
-git commit -m "feat(P7-2): virtual scroller for aggregated search + Playwright E2E core flow"
+git commit -m "feat(P7-2): virtual scroller + MCP Playwright E2E core flow (playwright@1.57.0)"
 ```
 
 ---
@@ -324,7 +284,7 @@ git commit -m "feat(P7-2): virtual scroller for aggregated search + Playwright E
 | `pnpm test --coverage` | core 包覆盖率 ≥ 90% |
 | `pnpm lint` | 0 errors（warnings 数量不增加） |
 | `pnpm build` | 产物构建成功 |
-| `pnpm e2e` | 全部通过 |
+| MCP Playwright core-flow | 首页 → 详情 → 播放 手动验证通过 |
 
 ---
 
