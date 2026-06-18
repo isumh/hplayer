@@ -1,45 +1,45 @@
 <script setup lang="ts">
-import type { VodItem } from '@hplayer/core';
-import { List, PullRefresh } from 'vant';
-import { ref, watch } from 'vue';
-import VodCard from './VodCard.vue';
+import type { VodItem } from '@hplayer/core'
+import { List, PullRefresh } from 'vant'
+import { ref, watch } from 'vue'
+import VodCard from './VodCard.vue'
 
 const props = defineProps<{
-  items: VodItem[];
-  sourceName?: string;
-  loading: boolean;
-  finished: boolean;
-}>();
+  items: VodItem[]
+  sourceName?: string
+  loading: boolean
+  finished: boolean
+}>()
 
 const emit = defineEmits<{
-  (e: 'load'): void;
-  (e: 'refresh'): void;
-  (e: 'select', item: VodItem): void;
-  (e: 'play', item: VodItem): void;
-}>();
+  (e: 'load'): void
+  (e: 'refresh'): void
+  (e: 'select', item: VodItem): void
+  (e: 'play', item: VodItem): void
+}>()
 
-const refreshing = ref(false);
+const refreshing = ref(false)
 
 // 关键修复：下拉刷新时父组件 emit('refresh') 后，PullRefresh 不会自动收起 loading
 // 监听外部 loading 由 true → false（覆盖分页和重置两种场景），自动收 refreshing
 watch(
   () => props.loading,
   (cur, prev) => {
-    if (prev && !cur) refreshing.value = false;
+    if (prev && !cur) refreshing.value = false
   },
-);
+)
 
 function onLoad() {
-  emit('load');
+  emit('load')
 }
 function onRefresh() {
-  emit('refresh');
+  emit('refresh')
 }
 function onSelect(it: VodItem) {
-  emit('select', it);
+  emit('select', it)
 }
 function onPlay(it: VodItem) {
-  emit('play', it);
+  emit('play', it)
 }
 </script>
 

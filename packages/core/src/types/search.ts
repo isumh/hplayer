@@ -1,4 +1,4 @@
 export interface SearchHistoryItem {
-  keyword: string;
-  lastAccessTime: number;
+  keyword: string
+  lastAccessTime: number
 }

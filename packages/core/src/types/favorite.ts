@@ -1,8 +1,8 @@
-import type { VodItem } from './vod';
+import type { VodItem } from './vod'
 
 export interface FavoriteItem {
-  id: string;
-  vod: VodItem;
-  sourceId: string;
-  createdAt: number;
+  id: string
+  vod: VodItem
+  sourceId: string
+  createdAt: number
 }

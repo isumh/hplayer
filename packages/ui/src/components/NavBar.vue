@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import { NavBar } from 'vant';
-import { useRouter } from 'vue-router';
+import { NavBar } from 'vant'
+import { useRouter } from 'vue-router'
 
 withDefaults(
   defineProps<{
-    title?: string;
-    showBack?: boolean;
-    rightText?: string;
+    title?: string
+    showBack?: boolean
+    rightText?: string
   }>(),
   {
     title: '',
     showBack: true,
     rightText: '',
   },
-);
+)
 
 const emit = defineEmits<{
-  (e: 'click-left'): void;
-  (e: 'click-right'): void;
-}>();
+  (e: 'click-left'): void
+  (e: 'click-right'): void
+}>()
 
-const router = useRouter();
+const router = useRouter()
 function back() {
-  if (window.history.length > 1) router.back();
-  else router.push('/home');
+  if (window.history.length > 1) router.back()
+  else router.push('/home')
 }
 </script>
 

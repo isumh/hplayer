@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useSearchHistoryStore } from '@hplayer/core';
-import { Dialog, Tag } from 'vant';
+import { useSearchHistoryStore } from '@hplayer/core'
+import { Dialog, Tag } from 'vant'
 
-const store = useSearchHistoryStore();
-const emit = defineEmits<(e: 'select', keyword: string) => void>();
+const store = useSearchHistoryStore()
+const emit = defineEmits<(e: 'select', keyword: string) => void>()
 
 async function clearAll() {
   const confirmed = await Dialog.confirm({
@@ -11,12 +11,12 @@ async function clearAll() {
     message: '确认删除所有搜索历史？',
   })
     .then(() => true)
-    .catch(() => false);
-  if (confirmed) store.clear();
+    .catch(() => false)
+  if (confirmed) store.clear()
 }
 
 function removeOne(keyword: string) {
-  store.remove(keyword);
+  store.remove(keyword)
 }
 </script>
 

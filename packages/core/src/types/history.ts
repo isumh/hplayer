@@ -1,11 +1,11 @@
-import type { Episode, VodItem } from './vod';
+import type { Episode, VodItem } from './vod'
 
 export interface HistoryItem {
-  id: string;
-  vod: VodItem;
-  sourceId: string;
-  episode?: Episode;
-  progress: number;
-  duration?: number;
-  lastWatchTime: number;
+  id: string
+  vod: VodItem
+  sourceId: string
+  episode?: Episode
+  progress: number
+  duration?: number
+  lastWatchTime: number
 }

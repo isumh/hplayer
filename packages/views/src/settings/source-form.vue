@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { NavBar, SourceForm } from '@hplayer/ui';
-import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { NavBar, SourceForm } from '@hplayer/ui'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-const route = useRoute();
-const router = useRouter();
+const route = useRoute()
+const router = useRouter()
 const sourceId = computed<string | undefined>(
   () => (route.params.id as string | undefined) ?? undefined,
-);
+)
 
 function onBack() {
-  if (window.history.length > 1) router.back();
-  else router.replace('/settings');
+  if (window.history.length > 1) router.back()
+  else router.replace('/settings')
 }
 </script>
 

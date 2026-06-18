@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { Tabbar, TabbarItem } from 'vant';
-import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { Tabbar, TabbarItem } from 'vant'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
-defineOptions({ name: 'HPlayerTabBar' });
+defineOptions({ name: 'HPlayerTabBar' })
 
-const route = useRoute();
-const router = useRouter();
+const route = useRoute()
+const router = useRouter()
 
-const active = computed(() => route.path);
+const active = computed(() => route.path)
 
 function go(path: string) {
-  router.push(path);
+  router.push(path)
 }
 </script>
 

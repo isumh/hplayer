@@ -1,80 +1,80 @@
 <script setup lang="ts">
-import { type FavoriteItem, useFavoriteStore } from '@hplayer/core';
-import { EmptyState, NavBar } from '@hplayer/ui';
-import type { SwipeCellInstance } from 'vant';
-import { Cell, SwipeCell, showConfirmDialog } from 'vant';
-import { computed, onBeforeUnmount, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { type FavoriteItem, useFavoriteStore } from '@hplayer/core'
+import { EmptyState, NavBar } from '@hplayer/ui'
+import type { SwipeCellInstance } from 'vant'
+import { Cell, SwipeCell, showConfirmDialog } from 'vant'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
-const store = useFavoriteStore();
+const router = useRouter()
+const store = useFavoriteStore()
 
 // 时间倒序：最新收藏的在前
 const list = computed<FavoriteItem[]>(() =>
   store.items.slice().sort((a, b) => b.createdAt - a.createdAt),
-);
+)
 
 // SwipeCell 实例 Map：互斥关闭用
-const cells = new Map<string, SwipeCellInstance>();
+const cells = new Map<string, SwipeCellInstance>()
 function bindRef(id: string) {
   return (el: unknown) => {
-    const inst = el as SwipeCellInstance | null;
-    if (inst) cells.set(id, inst);
-    else cells.delete(id);
-  };
+    const inst = el as SwipeCellInstance | null
+    if (inst) cells.set(id, inst)
+    else cells.delete(id)
+  }
 }
 
 function isInsideAnyCell(target: EventTarget | null): boolean {
-  if (!(target instanceof Node)) return false;
+  if (!(target instanceof Node)) return false
   for (const inst of cells.values()) {
-    const el = (inst as unknown as { $el?: HTMLElement }).$el;
-    if (el && el.contains(target)) return true;
+    const el = (inst as unknown as { $el?: HTMLElement }).$el
+    if (el && el.contains(target)) return true
   }
-  return false;
+  return false
 }
 
 function closeAllCells() {
-  for (const inst of cells.values()) inst?.close('right');
+  for (const inst of cells.values()) inst?.close('right')
 }
 
 function onDocClick(e: MouseEvent) {
-  if (!isInsideAnyCell(e.target)) closeAllCells();
+  if (!isInsideAnyCell(e.target)) closeAllCells()
 }
 
-onMounted(() => document.addEventListener('click', onDocClick));
-onBeforeUnmount(() => document.removeEventListener('click', onDocClick));
+onMounted(() => document.addEventListener('click', onDocClick))
+onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
 function openDetail(item: FavoriteItem) {
-  router.push({ path: `/detail/${item.vod.id}`, query: { sourceId: item.sourceId } });
+  router.push({ path: `/detail/${item.vod.id}`, query: { sourceId: item.sourceId } })
 }
 
 function remove(item: FavoriteItem) {
-  store.remove(item.vod.id, item.sourceId);
+  store.remove(item.vod.id, item.sourceId)
 }
 
 async function clearAll() {
-  if (!list.value.length) return;
+  if (!list.value.length) return
   const ok = await showConfirmDialog({
     title: '清空收藏',
     message: `确认清空所有 ${list.value.length} 条收藏？此操作不可恢复`,
   })
     .then(() => true)
-    .catch(() => false);
+    .catch(() => false)
   if (ok) {
     for (const i of list.value) {
-      store.remove(i.vod.id, i.sourceId);
+      store.remove(i.vod.id, i.sourceId)
     }
   }
 }
 
 function fmtTime(ts: number): string {
-  const d = new Date(ts);
-  const now = new Date();
-  const diffDay = Math.floor((now.getTime() - d.getTime()) / 86_400_000);
-  if (diffDay === 0) return `今天 ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-  if (diffDay === 1) return '昨天';
-  if (diffDay < 7) return `${diffDay} 天前`;
-  return d.toLocaleDateString();
+  const d = new Date(ts)
+  const now = new Date()
+  const diffDay = Math.floor((now.getTime() - d.getTime()) / 86_400_000)
+  if (diffDay === 0) return `今天 ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`
+  if (diffDay === 1) return '昨天'
+  if (diffDay < 7) return `${diffDay} 天前`
+  return d.toLocaleDateString()
 }
 </script>
 

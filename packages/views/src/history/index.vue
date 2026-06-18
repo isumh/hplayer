@@ -6,128 +6,128 @@ import {
   usePlayerStore,
   useSourceStore,
   type VodDetail,
-} from '@hplayer/core';
-import { EmptyState, NavBar } from '@hplayer/ui';
-import type { SwipeCellInstance } from 'vant';
-import { Cell, closeToast, SwipeCell, showConfirmDialog, showToast } from 'vant';
-import { computed, onBeforeUnmount, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+} from '@hplayer/core'
+import { EmptyState, NavBar } from '@hplayer/ui'
+import type { SwipeCellInstance } from 'vant'
+import { Cell, closeToast, SwipeCell, showConfirmDialog, showToast } from 'vant'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
-const store = useHistoryStore();
-const sourceStore = useSourceStore();
-const playerStore = usePlayerStore();
+const router = useRouter()
+const store = useHistoryStore()
+const sourceStore = useSourceStore()
+const playerStore = usePlayerStore()
 
 // 时间倒序：最近观看的在前
 const list = computed<HistoryItem[]>(() =>
   store.items.slice().sort((a, b) => b.lastWatchTime - a.lastWatchTime),
-);
+)
 
 // SwipeCell 实例 Map：互斥关闭
-const cells = new Map<string, SwipeCellInstance>();
+const cells = new Map<string, SwipeCellInstance>()
 function bindRef(id: string) {
   return (el: unknown) => {
-    const inst = el as SwipeCellInstance | null;
-    if (inst) cells.set(id, inst);
-    else cells.delete(id);
-  };
+    const inst = el as SwipeCellInstance | null
+    if (inst) cells.set(id, inst)
+    else cells.delete(id)
+  }
 }
 
 function isInsideAnyCell(target: EventTarget | null): boolean {
-  if (!(target instanceof Node)) return false;
+  if (!(target instanceof Node)) return false
   for (const inst of cells.values()) {
-    const el = (inst as unknown as { $el?: HTMLElement }).$el;
-    if (el && el.contains(target)) return true;
+    const el = (inst as unknown as { $el?: HTMLElement }).$el
+    if (el && el.contains(target)) return true
   }
-  return false;
+  return false
 }
 
 function closeAllCells() {
-  for (const inst of cells.values()) inst?.close('right');
+  for (const inst of cells.values()) inst?.close('right')
 }
 
 function onDocClick(e: MouseEvent) {
-  if (!isInsideAnyCell(e.target)) closeAllCells();
+  if (!isInsideAnyCell(e.target)) closeAllCells()
 }
 
-onMounted(() => document.addEventListener('click', onDocClick));
-onBeforeUnmount(() => document.removeEventListener('click', onDocClick));
+onMounted(() => document.addEventListener('click', onDocClick))
+onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
 function remove(item: HistoryItem) {
-  store.remove(item.id);
+  store.remove(item.id)
 }
 
 async function clearAll() {
-  if (!list.value.length) return;
+  if (!list.value.length) return
   const ok = await showConfirmDialog({
     title: '清空历史',
     message: `确认清空所有 ${list.value.length} 条观看历史？此操作不可恢复`,
   })
     .then(() => true)
-    .catch(() => false);
-  if (ok) store.clear();
+    .catch(() => false)
+  if (ok) store.clear()
 }
 
 function fmtTime(ts: number): string {
-  const d = new Date(ts);
-  const now = new Date();
-  const diffDay = Math.floor((now.getTime() - d.getTime()) / 86_400_000);
-  if (diffDay === 0) return `今天 ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-  if (diffDay === 1) return '昨天';
-  if (diffDay < 7) return `${diffDay} 天前`;
-  return d.toLocaleDateString();
+  const d = new Date(ts)
+  const now = new Date()
+  const diffDay = Math.floor((now.getTime() - d.getTime()) / 86_400_000)
+  if (diffDay === 0) return `今天 ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`
+  if (diffDay === 1) return '昨天'
+  if (diffDay < 7) return `${diffDay} 天前`
+  return d.toLocaleDateString()
 }
 
 function fmtProgress(progress: number, duration?: number): string {
   const fmt = (sec: number) => {
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return `${m}:${String(s).padStart(2, '0')}`;
-  };
-  if (duration && duration > 0) {
-    return `已看 ${fmt(progress)} / ${fmt(duration)}`;
+    const m = Math.floor(sec / 60)
+    const s = Math.floor(sec % 60)
+    return `${m}:${String(s).padStart(2, '0')}`
   }
-  return `已看 ${fmt(progress)}`;
+  if (duration && duration > 0) {
+    return `已看 ${fmt(progress)} / ${fmt(duration)}`
+  }
+  return `已看 ${fmt(progress)}`
 }
 
 // 点击主体：跳播放页 + 续播（progress-10秒）
 async function resume(item: HistoryItem) {
-  const source = sourceStore.list.find((s) => s.id === item.sourceId);
+  const source = sourceStore.list.find((s) => s.id === item.sourceId)
   if (!source) {
-    showToast('视频源已不存在');
-    return;
+    showToast('视频源已不存在')
+    return
   }
   if (!item.episode) {
-    showToast('该记录无剧集信息');
-    return;
+    showToast('该记录无剧集信息')
+    return
   }
-  showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true });
+  showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true })
   try {
-    const detail: VodDetail = await adapterProxy.getDetail(source, item.vod.id);
+    const detail: VodDetail = await adapterProxy.getDetail(source, item.vod.id)
     // 校验剧集 URL 是否仍在播放列表中
-    const allEps = Object.values(detail.playList).flat();
-    const epExists = allEps.some((e) => e.url === item.episode?.url);
+    const allEps = Object.values(detail.playList).flat()
+    const epExists = allEps.some((e) => e.url === item.episode?.url)
     if (!epExists) {
-      showToast('该剧集已失效');
-      return;
+      showToast('该剧集已失效')
+      return
     }
     // 续播：上次位置往前回 10 秒，下界 0
-    const startAt = Math.max(0, (item.progress ?? 0) - 10);
+    const startAt = Math.max(0, (item.progress ?? 0) - 10)
     playerStore.setCurrent({
       vod: detail,
       sourceId: item.sourceId,
       episode: item.episode,
       startAt,
-    });
+    })
     router.push({
       path: `/player/${item.vod.id}`,
       query: { sourceId: item.sourceId, ep: item.episode.url },
-    });
+    })
   } catch (err) {
-    console.error(err);
-    showToast('加载失败，请重试');
+    console.error(err)
+    showToast('加载失败，请重试')
   } finally {
-    closeToast();
+    closeToast()
   }
 }
 </script>

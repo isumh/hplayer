@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Radio, RadioGroup, Search } from 'vant';
-import { computed, ref, watch } from 'vue';
+import { Radio, RadioGroup, Search } from 'vant'
+import { computed, ref, watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{ modelValue: string; mode: 'single' | 'aggregate'; sourceName?: string }>(),
@@ -8,39 +8,39 @@ const props = withDefaults(
     modelValue: '',
     mode: 'single',
   },
-);
+)
 const emit = defineEmits<{
-  (e: 'update:modelValue', v: string): void;
-  (e: 'update:mode', v: 'single' | 'aggregate'): void;
-  (e: 'search', keyword: string): void;
-}>();
+  (e: 'update:modelValue', v: string): void
+  (e: 'update:mode', v: 'single' | 'aggregate'): void
+  (e: 'search', keyword: string): void
+}>()
 
-const local = ref(props.modelValue);
-const localMode = ref(props.mode);
+const local = ref(props.modelValue)
+const localMode = ref(props.mode)
 
 const singleLabel = computed(() => {
-  const name = props.sourceName?.trim();
-  return name ? `当前源（${name}）` : '当前源';
-});
+  const name = props.sourceName?.trim()
+  return name ? `当前源（${name}）` : '当前源'
+})
 
 watch(
   () => props.modelValue,
   (v) => {
-    local.value = v;
+    local.value = v
   },
-);
-watch(local, (v) => emit('update:modelValue', v));
-watch(localMode, (v) => emit('update:mode', v));
+)
+watch(local, (v) => emit('update:modelValue', v))
+watch(localMode, (v) => emit('update:mode', v))
 
-let timer: ReturnType<typeof setTimeout> | null = null;
+let timer: ReturnType<typeof setTimeout> | null = null
 function onInput(v: string) {
-  local.value = v;
-  if (timer) clearTimeout(timer);
-  timer = setTimeout(() => emit('search', v.trim()), 500);
+  local.value = v
+  if (timer) clearTimeout(timer)
+  timer = setTimeout(() => emit('search', v.trim()), 500)
 }
 function onSubmit() {
-  if (timer) clearTimeout(timer);
-  emit('search', local.value.trim());
+  if (timer) clearTimeout(timer)
+  emit('search', local.value.trim())
 }
 </script>
 

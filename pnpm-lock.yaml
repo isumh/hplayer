@@ -132,6 +132,9 @@ importers:
       pinia:
         specifier: ^2.2.0
         version: 2.3.1(typescript@5.9.3)(vue@3.5.38(typescript@5.9.3))
+      user-agents:
+        specifier: ^2.1.95
+        version: 2.1.95
       vue:
         specifier: ^3.5.0
         version: 3.5.38(typescript@5.9.3)
@@ -1670,6 +1673,10 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
+  user-agents@2.1.95:
+    resolution: {integrity: sha512-/F9MfadeLOH7sXqA1wFI0kfFx/Z8u1gTXK2LBb5XloyYkcdS+QZ45kvRz0ZXQqG7SOoYSNQDNpMomvB7fxwdhA==}
+    engines: {node: '>=18'}
+
   vant@4.9.24:
     resolution: {integrity: sha512-tP1A7Vjzv1/B1ljb95Jhv9Q9w6acaaZDJvy6wcKrwGgY0gQZlg+FXLZH/AIKZBE3xvYGDUsv/M7AuGcr/Pqd6A==}
     peerDependencies:
@@ -3164,6 +3171,8 @@ snapshots:
       browserslist: 4.28.2
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  user-agents@2.1.95: {}
 
   vant@4.9.24(vue@3.5.38(typescript@5.9.3)):
     dependencies:

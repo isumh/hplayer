@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import type { Episode, VodDetail } from '@hplayer/core';
-import { Tab, Tabs } from 'vant';
-import { computed, ref } from 'vue';
+import type { Episode, VodDetail } from '@hplayer/core'
+import { Tab, Tabs } from 'vant'
+import { computed, ref } from 'vue'
 
-const props = defineProps<{ detail: VodDetail }>();
-const emit = defineEmits<(e: 'select', ep: Episode) => void>();
+const props = defineProps<{ detail: VodDetail }>()
+const emit = defineEmits<(e: 'select', ep: Episode) => void>()
 
 // 全部线路名（mtm3u8 / mtyun 等）
-const lines = computed(() => props.detail.playFrom.map((p) => p.name));
-const activeLine = ref<string>(lines.value[0] ?? '');
+const lines = computed(() => props.detail.playFrom.map((p) => p.name))
+const activeLine = ref<string>(lines.value[0] ?? '')
 // 当前线路下的选集列表
-const episodes = computed<Episode[]>(() => props.detail.playList[activeLine.value] ?? []);
+const episodes = computed<Episode[]>(() => props.detail.playList[activeLine.value] ?? [])
 // 记录当前选中集（用于按钮高亮）
-const selectedUrl = ref<string>('');
+const selectedUrl = ref<string>('')
 
 function select(ep: Episode) {
-  selectedUrl.value = ep.url;
-  emit('select', ep);
+  selectedUrl.value = ep.url
+  emit('select', ep)
 }
 </script>
 

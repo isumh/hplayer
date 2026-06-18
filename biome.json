@@ -21,7 +21,7 @@
         "useNodejsImportProtocol": "error"
       },
       "suspicious": {
-        "noExplicitAny": "warn"
+        "noExplicitAny": "off"
       },
       "complexity": {
         "noBannedTypes": "error"
@@ -31,8 +31,9 @@
   "javascript": {
     "formatter": {
       "quoteStyle": "single",
-      "semicolons": "always",
-      "trailingCommas": "all"
+      "semicolons": "asNeeded",
+      "trailingCommas": "all",
+      "quoteProperties": "asNeeded"
     }
   },
   "css": {

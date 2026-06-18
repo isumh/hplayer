@@ -5,27 +5,27 @@
 export const storage = {
   get<T>(key: string, fallback: T): T {
     try {
-      const raw = localStorage.getItem(key);
-      if (raw === null) return fallback;
-      return JSON.parse(raw) as T;
+      const raw = localStorage.getItem(key)
+      if (raw === null) return fallback
+      return JSON.parse(raw) as T
     } catch {
-      return fallback;
+      return fallback
     }
   },
   set<T>(key: string, value: T): void {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem(key, JSON.stringify(value))
     } catch (err) {
-      console.error('[storage] set failed', err);
+      console.error('[storage] set failed', err)
     }
   },
   remove(key: string): void {
-    localStorage.removeItem(key);
+    localStorage.removeItem(key)
   },
   clearAll(): void {
-    localStorage.clear();
+    localStorage.clear()
   },
-};
+}
 
 export const STORAGE_KEYS = {
   sources: 'hplayer:sources',
@@ -36,4 +36,4 @@ export const STORAGE_KEYS = {
   searchHistory: 'hplayer:searchHistory',
   settings: 'hplayer:settings',
   playbackRate: 'hplayer:playbackRate',
-} as const;
+} as const

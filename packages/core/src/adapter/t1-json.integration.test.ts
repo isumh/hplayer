@@ -1,19 +1,19 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { T1JsonAdapter } from './t1-json';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { T1JsonAdapter } from './t1-json'
 
 vi.mock('../api/client', () => ({
   http: {
     get: vi.fn(),
   },
-}));
+}))
 
-import { http } from '../api/client';
+import { http } from '../api/client'
 
-const httpGet = http.get as unknown as ReturnType<typeof vi.fn>;
+const httpGet = http.get as unknown as ReturnType<typeof vi.fn>
 
 beforeEach(() => {
-  vi.clearAllMocks();
-});
+  vi.clearAllMocks()
+})
 
 const baseSource = {
   id: 's',
@@ -24,7 +24,7 @@ const baseSource = {
   enabled: true,
   createdAt: 0,
   order: 0,
-};
+}
 
 describe('T1JsonAdapter getList', () => {
   it('解析 mac-cms JSON 响应', async () => {
@@ -44,54 +44,54 @@ describe('T1JsonAdapter getList', () => {
           },
         ],
       },
-    });
-    const a = new T1JsonAdapter();
-    a.init(baseSource);
-    const res = await a.getList({ categoryId: 1, page: 1 });
-    expect(res.list).toHaveLength(1);
-    expect(res.list[0]?.name).toBe('示例');
-    expect(res.list[0]?.pic).toBe('https://x.com/a.jpg');
-    expect(res.list[0]?.year).toBe('2024');
-    expect(res.pageCount).toBe(5);
-    expect(res.total).toBe(100);
-    expect(res.currentPage).toBe(1);
-  });
+    })
+    const a = new T1JsonAdapter()
+    a.init(baseSource)
+    const res = await a.getList({ categoryId: 1, page: 1 })
+    expect(res.list).toHaveLength(1)
+    expect(res.list[0]?.name).toBe('示例')
+    expect(res.list[0]?.pic).toBe('https://x.com/a.jpg')
+    expect(res.list[0]?.year).toBe('2024')
+    expect(res.pageCount).toBe(5)
+    expect(res.total).toBe(100)
+    expect(res.currentPage).toBe(1)
+  })
 
   it('空 list 返回空数组而非抛错', async () => {
     httpGet.mockResolvedValueOnce({
       data: { code: 1, page: 1, pagecount: 0, total: 0, list: [] },
-    });
-    const a = new T1JsonAdapter();
-    a.init(baseSource);
-    const res = await a.getList({ categoryId: 1, page: 1 });
-    expect(res.list).toEqual([]);
-    expect(res.total).toBe(0);
-  });
+    })
+    const a = new T1JsonAdapter()
+    a.init(baseSource)
+    const res = await a.getList({ categoryId: 1, page: 1 })
+    expect(res.list).toEqual([])
+    expect(res.total).toBe(0)
+  })
 
   it('list 字段缺失时降级为空数组', async () => {
-    httpGet.mockResolvedValueOnce({ data: { code: 1 } });
-    const a = new T1JsonAdapter();
-    a.init(baseSource);
-    const res = await a.getList({ categoryId: 1, page: 1 });
-    expect(res.list).toEqual([]);
-  });
+    httpGet.mockResolvedValueOnce({ data: { code: 1 } })
+    const a = new T1JsonAdapter()
+    a.init(baseSource)
+    const res = await a.getList({ categoryId: 1, page: 1 })
+    expect(res.list).toEqual([])
+  })
 
   it('使用 baseUrl 拼接查询参数', async () => {
     httpGet.mockResolvedValueOnce({
       data: { code: 1, list: [] },
-    });
-    const a = new T1JsonAdapter();
-    a.init({ ...baseSource, baseUrl: 'https://x.com/api/' });
-    await a.getList({ categoryId: 5, page: 2, pageSize: 30 });
-    expect(httpGet).toHaveBeenCalledTimes(1);
-    const [url] = httpGet.mock.calls[0] as [string];
-    expect(url).toMatch(/^https:\/\/x\.com\/api\?/);
-    expect(url).toContain('ac=videolist');
-    expect(url).toContain('t=5');
-    expect(url).toContain('pg=2');
-    expect(url).toContain('pagesize=30');
-  });
-});
+    })
+    const a = new T1JsonAdapter()
+    a.init({ ...baseSource, baseUrl: 'https://x.com/api/' })
+    await a.getList({ categoryId: 5, page: 2, pageSize: 30 })
+    expect(httpGet).toHaveBeenCalledTimes(1)
+    const [url] = httpGet.mock.calls[0] as [string]
+    expect(url).toMatch(/^https:\/\/x\.com\/api\?/)
+    expect(url).toContain('ac=videolist')
+    expect(url).toContain('t=5')
+    expect(url).toContain('pg=2')
+    expect(url).toContain('pagesize=30')
+  })
+})
 
 describe('T1JsonAdapter getDetail', () => {
   it('解析详情并切分 playFrom/playUrl', async () => {
@@ -108,26 +108,26 @@ describe('T1JsonAdapter getDetail', () => {
           },
         ],
       },
-    });
-    const a = new T1JsonAdapter();
-    a.init(baseSource);
-    const res = await a.getDetail(1);
-    expect(res.name).toBe('详情剧');
-    expect(res.playFrom).toHaveLength(2);
-    expect(res.playFrom[0]?.name).toBe('线路1');
-    expect(res.playFrom[1]?.name).toBe('线路2');
-    expect(res.playList['线路1']).toHaveLength(2);
-    expect(res.playList['线路1']?.[0]?.url).toBe('url1');
-    expect(res.playList['线路2']?.[0]?.url).toBe('url3');
-  });
+    })
+    const a = new T1JsonAdapter()
+    a.init(baseSource)
+    const res = await a.getDetail(1)
+    expect(res.name).toBe('详情剧')
+    expect(res.playFrom).toHaveLength(2)
+    expect(res.playFrom[0]?.name).toBe('线路1')
+    expect(res.playFrom[1]?.name).toBe('线路2')
+    expect(res.playList['线路1']).toHaveLength(2)
+    expect(res.playList['线路1']?.[0]?.url).toBe('url1')
+    expect(res.playList['线路2']?.[0]?.url).toBe('url3')
+  })
 
   it('空 list 抛错', async () => {
-    httpGet.mockResolvedValueOnce({ data: { code: 1, list: [] } });
-    const a = new T1JsonAdapter();
-    a.init(baseSource);
-    await expect(a.getDetail(999)).rejects.toThrow('detail not found');
-  });
-});
+    httpGet.mockResolvedValueOnce({ data: { code: 1, list: [] } })
+    const a = new T1JsonAdapter()
+    a.init(baseSource)
+    await expect(a.getDetail(999)).rejects.toThrow('detail not found')
+  })
+})
 
 describe('T1JsonAdapter getCategories', () => {
   it('解析 class 字段', async () => {
@@ -138,23 +138,23 @@ describe('T1JsonAdapter getCategories', () => {
           { type_id: 2, type_name: '剧集' },
         ],
       },
-    });
-    const a = new T1JsonAdapter();
-    a.init(baseSource);
-    const cats = await a.getCategories();
-    expect(cats).toHaveLength(2);
-    expect(cats[0]?.name).toBe('电影');
-    expect(cats[1]?.id).toBe('2');
-  });
+    })
+    const a = new T1JsonAdapter()
+    a.init(baseSource)
+    const cats = await a.getCategories()
+    expect(cats).toHaveLength(2)
+    expect(cats[0]?.name).toBe('电影')
+    expect(cats[1]?.id).toBe('2')
+  })
 
   it('缺 class 字段返回空数组', async () => {
-    httpGet.mockResolvedValueOnce({ data: {} });
-    const a = new T1JsonAdapter();
-    a.init(baseSource);
-    const cats = await a.getCategories();
-    expect(cats).toEqual([]);
-  });
-});
+    httpGet.mockResolvedValueOnce({ data: {} })
+    const a = new T1JsonAdapter()
+    a.init(baseSource)
+    const cats = await a.getCategories()
+    expect(cats).toEqual([])
+  })
+})
 
 describe('T1JsonAdapter search', () => {
   it('搜索参数走 wd 字段', async () => {
@@ -166,12 +166,12 @@ describe('T1JsonAdapter search', () => {
         total: 1,
         list: [{ vod_id: 7, vod_name: '匹配', vod_pic: '' }],
       },
-    });
-    const a = new T1JsonAdapter();
-    a.init(baseSource);
-    const res = await a.search({ keyword: '关键字', page: 1 });
-    const [url] = httpGet.mock.calls[0] as [string];
-    expect(url).toContain('wd=');
-    expect(res.list[0]?.name).toBe('匹配');
-  });
-});
+    })
+    const a = new T1JsonAdapter()
+    a.init(baseSource)
+    const res = await a.search({ keyword: '关键字', page: 1 })
+    const [url] = httpGet.mock.calls[0] as [string]
+    expect(url).toContain('wd=')
+    expect(res.list[0]?.name).toBe('匹配')
+  })
+})

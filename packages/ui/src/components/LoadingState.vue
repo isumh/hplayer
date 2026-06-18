@@ -5,9 +5,9 @@
 </template>
 
 <script setup lang="ts">
-import { Skeleton } from 'vant';
+import { Skeleton } from 'vant'
 
-defineOptions({ name: 'HPlayerLoadingState' });
+defineOptions({ name: 'HPlayerLoadingState' })
 </script>
 
 <style scoped>

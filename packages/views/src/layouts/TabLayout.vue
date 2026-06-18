@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TabBar } from '@hplayer/ui';
+import { TabBar } from '@hplayer/ui'
 </script>
 
 <template>

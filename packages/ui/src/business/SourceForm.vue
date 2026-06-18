@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { VideoSource } from '@hplayer/core';
-import { clampPageSize, useSourceStore } from '@hplayer/core';
+import type { VideoSource } from '@hplayer/core'
+import { clampPageSize, useSourceStore } from '@hplayer/core'
 import {
   Button,
   CellGroup,
@@ -12,13 +12,13 @@ import {
   Switch,
   showConfirmDialog,
   showToast,
-} from 'vant';
-import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+} from 'vant'
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
-const props = defineProps<{ sourceId?: string }>();
-const router = useRouter();
-const store = useSourceStore();
+const props = defineProps<{ sourceId?: string }>()
+const router = useRouter()
+const store = useSourceStore()
 
 const form = ref<Omit<VideoSource, 'id' | 'createdAt' | 'order'>>({
   name: '',
@@ -27,13 +27,13 @@ const form = ref<Omit<VideoSource, 'id' | 'createdAt' | 'order'>>({
   pageSize: 20,
   enabled: true,
   remark: '',
-});
+})
 
 watch(
   () => props.sourceId,
   (id) => {
     if (id) {
-      const s = store.list.find((x) => x.id === id);
+      const s = store.list.find((x) => x.id === id)
       if (s) {
         const next: Omit<VideoSource, 'id' | 'createdAt' | 'order'> = {
           name: s.name,
@@ -41,47 +41,47 @@ watch(
           baseUrl: s.baseUrl,
           pageSize: s.pageSize ?? 20,
           enabled: s.enabled,
-        };
-        form.value = next;
+        }
+        form.value = next
       }
     }
   },
   { immediate: true },
-);
+)
 
 function submit() {
-  if (!form.value.baseUrl.trim()) return showToast('请输入接口地址');
-  if (!form.value.name.trim()) return showToast('请输入名称');
+  if (!form.value.baseUrl.trim()) return showToast('请输入接口地址')
+  if (!form.value.name.trim()) return showToast('请输入名称')
   const cleaned: Omit<VideoSource, 'id' | 'createdAt' | 'order'> = {
     ...form.value,
     name: form.value.name.trim(),
     baseUrl: form.value.baseUrl.trim().replace(/\/+$/, ''),
     pageSize: clampPageSize(form.value.pageSize, 20),
-  };
-  if (props.sourceId) {
-    store.update(props.sourceId, cleaned);
-    showToast('已更新');
-  } else {
-    store.add(cleaned);
-    showToast('已添加');
   }
-  router.replace('/settings');
+  if (props.sourceId) {
+    store.update(props.sourceId, cleaned)
+    showToast('已更新')
+  } else {
+    store.add(cleaned)
+    showToast('已添加')
+  }
+  router.replace('/settings')
 }
 
 async function remove() {
-  if (!props.sourceId) return;
-  const src = store.list.find((s) => s.id === props.sourceId);
-  const name = src?.name ?? '该视频源';
+  if (!props.sourceId) return
+  const src = store.list.find((s) => s.id === props.sourceId)
+  const name = src?.name ?? '该视频源'
   const ok = await showConfirmDialog({
     title: '删除视频源',
     message: `确认删除"${name}"？此操作不可恢复`,
   })
     .then(() => true)
-    .catch(() => false);
-  if (!ok) return;
-  store.remove(props.sourceId);
-  showToast('已删除');
-  router.replace('/settings');
+    .catch(() => false)
+  if (!ok) return
+  store.remove(props.sourceId)
+  showToast('已删除')
+  router.replace('/settings')
 }
 </script>
 

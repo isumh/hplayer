@@ -1,65 +1,72 @@
 <script setup lang="ts">
-import { exportBackup, importBackup, useSettingsStore, useSourceStore } from '@hplayer/core';
-import { Button, Cell, CellGroup, NavBar, Switch, showToast } from 'vant';
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { exportBackup, importBackup, useSettingsStore, useSourceStore } from '@hplayer/core'
+import { Button, Cell, CellGroup, NavBar, Switch, showToast } from 'vant'
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
-const sourceStore = useSourceStore();
-const settingsStore = useSettingsStore();
+const router = useRouter()
+const sourceStore = useSourceStore()
+const settingsStore = useSettingsStore()
 
-const fileInput = ref<HTMLInputElement | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null)
 
-const sources = computed(() => sourceStore.list.slice().sort((a, b) => a.order - b.order));
+const sources = computed(() => sourceStore.list.slice().sort((a, b) => a.order - b.order))
 
 function toggleEnabled(id: string, enabled: boolean) {
-  sourceStore.update(id, { enabled });
+  sourceStore.update(id, { enabled })
 }
 
 function editSource(id: string) {
-  router.push(`/settings/source/edit/${id}`);
+  router.push(`/settings/source/edit/${id}`)
 }
 
 function setTheme(theme: 'light' | 'dark' | 'auto') {
-  settingsStore.setTheme(theme);
+  settingsStore.setTheme(theme)
+}
+
+function setDevice(device: 'mobile' | 'desktop' | 'tablet') {
+  settingsStore.setDeviceType(device)
+  showToast(
+    `已切换至${device === 'mobile' ? '移动端' : device === 'desktop' ? '桌面端' : '平板'} UA`,
+  )
 }
 
 function exportData() {
-  const raw = exportBackup();
-  const blob = new Blob([raw], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `hplayer-backup-${new Date().toISOString().slice(0, 10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('导出成功');
+  const raw = exportBackup()
+  const blob = new Blob([raw], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `hplayer-backup-${new Date().toISOString().slice(0, 10)}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+  showToast('导出成功')
 }
 
 function triggerImport() {
-  fileInput.value?.click();
+  fileInput.value?.click()
 }
 
 function handleImport(e: Event) {
-  const target = e.target as HTMLInputElement;
-  const file = target.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
   reader.onload = (ev) => {
-    const raw = ev.target?.result as string | undefined;
+    const raw = ev.target?.result as string | undefined
     if (!raw) {
-      showToast('文件读取失败');
-      return;
+      showToast('文件读取失败')
+      return
     }
     if (importBackup(raw)) {
-      showToast('导入成功，请刷新页面');
+      showToast('导入成功，请刷新页面')
     } else {
-      showToast('无效的备份文件');
+      showToast('无效的备份文件')
     }
-  };
-  reader.onerror = () => showToast('文件读取失败');
-  reader.readAsText(file);
-  target.value = '';
+  }
+  reader.onerror = () => showToast('文件读取失败')
+  reader.readAsText(file)
+  target.value = ''
 }
 </script>
 
@@ -125,6 +132,33 @@ function handleImport(e: Event) {
           clickable
           @click="setTheme('auto')"
           :icon="settingsStore.settings.theme === 'auto' ? 'success' : ''"
+        />
+      </CellGroup>
+    </div>
+
+    <div class="section">
+      <div class="section-title">UA 设备类型</div>
+      <CellGroup inset>
+        <Cell
+          title="移动端"
+          label="iPhone / Android（推荐）"
+          clickable
+          @click="setDevice('mobile')"
+          :icon="settingsStore.settings.deviceType === 'mobile' ? 'success' : ''"
+        />
+        <Cell
+          title="桌面端"
+          label="Windows / Mac / Linux"
+          clickable
+          @click="setDevice('desktop')"
+          :icon="settingsStore.settings.deviceType === 'desktop' ? 'success' : ''"
+        />
+        <Cell
+          title="平板"
+          label="iPad / Android Tablet"
+          clickable
+          @click="setDevice('tablet')"
+          :icon="settingsStore.settings.deviceType === 'tablet' ? 'success' : ''"
         />
       </CellGroup>
     </div>

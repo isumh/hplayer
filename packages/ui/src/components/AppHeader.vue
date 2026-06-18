@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import SourcePicker from '../business/SourcePicker.vue';
+import { useRouter } from 'vue-router'
+import SourcePicker from '../business/SourcePicker.vue'
 
 // 当前选中分类名（视频源无分类时为空字符串或 undefined）
-defineProps<{ categoryName?: string | undefined }>();
+defineProps<{ categoryName?: string | undefined }>()
 
-const router = useRouter();
+const router = useRouter()
 function openFavorites() {
-  router.push('/favorite');
+  router.push('/favorite')
 }
 function openHistory() {
-  router.push('/history');
+  router.push('/history')
 }
 </script>
 

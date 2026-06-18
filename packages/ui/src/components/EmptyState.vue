@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { Empty } from 'vant';
+import { Empty } from 'vant'
 
 withDefaults(
   defineProps<{
-    text?: string;
-    icon?: string;
+    text?: string
+    icon?: string
   }>(),
   {
     text: '暂无数据',
     icon: 'inbox-o',
   },
-);
+)
 </script>
 
 <template>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { showImagePreview } from 'vant';
+import { showImagePreview } from 'vant'
 
-const props = withDefaults(defineProps<{ src: string }>(), {});
-defineExpose({ open });
+const props = withDefaults(defineProps<{ src: string }>(), {})
+defineExpose({ open })
 
 function open() {
-  showImagePreview({ images: [props.src], closeable: true });
+  showImagePreview({ images: [props.src], closeable: true })
 }
 </script>
 

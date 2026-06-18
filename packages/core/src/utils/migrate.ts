@@ -5,5 +5,5 @@
  */
 export async function migrateV1ToV2(): Promise<void> {
   // noop in V1
-  return Promise.resolve();
+  return Promise.resolve()
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Skeleton } from 'vant';
+import { Skeleton } from 'vant'
 
-defineProps<{ count?: number }>();
+defineProps<{ count?: number }>()
 </script>
 
 <template>

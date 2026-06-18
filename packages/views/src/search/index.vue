@@ -5,81 +5,81 @@ import {
   useSearchHistoryStore,
   useSourceStore,
   type VodItem,
-} from '@hplayer/core';
-import { EmptyState, SearchBar, SearchHistory, VodList } from '@hplayer/ui';
-import { closeToast, showToast } from 'vant';
-import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+} from '@hplayer/core'
+import { EmptyState, SearchBar, SearchHistory, VodList } from '@hplayer/ui'
+import { closeToast, showToast } from 'vant'
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
-const sourceStore = useSourceStore();
-const searchHistoryStore = useSearchHistoryStore();
+const router = useRouter()
+const sourceStore = useSourceStore()
+const searchHistoryStore = useSearchHistoryStore()
 
-const keyword = ref('');
-const mode = ref<'single' | 'aggregate'>('single');
-type SearchResult = VodItem & { sourceName?: string };
-const items = ref<SearchResult[]>([]);
-const page = ref(1);
-const finished = ref(false);
-const loading = ref(false);
-const searched = ref(false);
+const keyword = ref('')
+const mode = ref<'single' | 'aggregate'>('single')
+type SearchResult = VodItem & { sourceName?: string }
+const items = ref<SearchResult[]>([])
+const page = ref(1)
+const finished = ref(false)
+const loading = ref(false)
+const searched = ref(false)
 
 async function doSearch(kw: string) {
-  const trimmed = kw.trim();
-  if (!trimmed) return;
-  searchHistoryStore.touch(trimmed);
-  await loadResults(trimmed, true);
+  const trimmed = kw.trim()
+  if (!trimmed) return
+  searchHistoryStore.touch(trimmed)
+  await loadResults(trimmed, true)
 }
 
 async function loadResults(kw: string, reset = false) {
-  if (!kw) return;
-  searched.value = true;
-  loading.value = true;
+  if (!kw) return
+  searched.value = true
+  loading.value = true
   // 仅"上滑分页"时（reset=false）弹 loading Toast
-  const isPaginate = !reset;
+  const isPaginate = !reset
   if (isPaginate) {
-    showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true });
+    showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true })
   }
   try {
-    const targetPage = reset ? 1 : page.value;
+    const targetPage = reset ? 1 : page.value
     if (mode.value === 'single') {
-      const src = sourceStore.activeSource;
+      const src = sourceStore.activeSource
       if (!src) {
-        finished.value = true;
-        items.value = [];
-        return;
+        finished.value = true
+        items.value = []
+        return
       }
-      const res = await adapterProxy.search(src, { keyword: kw, page: targetPage });
-      const mapped = res.list.map((it) => ({ ...it, sourceName: src.name }));
-      items.value = reset ? mapped : items.value.concat(mapped);
-      finished.value = targetPage >= res.pageCount;
+      const res = await adapterProxy.search(src, { keyword: kw, page: targetPage })
+      const mapped = res.list.map((it) => ({ ...it, sourceName: src.name }))
+      items.value = reset ? mapped : items.value.concat(mapped)
+      finished.value = targetPage >= res.pageCount
     } else {
       const res = await aggregateSearch(sourceStore.list, {
         keyword: kw,
         page: targetPage,
-      });
-      items.value = reset ? res.list : items.value.concat(res.list);
-      finished.value = res.list.length === 0;
+      })
+      items.value = reset ? res.list : items.value.concat(res.list)
+      finished.value = res.list.length === 0
     }
-    page.value = targetPage + 1;
+    page.value = targetPage + 1
   } finally {
-    loading.value = false;
-    if (isPaginate) closeToast();
+    loading.value = false
+    if (isPaginate) closeToast()
   }
 }
 
 function onHistorySelect(kw: string) {
-  keyword.value = kw;
-  doSearch(kw);
+  keyword.value = kw
+  doSearch(kw)
 }
 
 function goDetail(it: VodItem) {
-  router.push({ path: `/detail/${it.id}`, query: { sourceId: it.sourceId } });
+  router.push({ path: `/detail/${it.id}`, query: { sourceId: it.sourceId } })
 }
 
 watch(mode, () => {
-  if (keyword.value) doSearch(keyword.value);
-});
+  if (keyword.value) doSearch(keyword.value)
+})
 </script>
 
 <template>

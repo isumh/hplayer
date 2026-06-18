@@ -1,7 +1,7 @@
-import { useSourceStore } from '@hplayer/core';
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { useSourceStore } from '@hplayer/core'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
-const TabLayout = () => import('@hplayer/views/layouts/TabLayout.vue');
+const TabLayout = () => import('@hplayer/views/layouts/TabLayout.vue')
 
 export const router = createRouter({
   history: createWebHashHistory(),
@@ -60,14 +60,14 @@ export const router = createRouter({
       props: true,
     },
   ],
-});
+})
 
 router.beforeEach((to) => {
-  const sourceStore = useSourceStore();
+  const sourceStore = useSourceStore()
   if (
     sourceStore.list.length === 0 &&
     (to.path === '/home' || to.path.startsWith('/detail') || to.path.startsWith('/player'))
   ) {
-    return { path: '/settings/source/add', replace: true };
+    return { path: '/settings/source/add', replace: true }
   }
-});
+})

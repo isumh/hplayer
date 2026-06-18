@@ -6,7 +6,7 @@ import {
   useSourceStore,
   type VodDetail,
   type VodItem,
-} from '@hplayer/core';
+} from '@hplayer/core'
 import {
   AppHeader,
   CategoryBar,
@@ -14,159 +14,161 @@ import {
   EmptyState,
   VodGridSkeleton,
   VodList,
-} from '@hplayer/ui';
-import { closeToast, showToast } from 'vant';
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+} from '@hplayer/ui'
+import { closeToast, showToast } from 'vant'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
-const sourceStore = useSourceStore();
-const playerStore = usePlayerStore();
+const router = useRouter()
+const sourceStore = useSourceStore()
+const playerStore = usePlayerStore()
 
-const categories = ref<Category[]>([]);
+const categories = ref<Category[]>([])
 // 选中的分类 ID（用于 v-model 绑定到 CategoryBar）
-const activeCategoryId = ref<string | number | null>(null);
-const activeCategory = ref<Category | null>(null);
-const items = ref<VodItem[]>([]);
-const page = ref(1);
-const loading = ref(false);
-const finished = ref(false);
+const activeCategoryId = ref<string | number | null>(null)
+const activeCategory = ref<Category | null>(null)
+const items = ref<VodItem[]>([])
+const page = ref(1)
+const loading = ref(false)
+const finished = ref(false)
 // 错误状态：用于区分"无源"和"加载失败"两种空态
-const error = ref<string | null>(null);
+const error = ref<string | null>(null)
 
 async function loadCategories() {
   // 无源时不报错（路由守卫已拦截），直接返回
   if (!sourceStore.activeSource) {
-    error.value = null;
-    return;
+    error.value = null
+    return
   }
-  error.value = null;
+  error.value = null
   try {
-    const list = await adapterProxy.getCategories(sourceStore.activeSource);
-    categories.value = list;
+    const list = await adapterProxy.getCategories(sourceStore.activeSource)
+    categories.value = list
     // 默认选中第一个分类（如已选过，保持现状）
     if (list.length && (activeCategoryId.value === null || activeCategoryId.value === undefined)) {
-      const first = list[0];
+      const first = list[0]
       if (first) {
-        activeCategoryId.value = first.id;
-        activeCategory.value = first;
-        await loadList(true);
+        activeCategoryId.value = first.id
+        activeCategory.value = first
+        await loadList(true)
       }
     } else if (activeCategoryId.value != null) {
       // 已选过 → 同步 activeCategory（防止外部修改 categories 后丢失）
-      const found = list.find((c) => c.id === activeCategoryId.value);
-      if (found) activeCategory.value = found;
+      const found = list.find((c) => c.id === activeCategoryId.value)
+      if (found) activeCategory.value = found
     }
   } catch (err) {
-    console.error(err);
-    error.value = '加载分类失败';
-    showToast('加载失败，请检查网络或视频源');
+    console.error(err)
+    error.value = '加载分类失败'
+    showToast('加载失败，请检查网络或视频源')
   }
 }
 
 async function loadList(reset = false) {
-  if (!sourceStore.activeSource || !activeCategory.value) return;
-  loading.value = true;
+  if (!sourceStore.activeSource || !activeCategory.value) return
+  loading.value = true
   // 仅"上滑分页"时（reset=false）弹 loading Toast；首次加载/重置时由骨架屏承担占位
-  const isPaginate = !reset;
+  const isPaginate = !reset
   if (isPaginate) {
-    showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true });
+    showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true })
   }
   try {
-    const ps = sourceStore.activeSource.pageSize ?? 20;
-    const targetPage = reset ? 1 : page.value;
+    const ps = sourceStore.activeSource.pageSize ?? 20
+    const targetPage = reset ? 1 : page.value
     const res = await adapterProxy.getList(sourceStore.activeSource, {
       categoryId: activeCategory.value.id,
       page: targetPage,
       pageSize: ps,
-    });
+    })
     if (reset) {
-      items.value = res.list;
-      page.value = 1;
+      items.value = res.list
+      page.value = 1
     } else {
-      items.value = items.value.concat(res.list);
+      items.value = items.value.concat(res.list)
     }
-    finished.value = targetPage >= res.pageCount;
-    if (!finished.value) page.value = targetPage + 1;
+    finished.value = targetPage >= res.pageCount
+    if (!finished.value) page.value = targetPage + 1
   } catch (err) {
-    console.error(err);
-    error.value = '加载列表失败';
-    showToast('加载失败，请检查网络或视频源');
+    console.error(err)
+    error.value = '加载列表失败'
+    showToast('加载失败，请检查网络或视频源')
   } finally {
-    loading.value = false;
-    if (isPaginate) closeToast();
+    loading.value = false
+    if (isPaginate) closeToast()
   }
 }
 
 function onCategorySelect(c: Category) {
-  activeCategory.value = c;
-  activeCategoryId.value = c.id;
-  finished.value = false;
-  items.value = [];
-  loadList(true);
+  activeCategory.value = c
+  activeCategoryId.value = c.id
+  finished.value = false
+  items.value = []
+  loadList(true)
 }
 
 function goDetail(it: VodItem) {
-  router.push({ path: `/detail/${it.id}`, query: { sourceId: it.sourceId } });
+  router.push({ path: `/detail/${it.id}`, query: { sourceId: it.sourceId } })
 }
 
 // ▶ 直接播放：调 getDetail 拿首个 episode → 跳 player
 async function onPlay(it: VodItem) {
-  const source = sourceStore.activeSource;
+  const source = sourceStore.activeSource
   if (!source) {
-    showToast('请先选择视频源');
-    return;
+    showToast('请先选择视频源')
+    return
   }
-  showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true });
+  showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true })
   try {
-    const detail: VodDetail = await adapterProxy.getDetail(source, it.id);
-    const firstLine = detail.playFrom[0];
-    const firstEp = firstLine ? detail.playList[firstLine.name]?.[0] : undefined;
+    const detail: VodDetail = await adapterProxy.getDetail(source, it.id)
+    const firstLine = detail.playFrom[0]
+    const firstEp = firstLine ? detail.playList[firstLine.name]?.[0] : undefined
     if (!firstEp) {
-      showToast('没有可播放的剧集');
-      return;
+      showToast('没有可播放的剧集')
+      return
     }
-    playerStore.setCurrent({ vod: detail, sourceId: source.id, episode: firstEp });
-    router.push(`/player/${it.id}`);
+    playerStore.setCurrent({ vod: detail, sourceId: source.id, episode: firstEp })
+    router.push(`/player/${it.id}`)
   } catch (err) {
-    console.error(err);
-    showToast('加载失败，请重试');
+    console.error(err)
+    showToast('加载失败，请重试')
   } finally {
-    closeToast();
+    closeToast()
   }
 }
 
 function retry() {
-  error.value = null;
-  loadCategories();
+  error.value = null
+  loadCategories()
 }
 
 function goAddSource() {
-  router.push('/settings/source/add');
+  router.push('/settings/source/add')
 }
 
 // 渲染判断：基于"业务数据存在性"而非 loading ref（避免分类未加载完时骨架不显示）
-const showCatSkeleton = computed(() => !categories.value.length && !error.value);
-const showGridSkeleton = computed(() => !items.value.length && !error.value);
+// biome-ignore lint/correctness/noUnusedVariables: used in <template> below
+const showCatSkeleton = computed(() => !categories.value.length && !error.value)
+// biome-ignore lint/correctness/noUnusedVariables: used in <template> below
+const showGridSkeleton = computed(() => !items.value.length && !error.value)
 
 // 三种空态：加载失败 / 有源但无数据 / 无源
 const emptyText = computed(() => {
-  if (error.value) return error.value;
-  if (sourceStore.activeSource) return '暂无内容';
-  return '请先在设置中添加视频源';
-});
+  if (error.value) return error.value
+  if (sourceStore.activeSource) return '暂无内容'
+  return '请先在设置中添加视频源'
+})
 
-onMounted(loadCategories);
+onMounted(loadCategories)
 watch(
   () => sourceStore.activeSourceId,
   () => {
-    activeCategory.value = null;
-    activeCategoryId.value = null;
-    items.value = [];
-    error.value = null;
-    loadCategories();
+    activeCategory.value = null
+    activeCategoryId.value = null
+    items.value = []
+    error.value = null
+    loadCategories()
   },
-);
+)
 </script>
 
 <template>

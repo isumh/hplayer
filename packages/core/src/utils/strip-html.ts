@@ -16,5 +16,5 @@ export function stripHtml(s: string): string {
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .replace(/ *\n */g, '\n')
-    .trim();
+    .trim()
 }

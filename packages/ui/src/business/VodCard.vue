@@ -1,37 +1,37 @@
 <script setup lang="ts">
-import type { VodItem } from '@hplayer/core';
-import { usePreviewStore } from '@hplayer/core';
-import { computed } from 'vue';
+import type { VodItem } from '@hplayer/core'
+import { usePreviewStore } from '@hplayer/core'
+import { computed } from 'vue'
 
-const props = defineProps<{ item: VodItem }>();
+const props = defineProps<{ item: VodItem }>()
 // ⓘ 图标 → 跳详情页；▶ 按钮 → 直接播放；cover 区域 → 弹图片预览
 const emit = defineEmits<{
-  (e: 'select', it: VodItem): void;
-  (e: 'play', it: VodItem): void;
-}>();
+  (e: 'select', it: VodItem): void
+  (e: 'play', it: VodItem): void
+}>()
 
 // 全局预览 store（App.vue 渲染唯一 ImagePreview 实例）
-const previewStore = usePreviewStore();
+const previewStore = usePreviewStore()
 
 // 完整名称（用于原生 title tooltip）
-const fullName = computed(() => props.item.name);
+const fullName = computed(() => props.item.name)
 
 function stop(e: MouseEvent) {
   // 防止 ⓘ/▶ 按钮的 click 冒泡触发 cover 的图片预览
-  e.stopPropagation();
+  e.stopPropagation()
 }
 function onDetail(e: MouseEvent) {
-  stop(e);
-  emit('select', props.item);
+  stop(e)
+  emit('select', props.item)
 }
 function onPlay(e: MouseEvent) {
-  stop(e);
-  emit('play', props.item);
+  stop(e)
+  emit('play', props.item)
 }
 function onPreview() {
-  if (!props.item.pic) return;
+  if (!props.item.pic) return
   // 触发全局单例 ImagePreview
-  previewStore.open([props.item.pic], 0);
+  previewStore.open([props.item.pic], 0)
 }
 </script>
 
