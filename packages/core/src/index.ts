@@ -22,12 +22,12 @@ export * from './types/search';
 export * from './types/settings';
 export * from './types/source';
 export * from './types/vod';
+// utils
+export * from './utils/backup';
 export * from './utils/lru';
 export * from './utils/migrate';
 export * from './utils/page-size';
 export * from './utils/play-url';
-// utils
-export * from './utils/backup';
 export * from './utils/storage';
 export * from './utils/strip-html';
 export * from './utils/time';

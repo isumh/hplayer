@@ -1,13 +1,8 @@
 <script setup lang="ts">
+import { exportBackup, importBackup, useSettingsStore, useSourceStore } from '@hplayer/core';
+import { Button, Cell, CellGroup, NavBar, Switch, showToast } from 'vant';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { CellGroup, Cell, Button, Switch, NavBar, showToast } from 'vant';
-import {
-  useSourceStore,
-  useSettingsStore,
-  exportBackup,
-  importBackup,
-} from '@hplayer/core';
 
 const router = useRouter();
 const sourceStore = useSourceStore();

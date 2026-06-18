@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { useSourceStore } from './source';
 
 beforeEach(() => {
@@ -73,7 +73,9 @@ describe('sourceStore 删除流程', () => {
     store.remove(b.id);
     store.remove(c.id);
     expect(store.list.map((s) => s.id)).toEqual([a.id]);
-    const stored = JSON.parse(localStorage.getItem('hplayer:sources') ?? '[]') as Array<{ id: string }>;
+    const stored = JSON.parse(localStorage.getItem('hplayer:sources') ?? '[]') as Array<{
+      id: string;
+    }>;
     expect(stored.map((s) => s.id)).toEqual([a.id]);
   });
 

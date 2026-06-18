@@ -1,35 +1,77 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import {
+  adapterProxy,
+  type Category,
+  usePlayerStore,
+  useSourceStore,
+  type VodDetail,
+  type VodItem,
+} from '@hplayer/core';
+import {
+  AppHeader,
+  CategoryBar,
+  CategoryBarSkeleton,
+  EmptyState,
+  VodGridSkeleton,
+  VodList,
+} from '@hplayer/ui';
+import { closeToast, showToast } from 'vant';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { VodList, EmptyState, LoadingState, AppHeader, CategoryBar } from '@hplayer/ui';
-import { useSourceStore, adapterProxy, type Category, type VodItem } from '@hplayer/core';
 
 const router = useRouter();
 const sourceStore = useSourceStore();
+const playerStore = usePlayerStore();
 
 const categories = ref<Category[]>([]);
+// 选中的分类 ID（用于 v-model 绑定到 CategoryBar）
+const activeCategoryId = ref<string | number | null>(null);
 const activeCategory = ref<Category | null>(null);
 const items = ref<VodItem[]>([]);
 const page = ref(1);
 const loading = ref(false);
 const finished = ref(false);
+// 错误状态：用于区分"无源"和"加载失败"两种空态
+const error = ref<string | null>(null);
 
 async function loadCategories() {
-  if (!sourceStore.activeSource) return;
+  // 无源时不报错（路由守卫已拦截），直接返回
+  if (!sourceStore.activeSource) {
+    error.value = null;
+    return;
+  }
+  error.value = null;
   try {
-    categories.value = await adapterProxy.getCategories(sourceStore.activeSource);
-    if (categories.value.length && !activeCategory.value) {
-      activeCategory.value = categories.value[0] ?? null;
-      if (activeCategory.value) await loadList(true);
+    const list = await adapterProxy.getCategories(sourceStore.activeSource);
+    categories.value = list;
+    // 默认选中第一个分类（如已选过，保持现状）
+    if (list.length && (activeCategoryId.value === null || activeCategoryId.value === undefined)) {
+      const first = list[0];
+      if (first) {
+        activeCategoryId.value = first.id;
+        activeCategory.value = first;
+        await loadList(true);
+      }
+    } else if (activeCategoryId.value != null) {
+      // 已选过 → 同步 activeCategory（防止外部修改 categories 后丢失）
+      const found = list.find((c) => c.id === activeCategoryId.value);
+      if (found) activeCategory.value = found;
     }
   } catch (err) {
     console.error(err);
+    error.value = '加载分类失败';
+    showToast('加载失败，请检查网络或视频源');
   }
 }
 
 async function loadList(reset = false) {
   if (!sourceStore.activeSource || !activeCategory.value) return;
   loading.value = true;
+  // 仅"上滑分页"时（reset=false）弹 loading Toast；首次加载/重置时由骨架屏承担占位
+  const isPaginate = !reset;
+  if (isPaginate) {
+    showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true });
+  }
   try {
     const ps = sourceStore.activeSource.pageSize ?? 20;
     const targetPage = reset ? 1 : page.value;
@@ -46,14 +88,21 @@ async function loadList(reset = false) {
     }
     finished.value = targetPage >= res.pageCount;
     if (!finished.value) page.value = targetPage + 1;
+  } catch (err) {
+    console.error(err);
+    error.value = '加载列表失败';
+    showToast('加载失败，请检查网络或视频源');
   } finally {
     loading.value = false;
+    if (isPaginate) closeToast();
   }
 }
 
 function onCategorySelect(c: Category) {
   activeCategory.value = c;
+  activeCategoryId.value = c.id;
   finished.value = false;
+  items.value = [];
   loadList(true);
 }
 
@@ -61,21 +110,81 @@ function goDetail(it: VodItem) {
   router.push({ path: `/detail/${it.id}`, query: { sourceId: it.sourceId } });
 }
 
-const showInitialLoader = computed(() => loading.value && !items.value.length);
+// ▶ 直接播放：调 getDetail 拿首个 episode → 跳 player
+async function onPlay(it: VodItem) {
+  const source = sourceStore.activeSource;
+  if (!source) {
+    showToast('请先选择视频源');
+    return;
+  }
+  showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true });
+  try {
+    const detail: VodDetail = await adapterProxy.getDetail(source, it.id);
+    const firstLine = detail.playFrom[0];
+    const firstEp = firstLine ? detail.playList[firstLine.name]?.[0] : undefined;
+    if (!firstEp) {
+      showToast('没有可播放的剧集');
+      return;
+    }
+    playerStore.setCurrent({ vod: detail, sourceId: source.id, episode: firstEp });
+    router.push(`/player/${it.id}`);
+  } catch (err) {
+    console.error(err);
+    showToast('加载失败，请重试');
+  } finally {
+    closeToast();
+  }
+}
+
+function retry() {
+  error.value = null;
+  loadCategories();
+}
+
+function goAddSource() {
+  router.push('/settings/source/add');
+}
+
+// 渲染判断：基于"业务数据存在性"而非 loading ref（避免分类未加载完时骨架不显示）
+const showCatSkeleton = computed(() => !categories.value.length && !error.value);
+const showGridSkeleton = computed(() => !items.value.length && !error.value);
+
+// 三种空态：加载失败 / 有源但无数据 / 无源
+const emptyText = computed(() => {
+  if (error.value) return error.value;
+  if (sourceStore.activeSource) return '暂无内容';
+  return '请先在设置中添加视频源';
+});
 
 onMounted(loadCategories);
-watch(() => sourceStore.activeSourceId, () => {
-  activeCategory.value = null;
-  items.value = [];
-  loadCategories();
-});
+watch(
+  () => sourceStore.activeSourceId,
+  () => {
+    activeCategory.value = null;
+    activeCategoryId.value = null;
+    items.value = [];
+    error.value = null;
+    loadCategories();
+  },
+);
 </script>
 
 <template>
   <div class="home">
-    <AppHeader />
-    <CategoryBar v-if="categories.length" :items="categories" @select="onCategorySelect" />
-    <div v-if="showInitialLoader" class="loader"><LoadingState /></div>
+    <AppHeader :category-name="activeCategory?.name" />
+
+    <!-- 分类栏：已加载显示真实，未加载显示骨架 -->
+    <CategoryBar
+      v-if="categories.length"
+      :items="categories"
+      v-model:active-id="activeCategoryId"
+      @select="onCategorySelect"
+    />
+    <CategoryBarSkeleton v-else-if="showCatSkeleton" />
+
+    <!-- 视频列表骨架（首次/重置时占位，分页时由 Toast 提示） -->
+    <VodGridSkeleton v-if="showGridSkeleton" />
+
     <VodList
       v-else-if="items.length"
       :items="items"
@@ -84,12 +193,28 @@ watch(() => sourceStore.activeSourceId, () => {
       @load="() => loadList()"
       @refresh="() => loadList(true)"
       @select="goDetail"
+      @play="onPlay"
     />
-    <EmptyState v-else text="请先在设置中添加视频源" />
+
+    <EmptyState v-else :text="emptyText">
+      <button v-if="error" class="empty-btn" @click="retry">重试</button>
+      <button v-else-if="!sourceStore.activeSource" class="empty-btn" @click="goAddSource">
+        去添加
+      </button>
+    </EmptyState>
   </div>
 </template>
 
 <style scoped>
 .home { display: flex; flex-direction: column; min-height: 100%; }
-.loader { padding: 12px; }
+.empty-btn {
+  padding: 8px 24px;
+  background: var(--van-primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.empty-btn:active { opacity: 0.8; }
 </style>

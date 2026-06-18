@@ -10,6 +10,7 @@ import {
   RadioGroup,
   Stepper,
   Switch,
+  showConfirmDialog,
   showToast,
 } from 'vant';
 import { ref, watch } from 'vue';
@@ -49,8 +50,8 @@ watch(
 );
 
 function submit() {
-  if (!form.value.name.trim()) return showToast('请输入名称');
   if (!form.value.baseUrl.trim()) return showToast('请输入接口地址');
+  if (!form.value.name.trim()) return showToast('请输入名称');
   const cleaned: Omit<VideoSource, 'id' | 'createdAt' | 'order'> = {
     ...form.value,
     name: form.value.name.trim(),
@@ -66,11 +67,29 @@ function submit() {
   }
   router.replace('/settings');
 }
+
+async function remove() {
+  if (!props.sourceId) return;
+  const src = store.list.find((s) => s.id === props.sourceId);
+  const name = src?.name ?? '该视频源';
+  const ok = await showConfirmDialog({
+    title: '删除视频源',
+    message: `确认删除"${name}"？此操作不可恢复`,
+  })
+    .then(() => true)
+    .catch(() => false);
+  if (!ok) return;
+  store.remove(props.sourceId);
+  showToast('已删除');
+  router.replace('/settings');
+}
 </script>
 
 <template>
   <Form @submit="submit">
     <CellGroup inset>
+      <!-- 顺序：接口地址 → 名称 → 类型 → 每页条数 → 启用 → 备注 -->
+      <Field v-model="form.baseUrl" label="接口地址" placeholder="https://.../api.php/provide/vod" required />
       <Field v-model="form.name" label="名称" placeholder="如：猫咪" required :maxlength="20" />
       <Field name="type" label="类型">
         <template #input>
@@ -80,7 +99,6 @@ function submit() {
           </RadioGroup>
         </template>
       </Field>
-      <Field v-model="form.baseUrl" label="接口地址" placeholder="https://.../api.php/provide/vod" required />
       <Field name="pageSize" label="每页条数">
         <template #input>
           <Stepper v-model="form.pageSize as number" :min="1" :max="100" />
@@ -95,10 +113,22 @@ function submit() {
     </CellGroup>
     <div class="actions">
       <Button type="primary" native-type="submit" block>保存</Button>
+      <!-- 删除按钮：仅编辑模式显示 -->
+      <Button
+        v-if="sourceId"
+        type="danger"
+        plain
+        block
+        class="delete-btn"
+        @click="remove"
+      >
+        删除视频源
+      </Button>
     </div>
   </Form>
 </template>
 
 <style scoped>
-.actions { padding: 16px; }
+.actions { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.delete-btn { margin-top: 4px; }
 </style>

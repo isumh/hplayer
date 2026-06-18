@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { exportBackup, importBackup, type BackupFile } from './backup';
-import { STORAGE_KEYS, storage } from './storage';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { FavoriteItem } from '../types/favorite';
 import type { HistoryItem } from '../types/history';
 import type { VideoSource } from '../types/source';
+import { type BackupFile, exportBackup, importBackup } from './backup';
+import { STORAGE_KEYS, storage } from './storage';
 
 beforeEach(() => {
   localStorage.clear();
@@ -102,7 +102,13 @@ describe('importBackup', () => {
   });
 
   it('缺 favorites/history 时仅恢复 sources', () => {
-    const file: BackupFile = { version: 'v0.1.0', exportedAt: 0, sources: [], favorites: [], history: [] };
+    const file: BackupFile = {
+      version: 'v0.1.0',
+      exportedAt: 0,
+      sources: [],
+      favorites: [],
+      history: [],
+    };
     expect(importBackup(JSON.stringify(file))).toBe(true);
   });
 

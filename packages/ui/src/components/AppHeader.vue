@@ -1,11 +1,16 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
 import SourcePicker from '../business/SourcePicker.vue';
 
+// 当前选中分类名（视频源无分类时为空字符串或 undefined）
+defineProps<{ categoryName?: string | undefined }>();
+
+const router = useRouter();
 function openFavorites() {
-  // 由 router 注入
+  router.push('/favorite');
 }
 function openHistory() {
-  // 由 router 注入
+  router.push('/history');
 }
 </script>
 
@@ -16,7 +21,7 @@ function openHistory() {
       <span class="title">hplayer</span>
     </div>
     <div class="center">
-      <SourcePicker />
+      <SourcePicker :category-name="categoryName" />
     </div>
     <div class="right">
       <button class="icon-btn" @click="openFavorites" aria-label="收藏">★</button>

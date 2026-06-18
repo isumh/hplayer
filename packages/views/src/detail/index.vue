@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { NavBar, EpisodeList, LoadingState, EmptyState } from '@hplayer/ui';
-import { Cell, CellGroup } from 'vant';
 import {
-  useSourceStore,
+  adapterProxy,
+  type Episode,
+  stripHtml,
   useFavoriteStore,
   useHistoryStore,
   usePlayerStore,
-  adapterProxy,
-  stripHtml,
+  useSourceStore,
   type VodDetail,
-  type Episode,
 } from '@hplayer/core';
+import { EmptyState, EpisodeList, LoadingState, NavBar } from '@hplayer/ui';
+import { Cell, CellGroup } from 'vant';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();

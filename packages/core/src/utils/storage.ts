@@ -35,4 +35,5 @@ export const STORAGE_KEYS = {
   history: 'hplayer:history',
   searchHistory: 'hplayer:searchHistory',
   settings: 'hplayer:settings',
+  playbackRate: 'hplayer:playbackRate',
 } as const;

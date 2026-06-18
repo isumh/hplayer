@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { T1JsonAdapter } from './t1-json';
 
 vi.mock('../api/client', () => ({
@@ -132,7 +132,12 @@ describe('T1JsonAdapter getDetail', () => {
 describe('T1JsonAdapter getCategories', () => {
   it('解析 class 字段', async () => {
     httpGet.mockResolvedValueOnce({
-      data: { class: [{ type_id: 1, type_name: '电影' }, { type_id: 2, type_name: '剧集' }] },
+      data: {
+        class: [
+          { type_id: 1, type_name: '电影' },
+          { type_id: 2, type_name: '剧集' },
+        ],
+      },
     });
     const a = new T1JsonAdapter();
     a.init(baseSource);
@@ -154,7 +159,13 @@ describe('T1JsonAdapter getCategories', () => {
 describe('T1JsonAdapter search', () => {
   it('搜索参数走 wd 字段', async () => {
     httpGet.mockResolvedValueOnce({
-      data: { code: 1, page: 1, pagecount: 1, total: 1, list: [{ vod_id: 7, vod_name: '匹配', vod_pic: '' }] },
+      data: {
+        code: 1,
+        page: 1,
+        pagecount: 1,
+        total: 1,
+        list: [{ vod_id: 7, vod_name: '匹配', vod_pic: '' }],
+      },
     });
     const a = new T1JsonAdapter();
     a.init(baseSource);

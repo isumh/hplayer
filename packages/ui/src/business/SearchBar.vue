@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { Radio, RadioGroup, Search } from 'vant';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
-const props = withDefaults(defineProps<{ modelValue: string; mode: 'single' | 'aggregate' }>(), {
-  modelValue: '',
-  mode: 'aggregate',
-});
+const props = withDefaults(
+  defineProps<{ modelValue: string; mode: 'single' | 'aggregate'; sourceName?: string }>(),
+  {
+    modelValue: '',
+    mode: 'single',
+  },
+);
 const emit = defineEmits<{
   (e: 'update:modelValue', v: string): void;
   (e: 'update:mode', v: 'single' | 'aggregate'): void;
@@ -14,6 +17,11 @@ const emit = defineEmits<{
 
 const local = ref(props.modelValue);
 const localMode = ref(props.mode);
+
+const singleLabel = computed(() => {
+  const name = props.sourceName?.trim();
+  return name ? `当前源（${name}）` : '当前源';
+});
 
 watch(
   () => props.modelValue,
@@ -40,7 +48,7 @@ function onSubmit() {
   <div class="search-bar">
     <Search v-model="local" placeholder="搜索影视名称" @update:model-value="onInput" @search="onSubmit" />
     <RadioGroup v-model="localMode" direction="horizontal" class="mode-group">
-      <Radio name="single">当前源</Radio>
+      <Radio name="single">{{ singleLabel }}</Radio>
       <Radio name="aggregate">聚合</Radio>
     </RadioGroup>
   </div>

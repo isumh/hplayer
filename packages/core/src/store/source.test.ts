@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { useSourceStore } from './source';
 
 beforeEach(() => {
@@ -92,7 +92,9 @@ describe('sourceStore', () => {
   it('持久化到 localStorage', () => {
     const store = useSourceStore();
     const s = store.add(makeInput('持久'));
-    const stored = JSON.parse(localStorage.getItem('hplayer:sources') ?? '[]') as Array<{ id: string }>;
+    const stored = JSON.parse(localStorage.getItem('hplayer:sources') ?? '[]') as Array<{
+      id: string;
+    }>;
     expect(stored.map((x) => x.id)).toContain(s.id);
   });
 });

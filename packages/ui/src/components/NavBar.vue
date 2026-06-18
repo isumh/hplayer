@@ -2,10 +2,23 @@
 import { NavBar } from 'vant';
 import { useRouter } from 'vue-router';
 
-withDefaults(defineProps<{ title?: string; showBack?: boolean }>(), {
-  title: '',
-  showBack: true,
-});
+withDefaults(
+  defineProps<{
+    title?: string;
+    showBack?: boolean;
+    rightText?: string;
+  }>(),
+  {
+    title: '',
+    showBack: true,
+    rightText: '',
+  },
+);
+
+const emit = defineEmits<{
+  (e: 'click-left'): void;
+  (e: 'click-right'): void;
+}>();
 
 const router = useRouter();
 function back() {
@@ -15,5 +28,13 @@ function back() {
 </script>
 
 <template>
-  <NavBar :title="title ?? ''" :left-arrow="showBack ?? true" @click-left="back" fixed safe-area-inset-top />
+  <NavBar
+    :title="title ?? ''"
+    :left-arrow="showBack ?? true"
+    :right-text="rightText ?? ''"
+    @click-left="back"
+    @click-right="emit('click-right')"
+    fixed
+    safe-area-inset-top
+  />
 </template>

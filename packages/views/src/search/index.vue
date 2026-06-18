@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { VodList, SearchBar, SearchHistory, EmptyState } from '@hplayer/ui';
 import {
-  useSourceStore,
-  useSearchHistoryStore,
   adapterProxy,
   aggregateSearch,
+  useSearchHistoryStore,
+  useSourceStore,
   type VodItem,
 } from '@hplayer/core';
+import { EmptyState, SearchBar, SearchHistory, VodList } from '@hplayer/ui';
+import { closeToast, showToast } from 'vant';
+import { ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const sourceStore = useSourceStore();
 const searchHistoryStore = useSearchHistoryStore();
 
 const keyword = ref('');
-const mode = ref<'single' | 'aggregate'>('aggregate');
+const mode = ref<'single' | 'aggregate'>('single');
 type SearchResult = VodItem & { sourceName?: string };
 const items = ref<SearchResult[]>([]);
 const page = ref(1);
@@ -34,6 +35,11 @@ async function loadResults(kw: string, reset = false) {
   if (!kw) return;
   searched.value = true;
   loading.value = true;
+  // 仅"上滑分页"时（reset=false）弹 loading Toast
+  const isPaginate = !reset;
+  if (isPaginate) {
+    showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true });
+  }
   try {
     const targetPage = reset ? 1 : page.value;
     if (mode.value === 'single') {
@@ -58,6 +64,7 @@ async function loadResults(kw: string, reset = false) {
     page.value = targetPage + 1;
   } finally {
     loading.value = false;
+    if (isPaginate) closeToast();
   }
 }
 
@@ -77,7 +84,7 @@ watch(mode, () => {
 
 <template>
   <div class="search-page">
-    <SearchBar v-model="keyword" v-model:mode="mode" @search="doSearch" />
+    <SearchBar v-model="keyword" v-model:mode="mode" :source-name="sourceStore.activeSource?.name ?? ''" @search="doSearch" />
     <SearchHistory v-if="!searched" @select="onHistorySelect" />
     <VodList
       v-else-if="items.length"
