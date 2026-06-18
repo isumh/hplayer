@@ -35,6 +35,12 @@
 
 **🎉 hplayer V1.0 MVP 实施完成**
 
+## V1.1 计划入口
+
+- 设计文档：[docs/design/HPlayer-v1.1.md](../design/HPlayer-v1.1.md)
+- 开发计划：[docs/dev-plans/08-phase-7-v1.1.md](08-phase-7-v1.1.md)
+- 状态：pending，待开始 P7-1 批次
+
 ---
 
 ## 并行 Agent 状态行（P1 / P3 / P4 阶段使用）

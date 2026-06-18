@@ -19,8 +19,9 @@
 | 05 | [05-phase-4-pages-and-router.md](file:///workspace/docs/dev-plans/05-phase-4-pages-and-router.md) | 页面 + 路由 | 6 | P3 | ✅ A-F |
 | 06 | [06-phase-5-tests.md](file:///workspace/docs/dev-plans/06-phase-5-tests.md) | 集成 + 单元测试 | 1 | P4 | ❌ |
 | 07 | [07-phase-6-quality-gate.md](file:///workspace/docs/dev-plans/07-phase-6-quality-gate.md) | 质量门禁 + 收尾 | 1 | P5 | ❌ |
+| 08 | [08-phase-7-v1.1.md](file:///workspace/docs/dev-plans/08-phase-7-v1.1.md) | V1.1 增强 | 2 | P6 | ❌ 批次 1 → 批次 2 |
 
-**总 Agent 数：15**（P0×1, P1×2, P2×1, P3×3, P4×6, P5×1, P6×1）
+**总 Agent 数：17**（P0×1, P1×2, P2×1, P3×3, P4×6, P5×1, P6×1, P7×2）
 
 ---
 
