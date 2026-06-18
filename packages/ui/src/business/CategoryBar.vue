@@ -118,8 +118,8 @@ onBeforeUnmount(() => {
 /* 横向滚动容器；移动端走原生 touch 滚动，桌面端由 pointer 拖动接管 */
 .cat-bar {
   display: flex;
-  gap: 6px;
-  padding: 10px 16px;
+  gap: 4px;
+  padding: 6px 12px;
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
@@ -135,13 +135,13 @@ onBeforeUnmount(() => {
 
 .cat-item {
   flex: 0 0 auto;
-  margin: 0 6px;        /* 左右外边距（叠加 cat-bar gap 形成视觉间距） */
-  padding: 6px 14px;
-  border-radius: 16px;
+  padding: 3px 10px;
+  border-radius: 12px;
   background: var(--van-background-2);
   color: var(--van-text-color);
   border: none;
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 1.4;
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;

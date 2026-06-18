@@ -3,7 +3,15 @@
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["apps/**/*", "packages/**/*", "*.json", "*.ts", "*.vue"]
+    "includes": [
+      "apps/**/*",
+      "packages/**/*",
+      "*.json",
+      "*.ts",
+      "*.vue",
+      "!**/src/**/*.test.ts",
+      "!**/src/**/*.spec.ts"
+    ]
   },
   "formatter": {
     "enabled": true,
