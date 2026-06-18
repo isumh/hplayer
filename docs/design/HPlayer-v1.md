@@ -1,36 +1,20 @@
-# HPlayer v1.0 设计定稿文档
+# HPlayer v1.0 设计定稿
 
 > 文档版本：v1.0-final
 > 编写日期：2026-06-18
-> 最后更新：2026-06-18（基于 P0–P6 实施完成态）
-> 前置参考：[HPlayer.md](file:///workspace/docs/design/HPlayer.md)（v1.0 规划稿）/ [CodeWiki.md](file:///workspace/docs/CodeWiki.md)
-> 状态：**V1.0 MVP 已交付**（104/104 task 完成，81 个测试通过，core 包覆盖率 78.43%）
+> 状态：V1.0 MVP 已交付（104/104 task 完成，81 个测试通过，core 包覆盖率 78.43%）
 
 ## 0. 文档定位
 
-本文件是 HPlayer v1.0 MVP **实际交付态** 的设计定稿，对照 [HPlayer.md](file:///workspace/docs/design/HPlayer.md)（v1.0 规划稿）记录：
+本文件是 HPlayer v1.0 MVP 当前项目实际情况的设计定稿，记录：
 
-- 已落地的架构、模块、数据模型
-- 实施过程中与原规划的**变更点**
-- 用户驱动的 18 项细化需求（P4 之后追加）
+- 已落地的架构、模块、数据模型、组件
+- 实施过程中用户驱动的细化需求
 - 当前遗留的待办与 V1.1 / V2 路线图
 
-如需查阅原始设计意图，请阅读 [HPlayer.md](file:///workspace/docs/design/HPlayer.md)。
+## 1. 项目概述
 
----
-
-## 1. 变更记录
-
-| 版本 | 日期 | 变更 |
-| --- | --- | --- |
-| v1.0 | 2026-06-13 | 初稿（规划态） |
-| v1.0-final | 2026-06-18 | 实施定稿：P0–P6 全部 104 task 完成；81 测试通过；core 包覆盖率 78.43% |
-
----
-
-## 2. 项目概述
-
-### 2.1 定位
+### 1.1 定位
 
 HPlayer 是一款**移动端优先**的极简影视资源浏览器，专注于"浏览 → 搜索 → 播放"三步体验。
 
@@ -38,20 +22,20 @@ HPlayer 是一款**移动端优先**的极简影视资源浏览器，专注于"�
 - 借鉴 zyfun 的**多视频源聚合**思路，取其精华（CMS 适配器 + 播放 + 收藏）。
 - **不包含**直播、解析源、插件、实验室、AI、云同步、代理、桌面特性、多窗口、i18n 等 zyfun 的扩展能力。
 
-### 2.2 目标用户
+### 1.2 目标用户
 
 - 拥有自定义视频源（Apple CMS JSON/XML）且希望**移动端**浏览的人群。
 - 重视隐私与本地化（数据全部存本地，不上云）。
 - 偏好极简 UI，不需要"全能管家"。
 
-### 2.3 核心价值主张
+### 1.3 核心价值主张
 
 1. **快**：Web 端 Vite HMR，UI 调整即时生效。
 2. **轻**：V1 离线首屏 < 300KB，V2 APK < 20MB（规划）。
-3. **稳**：多源聚合、单点故障不影响整体浏览。
+3. **稳**：多源聚合，单点故障不影响整体浏览。
 4. **私**：无登录、无统计、无追踪、无云端。
 
-### 2.4 核心指标（V1.0 实际）
+### 1.4 核心指标（V1.0）
 
 | 指标 | 实际值 |
 | --- | --- |
@@ -59,12 +43,9 @@ HPlayer 是一款**移动端优先**的极简影视资源浏览器，专注于"�
 | 已完成 | 104 / 104 |
 | 单元 / 集成测试 | 81 通过 |
 | core 包覆盖率 | 78.43% |
-| 提交次数 | 8（`24a71f2` → `9b2aeec`） |
 | dev server | `http://localhost:5173/` |
 
----
-
-## 3. 技术选型（实际版本）
+## 2. 技术选型
 
 | 类别 | 选型 | 版本 | 落地备注 |
 | --- | --- | --- | --- |
@@ -72,7 +53,7 @@ HPlayer 是一款**移动端优先**的极简影视资源浏览器，专注于"�
 | 构建 | Vite | ^7.0 | HMR < 100ms |
 | UI 组件 | Vant | ^4.9 | TS 一等公民，60+ 组件 |
 | 工具样式 | Tailwind CSS | ^4.0 | 与 Vant 互补 |
-| 状态 | Pinia | ^2.3.1 | setup store 风格 |
+| 状态 | Pinia | ^2.3.1 | setup store 风格 + 手写 `storage` 工具持久化 |
 | 路由 | vue-router | ^4.4 | hash 模式（V1） |
 | 语言 | TypeScript | ^5.6 | `exactOptionalPropertyTypes: true` 严格模式 |
 | HTTP | Axios | ^1.7 | 拦截器 + UAPool 随机 UA |
@@ -84,17 +65,7 @@ HPlayer 是一款**移动端优先**的极简影视资源浏览器，专注于"�
 | 测试 | Vitest | ^2.1 | 与 Vite 同源 |
 | 包管理 | pnpm | ^10.x | Monorepo workspace |
 
-### 3.1 与原规划的关键差异
-
-| 项 | 原规划 | 实际 |
-| --- | --- | --- |
-| Pinia 持久化 | `pinia-plugin-persistedstate` | **手写 store + `storage` 工具**（V1 不需要跨窗口同步） |
-| `player` 包 | 独立 `packages/player` | **合并到 `views/player/index.vue`**（单页播放器，组件化收益小） |
-| `utils` 包 | 独立 `packages/utils` | **合并到 `packages/core/src/utils/`**（减少跨包依赖） |
-| `theme/` 目录 | `light.css` / `dark.css` 分文件 | **用 Vant CSS 变量 + ConfigProvider** |
-| `SourcePicker.vue` 通用组件 | 列出 | **未实现**（首页直接展示当前源名） |
-
-### 3.2 延后项（V1 不做）
+### 2.1 暂不实现（V1 不做）
 
 - Vue I18n
 - Pinia-shared-state（跨窗口同步）
@@ -104,14 +75,11 @@ HPlayer 是一款**移动端优先**的极简影视资源浏览器，专注于"�
 - 解析源模块（T0/T1 直接返回播放 URL）
 - AIGC / 插件 / 加密 / Lab
 - VLC 原生桥接
-- Vue I18n
 - T0_XML 适配器（仅占位，未完整实现）
 
----
+## 3. 信息架构
 
-## 4. 信息架构（IA）
-
-### 4.1 顶层导航
+### 3.1 顶层导航
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
@@ -120,9 +88,9 @@ HPlayer 是一款**移动端优先**的极简影视资源浏览器，专注于"�
 └─────────────────────────────────────────────────────────────┘
 ```
 
-底部 [Tabbar](https://vant-ui.github.io/vant/v4/#/zh-CN/tabbar) 三入口（Vant Tabbar 封装在 `ui/components/TabBar.vue`）。
+底部 Vant Tabbar 三入口（封装在 `ui/components/TabBar.vue`）。
 
-### 4.2 页面树
+### 3.2 页面树
 
 ```text
 /                              # 重定向到 /home（无源则跳 /settings/source/add）
@@ -137,7 +105,7 @@ HPlayer 是一款**移动端优先**的极简影视资源浏览器，专注于"�
 └── /player/:id?sourceId=xxx&episode=xxx  # 全屏播放
 ```
 
-### 4.3 状态机
+### 3.3 状态机
 
 ```text
 App Start
@@ -148,11 +116,9 @@ App Start
   → 渲染 /home
 ```
 
----
+## 4. 关键页面流程
 
-## 5. 关键页面流程
-
-### 5.1 首次启动（无视频源）
+### 4.1 首次启动（无视频源）
 
 ```text
 App 启动
@@ -161,7 +127,7 @@ App 启动
     → 非空 → /home（按 activeSourceId 选源）
 ```
 
-### 5.2 首页浏览
+### 4.2 首页浏览
 
 ```text
 /home
@@ -177,7 +143,7 @@ App 启动
   → 点击视频卡片 → /detail/:id?sourceId=xxx
 ```
 
-### 5.3 搜索
+### 4.3 搜索
 
 ```text
 /search
@@ -188,7 +154,7 @@ App 启动
   → 写入 searchHistory（更新 lastAccessTime）
 ```
 
-### 5.4 视频详情与播放
+### 4.4 视频详情与播放
 
 ```text
 /detail/:id?sourceId=xxx
@@ -201,7 +167,7 @@ App 启动
   → 播放结束/退出：history.progress 更新
 ```
 
-### 5.5 收藏 / 历史
+### 4.5 收藏 / 历史
 
 ```text
 /favorite
@@ -219,7 +185,7 @@ App 启动
   → 左滑 → showConfirmDialog 二次确认 → store.remove
 ```
 
-### 5.6 设置
+### 4.6 设置
 
 ```text
 /settings
@@ -230,11 +196,9 @@ App 启动
   → 关于（可选）
 ```
 
----
+## 5. 页面与组件清单
 
-## 6. 页面与组件清单
-
-### 6.1 页面（`packages/views/src/`）
+### 5.1 页面（`packages/views/src/`）
 
 | 路径 | 组件 | 职责 |
 | --- | --- | --- |
@@ -249,7 +213,7 @@ App 启动
 | `/history` | `history/index.vue` | 历史 |
 | `/player/:id` | `player/index.vue` | 全屏播放 |
 
-### 6.2 通用组件（`packages/ui/src/components/`）
+### 5.2 通用组件（`packages/ui/src/components/`）
 
 | 组件 | 职责 |
 | --- | --- |
@@ -259,7 +223,7 @@ App 启动
 | `EmptyState.vue` | 空状态（Vant `<van-empty>` + default slot） |
 | `LoadingState.vue` | 加载占位（Vant Skeleton） |
 
-### 6.3 业务组件（`packages/ui/src/business/`）
+### 5.3 业务组件（`packages/ui/src/business/`）
 
 | 组件 | 职责 |
 | --- | --- |
@@ -274,23 +238,21 @@ App 启动
 | `EpisodeList.vue` | 选集列表（Vant Tabs + Grid） |
 | `SourceForm.vue` | 视频源表单（Vant Form + Field） |
 
-### 6.4 布局（`packages/views/src/layouts/`）
+### 5.4 布局（`packages/views/src/layouts/`）
 
 | 文件 | 职责 |
 | --- | --- |
 | `TabLayout.vue` | 带 TabBar 的根布局（`<router-view>` + 底部 Tab） |
 
-### 6.5 全局预览（`apps/hplayer_web/src/App.vue`）
+### 5.5 全局预览（`apps/hplayer_web/src/App.vue`）
 
 - `<usePreviewStore>` 单一 `<van-image-preview>` 实例位于根组件
 - 任意子组件调 `usePreviewStore().open([...])` 即可触发
 - 支持双指缩放、wheel 缩放、点击关闭
 
----
+## 6. 数据模型
 
-## 7. 数据模型
-
-### 7.1 localStorage 键设计
+### 6.1 localStorage 键设计
 
 | Key | 类型 | 用途 |
 | --- | --- | --- |
@@ -301,7 +263,7 @@ App 启动
 | `hplayer:searchHistory` | `SearchHistoryItem[]` | 搜索历史（5 天清理） |
 | `hplayer:settings` | `Settings` | 主题 / UA 设备类型 |
 
-### 7.2 类型定义（`packages/core/src/types/`）
+### 6.2 类型定义（`packages/core/src/types/`）
 
 ```ts
 // 视频源
@@ -383,7 +345,7 @@ export interface Settings {
 }
 ```
 
-### 7.3 SourceForm 字段顺序（用户决策）
+### 6.3 SourceForm 字段顺序
 
 | # | 字段 | 控件 | 必填 | 默认值 | 校验 |
 | --- | --- | --- | --- | --- | --- |
@@ -396,11 +358,9 @@ export interface Settings {
 
 > 编辑模式底部追加：红色「删除视频源」按钮 → `showConfirmDialog` 二次确认 → `store.remove(id)` → 跳回 `/settings`。
 
----
+## 7. CMS 适配器
 
-## 8. CMS 适配器
-
-### 8.1 接口定义
+### 7.1 接口定义
 
 ```ts
 export interface CmsAdapter {
@@ -420,7 +380,7 @@ export interface ListPage<T> {
 }
 ```
 
-### 8.2 T1_JSON 适配器
+### 7.2 T1_JSON 适配器
 
 苹果 CMS V10 JSON 协议。基础 URL：`{baseUrl}?ac=videolist&pg=1&pagesize=20&t=1&wd=...&ids=...`
 
@@ -432,11 +392,11 @@ export interface ListPage<T> {
 
 **字段映射**：`vod_id → id` / `vod_name → name` / `vod_pic → pic` / `vod_play_from` 按 `$$$` 拆线路 / `vod_play_url` 按 `$$$` 拆线路再按 `#` 拆集。
 
-### 8.3 T0_XML 适配器
+### 7.3 T0_XML 适配器
 
 V1 仅占位（`t0-xml.ts`），V1.1 用 `fast-xml-parser` 实现。
 
-### 8.4 适配器工厂
+### 7.4 适配器工厂
 
 ```ts
 const cache = new Map<string, CmsAdapter>()
@@ -450,13 +410,13 @@ export function getAdapter(sourceId: string): CmsAdapter | null {
 }
 ```
 
-### 8.5 错误处理
+### 7.5 错误处理
 
 - 网络错误：Toast 提示，列表保留上次数据。
 - 4xx / 5xx / 超时：拦截器 `console.warn`，不 throw 到 UI（依赖响应拦截器处理）。
 - 鉴权（401/403）：V1 忽略（无账号体系）。
 
-### 8.6 UA 随机化（V1 增强）
+### 7.6 UA 随机化
 
 `packages/core/src/api/ua-pool.ts`：
 
@@ -465,17 +425,15 @@ export function getAdapter(sourceId: string): CmsAdapter | null {
 - 设备类型（mobile / desktop / tablet）由 `useSettingsStore.setDeviceType` 触发池重建
 - 防御性：池为空时回退到默认 mobile UA
 
-### 8.7 缓存策略
+### 7.7 缓存策略
 
 - LRU 内存缓存（`utils/lru.ts`），容量 500。
 - 分类 10min / 列表 5min / 详情 30min / 搜索 1min。
 - 手动刷新（PullRefresh）清空当前分类与列表缓存。
 
----
+## 8. 播放方案
 
-## 9. 播放方案
-
-### 9.1 协议映射
+### 8.1 协议映射
 
 | 协议 | 检测 | 播放器 |
 | --- | --- | --- |
@@ -484,21 +442,19 @@ export function getAdapter(sourceId: string): CmsAdapter | null {
 | FLV | URL 含 `.flv` | 原生 `<video>`（V1 占位） |
 | 其他 | — | 原生 `<video>` 兜底 |
 
-### 9.2 artplayer 配置
+### 8.2 artplayer 配置
 
 `playerStore.current.startAt` 在 `loadedmetadata` 后设置 `art.currentTime = startAt`，实现历史续播（减 10s 由 detail/index.vue 算出后写入 startAt）。
 
-### 9.3 移动端优化
+### 8.3 移动端优化
 
 - `playsInline: true`（iOS 关键）
 - 锁屏：artplayer 双击锁
 - 进度记录：`timeupdate` 10s 一次写 history
 
----
+## 9. 状态管理
 
-## 10. 状态管理
-
-### 10.1 Pinia Store 列表（`packages/core/src/store/`）
+### 9.1 Pinia Store 列表（`packages/core/src/store/`）
 
 | Store | 职责 | 持久化 |
 | --- | --- | --- |
@@ -510,14 +466,7 @@ export function getAdapter(sourceId: string): CmsAdapter | null {
 | `usePlayerStore` | 当前播放上下文（不持久化） | 内存 |
 | `usePreviewStore` | 全局图片预览 | 内存 |
 
-### 10.2 与原规划的差异
-
-- **未使用** `pinia-plugin-persistedstate` → 手写 `useXxxStore` + `storage` 工具
-- **未使用** Pinia `pinia-shared-state` → V1 单窗口无需跨窗口同步
-- **新增** `usePreviewStore`（P4 之后用户驱动）— 全局单一 ImagePreview 实例
-- **新增** `useSettingsStore.setDeviceType` 触发 `UAPool.reset`
-
-### 10.3 工具函数（`packages/core/src/utils/`）
+### 9.2 工具函数（`packages/core/src/utils/`）
 
 | 工具 | 职责 |
 | --- | --- |
@@ -531,11 +480,9 @@ export function getAdapter(sourceId: string): CmsAdapter | null {
 | `backup.ts` | 数据导入导出（sources / favorites / history） |
 | `ua-pool.ts` | user-agents 包装（设备类型 + 池轮询） |
 
----
+## 10. 路由设计
 
-## 11. 路由设计
-
-### 11.1 路由表（`packages/router/src/index.ts`）
+### 10.1 路由表（`packages/router/src/index.ts`）
 
 ```ts
 const routes = [
@@ -558,7 +505,7 @@ const routes = [
 ]
 ```
 
-### 11.2 路由守卫
+### 10.2 路由守卫
 
 ```ts
 router.beforeEach((to) => {
@@ -570,15 +517,13 @@ router.beforeEach((to) => {
 })
 ```
 
-### 11.3 Hash vs History
+### 10.3 Hash vs History
 
 V1 用 **hash 模式**（V2 Capacitor Android 切换为 history 模式）。
 
----
+## 11. 视觉与交互
 
-## 12. 视觉与交互
-
-### 12.1 主题色（Vant CSS 变量）
+### 11.1 主题色（Vant CSS 变量）
 
 | Token | 亮色 | 暗色 |
 | --- | --- | --- |
@@ -587,12 +532,12 @@ V1 用 **hash 模式**（V2 Capacitor Android 切换为 history 模式）。
 | `--van-background-2` | `#f7f8fa` | `#1a1a1a` |
 | `--van-text-color` | `#1f2937` | `#e5e7eb` |
 
-### 12.2 主题切换
+### 11.2 主题切换
 
 `useSettingsStore.theme` + `watch(theme, applyTheme)`：
 - `light` / `dark` / `auto`（`prefers-color-scheme`）
 
-### 12.3 关键交互（P4 之后用户驱动）
+### 11.3 关键交互
 
 | 场景 | 实现 |
 | --- | --- |
@@ -608,13 +553,13 @@ V1 用 **hash 模式**（V2 Capacitor Android 切换为 history 模式）。
 | SourceForm | 字段对调（接口地址前置）+ 删除按钮 |
 | 桌面端 touch | `@vant/touch-emulator`（SwipeCell 可拖） |
 
-### 12.4 动画与过渡
+### 11.4 动画与过渡
 
 - 路由切换：`<router-view v-slot="{ Component }">` + `<transition>`（左右滑入）。
 - 列表项：进入动画用 Vant `<transition-group>`。
 - 卡片点击：`transform: scale(0.97)` + 100ms 过渡。
 
-### 12.5 响应式断点
+### 11.5 响应式断点
 
 | 设备 | 宽度 | 布局 |
 | --- | --- | --- |
@@ -624,37 +569,33 @@ V1 用 **hash 模式**（V2 Capacitor Android 切换为 history 模式）。
 
 > V1 优先保证手机体验，桌面端 `@vant/touch-emulator` 兜底手势。
 
----
+## 12. 性能优化
 
-## 13. 性能优化
-
-### 13.1 图片懒加载
+### 12.1 图片懒加载
 
 - `VodCard` 用 Vant `Lazyload` 指令
 - 缩略图：源站原图（V1 不做压缩，依赖源站 CDN）
 - 占位：`VodGridSkeleton` + `CategoryBarSkeleton`
 
-### 13.2 虚拟列表
+### 12.2 虚拟列表
 
 - 视频列表默认不上虚拟列表（20–60 条/页）
 - 聚合搜索结果（V1 未上虚拟列表，规划中）
 
-### 13.3 请求去重
+### 12.3 请求去重
 
 - 同一 `sourceId + categoryId + page` 的请求在 200ms 内合并
 - LRU 缓存已覆盖大部分重复请求
 
-### 13.4 启动优化
+### 12.4 启动优化
 
 - 路由懒加载
 - 字体：系统字体栈，无 webfont 加载
 - Vite chunk splitting：`vite.config.ts` `build.rollupOptions.output.manualChunks`
 
----
+## 13. 测试与质量门禁
 
-## 14. 测试与质量门禁（V1 实际）
-
-### 14.1 单元 / 集成测试（Vitest）
+### 13.1 单元 / 集成测试（Vitest）
 
 **共 81 个测试通过 / 12 个测试文件**：
 
@@ -674,7 +615,7 @@ V1 用 **hash 模式**（V2 Capacitor Android 切换为 history 模式）。
 | `utils/backup.test.ts` | 数据导入导出 |
 | `api/ua-pool.test.ts` | UA 池轮询 / reset / 单例 |
 
-### 14.2 覆盖率
+### 13.2 覆盖率
 
 ```
 core 包：78.43%（utils 89.91% / store 81.67% / adapter 69.53%）
@@ -688,7 +629,7 @@ core 包：78.43%（utils 89.91% / store 81.67% / adapter 69.53%）
 - `store/favorite.ts` / `player.ts` / `preview.ts` / `settings.ts`（P5 范围外）
 - `utils/migrate.ts`（V2 启用）
 
-### 14.3 Biome 配置
+### 13.3 Biome 配置
 
 ```jsonc
 {
@@ -719,9 +660,7 @@ core 包：78.43%（utils 89.91% / store 81.67% / adapter 69.53%）
 - `pnpm test --coverage` → 78.43%
 - `pnpm build` → dist 产物
 
----
-
-## 15. 项目结构（实际）
+## 14. 项目结构
 
 ```text
 hplayer/
@@ -782,9 +721,7 @@ hplayer/
 └── coverage/                        # vitest 覆盖率输出
 ```
 
----
-
-## 16. 里程碑
+## 15. 里程碑
 
 ### V1.0 MVP（已完成 ✅）
 
@@ -795,8 +732,8 @@ hplayer/
 - [x] 页面 + 路由（**P4**）
 - [x] 集成测试 + 覆盖率 78.43%（**P5**）
 - [x] lint + format + type-check + build（**P6**）
-- [x] P4 之后 18 项用户驱动细化需求（合入 `9b2aeec`）
-- [x] UA 随机化（`9b2aeec`）
+- [x] P4 之后 23 项用户驱动细化需求
+- [x] UA 随机化
 
 ### V1.1 增强（规划）
 
@@ -815,9 +752,7 @@ hplayer/
 - [ ] APK 打包 + 签名
 - [ ] 应用内更新
 
----
-
-## 17. 风险与对冲（V1 实际）
+## 16. 风险与对冲
 
 | 风险 | V1 应对 |
 | --- | --- |
@@ -830,11 +765,9 @@ hplayer/
 | 桌面端 SwipeCell 不可拖 | `@vant/touch-emulator` 桌面适配 |
 | 资源站 403/反爬 | UAPool 自动轮换（每次请求 nextUA） |
 
----
+## 17. 用户驱动细化需求
 
-## 18. 用户驱动细化需求（P4 之后）
-
-> 全部在 P4 完成后由用户驱动追加，已合入 `a8bd4ca`（P4 final）与 `9b2aeec`（UA + biome）两个 commit。
+> 全部在 P4 完成后由用户驱动追加，合入 `a8bd4ca`（P4 final）与 `9b2aeec`（UA + biome）等多个 commit。
 
 | # | 需求 | 落地位置 |
 | --- | --- | --- |
@@ -862,26 +795,7 @@ hplayer/
 | 22 | 设置页 UA 设备类型切换 UI | `settings/index.vue` |
 | 23 | biome 配置更新（`noExplicitAny: off` / `semicolons: asNeeded` / `quoteProperties: asNeeded` / 排除测试文件） | `biome.json` |
 
----
-
-## 19. 与原 v1.0 规划稿的对比（实施变更点）
-
-| 维度 | 规划稿 | 实施定稿 | 变更原因 |
-| --- | --- | --- | --- |
-| Pinia 持久化 | `pinia-plugin-persistedstate` | 手写 store + `storage` 工具 | 减少依赖；store 与 utils 紧耦合更易测 |
-| `player` 包 | 独立 `packages/player` | 合并到 `views/player/index.vue` | 播放页单点，单包无收益 |
-| `utils` 包 | 独立 `packages/utils` | 合并到 `core/src/utils` | 跨包依赖过重 |
-| `theme/` 目录 | `light.css` / `dark.css` | Vant CSS 变量 + `useSettingsStore` | 避免重复维护 |
-| `SourcePicker.vue` | 通用组件 | 未实现（首页直接展示源名） | 用户偏好更紧凑布局 |
-| `imagePreview` 单元 | 多图 + 缩略图 | 单图（V1 决策 #5） | mac-cms 海报通常 1:1 比例 |
-| 5 天清理 | 滑动窗口 | 滑动窗口（**保留**） | 与原规划一致 |
-| activeSourceId 持久化 | 优先选中 | **保留** | 与原规划一致 |
-| `pageSize` 暴露 | 编辑表单 | **保留** | 与原规划一致 |
-| 路由 `replace` 守卫 | `router.replace` | **保留** | 与原规划一致 |
-
----
-
-## 20. 下一步建议
+## 18. 下一步建议
 
 1. **V1.1**（推荐先做）：
    - T0_XML 适配器完整实现
@@ -895,14 +809,12 @@ hplayer/
 
 3. **V1 后续 bug 跟踪**：见 `STATE.md` 变更记录，所有 P4-P6 期间发现并修复的 30+ issue 已在 `STATE.md` 留痕。
 
----
+## 19. 参考资料
 
-## 21. 参考资料
-
-- 原 v1.0 规划稿：[HPlayer.md](file:///workspace/docs/design/HPlayer.md)
-- zyfun 源码分析：[CodeWiki.md](file:///workspace/docs/CodeWiki.md)
-- 实施计划索引：[dev-plans/00-INDEX.md](file:///workspace/docs/dev-plans/00-INDEX.md)
-- 阶段状态跟踪：[dev-plans/STATE.md](file:///workspace/docs/dev-plans/STATE.md)
+- 原始设计稿：[HPlayer.md](./HPlayer.md)
+- zyfun 源码分析：[CodeWiki.md](../CodeWiki.md)
+- 实施计划索引：[dev-plans/00-INDEX.md](../dev-plans/00-INDEX.md)
+- 阶段状态跟踪：[dev-plans/STATE.md](../dev-plans/STATE.md)
 - 苹果 CMS V10 API：[https://www.maccms.la/doc/v10/api.html](https://www.maccms.la/doc/v10/api.html)
 - Vant 4 文档：[https://vant-ui.github.io/vant/v4/](https://vant-ui.github.io/vant/v4/)
 - Tailwind CSS 4 文档：[https://tailwindcss.com/docs/installation/using-vite](https://tailwindcss.com/docs/installation/using-vite)
