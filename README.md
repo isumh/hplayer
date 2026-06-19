@@ -115,7 +115,55 @@ pnpm open:android
 
 1. 配置 `apps/hplayer_android/android/local.properties`（签名信息不提交到版本控制）。
 2. 连接真机或启动模拟器。
-3. 执行 `Build → Generate Signed App Bundle / APK` 或 `./gradlew assembleRelease`。
+3. 执行 `Build → Generate Signed App Bundle / APK` 或 `./gradlew assembleRelease`.
+
+### GitHub Actions 自动打包
+
+项目已配置 CI 工作流 [`.github/workflows/build-apk.yml`](.github/workflows/build-apk.yml)，无需本地 Android 环境即可自动构建 release APK。
+
+#### 1. 生成本地 release 签名文件
+
+```bash
+cd apps/hplayer_android/android/app
+keytool -genkey -v \
+  -keystore release.keystore \
+  -alias hplayer \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000
+```
+
+请妥善保管 `release.keystore` 文件，**不要提交到 Git**。
+
+#### 2. 将 keystore 转为 base64
+
+```bash
+# macOS / Linux
+base64 -i release.keystore -o release.keystore.b64
+
+# 或输出到终端（复制全部内容）
+base64 release.keystore | tr -d '\n'
+```
+
+#### 3. 配置 GitHub Secrets
+
+在仓库页面进入 **Settings → Secrets and variables → Actions → New repository secret**，添加以下 4 个 Secret：
+
+| Secret | 说明 |
+| --- | --- |
+| `RELEASE_KEYSTORE` | `release.keystore` 文件经 base64 编码后的完整字符串 |
+| `RELEASE_STORE_PASSWORD` | 密钥库密码 |
+| `RELEASE_KEY_ALIAS` | 别名，例如 `hplayer` |
+| `RELEASE_KEY_PASSWORD` | 别名密码 |
+
+#### 4. 触发构建
+
+- 推送代码到 `main` / `master` / `feat/**` 分支会自动触发构建。
+- 也可以在 **Actions → Build Android APK → Run workflow** 手动触发。
+
+#### 5. 下载 APK
+
+构建完成后，在 Actions 运行详情页底部的 **Artifacts** 中下载 `hplayer-release-apk`，解压后即可得到 `app-release.apk`。
 
 ---
 
