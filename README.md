@@ -156,6 +156,8 @@ base64 release.keystore | tr -d '\n'
 | `RELEASE_KEY_ALIAS` | 别名，例如 `hplayer` |
 | `RELEASE_KEY_PASSWORD` | 别名密码 |
 
+> 注意：工作流中的 `RELEASE_STORE_FILE` 已固定为 `release.keystore`， keystore 解码后会直接放在 `apps/hplayer_android/android/app/release.keystore`，与 `build.gradle` 中的相对路径一致。
+
 #### 4. 触发构建
 
 - 推送代码到 `main` / `master` / `feat/**` 分支会自动触发构建。
