@@ -1,4 +1,8 @@
-import { CapacitorSQLite, SQLiteConnection, type SQLiteDBConnection } from '@capacitor-community/sqlite'
+import {
+  CapacitorSQLite,
+  SQLiteConnection,
+  type SQLiteDBConnection,
+} from '@capacitor-community/sqlite'
 import type { StorageAdapter } from './storage'
 
 const DB_NAME = 'hplayer_db'
@@ -49,10 +53,10 @@ async function persist(key: string): Promise<void> {
     await connection.run(`DELETE FROM ${TABLE_NAME} WHERE key = ?;`, [key])
     return
   }
-  await connection.run(
-    `INSERT OR REPLACE INTO ${TABLE_NAME} (key, value) VALUES (?, ?);`,
-    [key, JSON.stringify(value)],
-  )
+  await connection.run(`INSERT OR REPLACE INTO ${TABLE_NAME} (key, value) VALUES (?, ?);`, [
+    key,
+    JSON.stringify(value),
+  ])
 }
 
 export const capacitorStorageAdapter: StorageAdapter = {

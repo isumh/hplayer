@@ -7,7 +7,7 @@
 ## 状态
 
 - [x] pending
-- [ ] in_progress
+- [x] in_progress
 - [ ] completed
 
 ## 依赖
@@ -67,7 +67,7 @@
 
 ---
 
-- [ ] **Task 1.1: 安装 Capacitor CLI 与核心依赖**
+- [x] **Task 1.1: 安装 Capacitor CLI 与核心依赖**
 
 在仓库根目录执行：
 
@@ -85,7 +85,7 @@ pnpm exec cap --version
 
 ---
 
-- [ ] **Task 1.2: 创建 hplayer_android package**
+- [x] **Task 1.2: 创建 hplayer_android package**
 
 创建 `apps/hplayer_android/package.json`：
 
@@ -121,7 +121,7 @@ pnpm exec cap --version
 
 ---
 
-- [ ] **Task 1.3: 创建 capacitor.config.ts**
+- [x] **Task 1.3: 创建 capacitor.config.ts**
 
 创建 `apps/hplayer_android/capacitor.config.ts`：
 
@@ -151,7 +151,7 @@ export default config
 
 ---
 
-- [ ] **Task 1.4: 更新 workspace 与根脚本**
+- [x] **Task 1.4: 更新 workspace 与根脚本**
 
 修改 `pnpm-workspace.yaml`，确保包含：
 
@@ -178,7 +178,7 @@ packages:
 
 ---
 
-- [ ] **Task 1.5: 生成 Android 工程**
+- [x] **Task 1.5: 生成 Android 工程**
 
 在 `apps/hplayer_android` 下执行：
 
@@ -205,7 +205,7 @@ apps/hplayer_android/android/
 
 ---
 
-- [ ] **Task 1.6: 首次 sync 验证**
+- [x] **Task 1.6: 首次 sync 验证**
 
 执行：
 
@@ -223,7 +223,7 @@ pnpm sync:android
 
 ---
 
-- [ ] **Task 1.7: commit P8-1**
+- [x] **Task 1.7: commit P8-1**
 
 ```bash
 git add .
@@ -243,7 +243,7 @@ git commit -m "feat(P8-1): initialize Capacitor Android project and workspace sc
 
 ---
 
-- [ ] **Task 2.1: 路由切换为 history 模式**
+- [x] **Task 2.1: 路由切换为 history 模式**
 
 修改 `packages/router/src/index.ts`：
 
@@ -260,7 +260,7 @@ const router = createRouter({
 
 ---
 
-- [ ] **Task 2.2: Vite 配置适配 Capacitor**
+- [x] **Task 2.2: Vite 配置适配 Capacitor**
 
 确认 `apps/hplayer_web/vite.config.ts`：
 
@@ -280,7 +280,7 @@ const historyMode = import.meta.env.VITE_ROUTER_HISTORY === 'hash'
 
 ---
 
-- [ ] **Task 2.3: 初始化 Capacitor 与插件**
+- [x] **Task 2.3: 初始化 Capacitor 与插件**
 
 修改 `apps/hplayer_web/src/main.ts`：
 
@@ -302,7 +302,7 @@ initNative()
 
 ---
 
-- [ ] **Task 2.4: 构建产物 sync 后验证**
+- [x] **Task 2.4: 构建产物 sync 后验证**
 
 执行：
 
@@ -318,7 +318,7 @@ pnpm sync:android
 
 ---
 
-- [ ] **Task 2.5: commit P8-2**
+- [x] **Task 2.5: commit P8-2**
 
 ```bash
 git add .
@@ -341,7 +341,7 @@ git commit -m "feat(P8-2): switch router to history mode and wire Capacitor nati
 
 ---
 
-- [ ] **Task 3.1: 抽象 storage 接口**
+- [x] **Task 3.1: 抽象 storage 接口**
 
 重构 `packages/core/src/utils/storage.ts`：
 
@@ -369,13 +369,13 @@ export function createLocalStorageAdapter(): StorageAdapter { ... }
 
 ---
 
-- [ ] **Task 3.2: 实现 storage-local.ts**
+- [x] **Task 3.2: 实现 storage-local.ts**
 
 将现有 localStorage 实现提取到 `packages/core/src/utils/storage-local.ts`，`storage.ts` 仅保留接口与默认引用。
 
 ---
 
-- [ ] **Task 3.3: 实现 storage-capacitor.ts**
+- [x] **Task 3.3: 实现 storage-capacitor.ts**
 
 创建 `packages/core/src/utils/storage-capacitor.ts`：
 
@@ -403,7 +403,7 @@ export async function createCapacitorSqliteAdapter(): Promise<StorageAdapter> {
 
 ---
 
-- [ ] **Task 3.4: 实现 V1 → V2 迁移逻辑**
+- [x] **Task 3.4: 实现 V1 → V2 迁移逻辑**
 
 修改 `packages/core/src/utils/migrate.ts`：
 
@@ -438,7 +438,7 @@ export async function migrateV1ToV2(adapter: StorageAdapter): Promise<void> {
 
 ---
 
-- [ ] **Task 3.5: 在 App 启动时选择 storage 并迁移**
+- [x] **Task 3.5: 在 App 启动时选择 storage 并迁移**
 
 修改 `apps/hplayer_web/src/App.vue`：
 
@@ -462,7 +462,7 @@ onMounted(async () => {
 
 ---
 
-- [ ] **Task 3.6: 新增测试**
+- [x] **Task 3.6: 新增测试**
 
 - `storage-capacitor.test.ts`：mock `@capacitor-community/sqlite`。
 - `migrate.test.ts`：mock `storage-local` 与 `Preferences`，验证迁移字段映射。
@@ -471,7 +471,7 @@ onMounted(async () => {
 
 ---
 
-- [ ] **Task 3.7: commit P8-3**
+- [x] **Task 3.7: commit P8-3**
 
 ```bash
 git add .
@@ -491,7 +491,7 @@ git commit -m "feat(P8-3): abstract storage layer and migrate V1 localStorage to
 
 ---
 
-- [ ] **Task 4.1: 状态栏主题同步**
+- [x] **Task 4.1: 状态栏主题同步**
 
 在 `App.vue` 中监听 settings theme：
 
@@ -508,7 +508,7 @@ watch(() => settingsStore.settings.theme, async (theme) => {
 
 ---
 
-- [ ] **Task 4.2: 启动屏资源**
+- [x] **Task 4.2: 启动屏资源**
 
 准备 `splash.png`（推荐 2732×2732），放入：
 
@@ -522,7 +522,7 @@ apps/hplayer_android/android/app/src/main/res/drawable-xxxhdpi/splash.png
 
 ---
 
-- [ ] **Task 4.3: 播放页横屏**
+- [x] **Task 4.3: 播放页横屏**
 
 修改 `packages/views/src/player/index.vue`：
 
@@ -544,7 +544,7 @@ onBeforeUnmount(async () => {
 
 ---
 
-- [ ] **Task 4.4: 返回键适配**
+- [x] **Task 4.4: 返回键适配**
 
 修改 `apps/hplayer_web/src/main.ts` 或 `App.vue`：
 
@@ -564,7 +564,7 @@ if (Capacitor.isNativePlatform()) {
 
 ---
 
-- [ ] **Task 4.5: 后台播放（V2.0 不实现系统控制）**
+- [x] **Task 4.5: 后台播放（V2.0 不实现系统控制）**
 
 - V2.0 不集成 MediaSession / 锁屏通知控制。
 - 后台音频行为由 WebView `<video>` / `<audio>` 元素决定。
@@ -572,7 +572,7 @@ if (Capacitor.isNativePlatform()) {
 
 ---
 
-- [ ] **Task 4.6: commit P8-4**
+- [x] **Task 4.6: commit P8-4**
 
 ```bash
 git add .

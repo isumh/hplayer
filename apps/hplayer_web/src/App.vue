@@ -1,12 +1,20 @@
 <script setup lang="ts">
-import { useHistoryStore, usePreviewStore, useSearchHistoryStore, useSettingsStore } from '@hplayer/core'
+import { App } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { StatusBar, Style } from '@capacitor/status-bar'
+import {
+  useHistoryStore,
+  usePreviewStore,
+  useSearchHistoryStore,
+  useSettingsStore,
+} from '@hplayer/core'
 import { ImagePreview } from 'vant'
 import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 const historyStore = useHistoryStore()
+const router = useRouter()
 const searchHistoryStore = useSearchHistoryStore()
 const previewStore = usePreviewStore()
 const settingsStore = useSettingsStore()
@@ -52,14 +60,37 @@ async function syncStatusBar() {
   await StatusBar.setBackgroundColor({ color: isDark ? '#0a0a0a' : '#ffffff' })
 }
 
+let backButtonListener: { remove: () => Promise<void> } | null = null
+
+async function setupBackButton() {
+  if (!Capacitor.isNativePlatform()) return
+  backButtonListener = await App.addListener('backButton', ({ canGoBack }) => {
+    const currentPath = router.currentRoute.value.path
+    // 播放页优先退出播放
+    if (currentPath.startsWith('/player')) {
+      router.back()
+      return
+    }
+    // 非首页且存在可后退历史则返回上一页
+    if (currentPath !== '/home' && canGoBack) {
+      router.back()
+      return
+    }
+    // 首页按返回键退出应用
+    void App.exitApp()
+  })
+}
+
 onMounted(() => {
   historyStore.cleanup()
   searchHistoryStore.cleanup()
   window.addEventListener('wheel', onWheel, { passive: false })
+  prefersDark.addEventListener('change', syncStatusBar)
 
   if (Capacitor.isNativePlatform()) {
     SplashScreen.hide()
-    syncStatusBar()
+    void syncStatusBar()
+    void setupBackButton()
   }
 })
 
@@ -67,6 +98,8 @@ watch(() => settingsStore.settings.theme, syncStatusBar)
 
 onBeforeUnmount(() => {
   window.removeEventListener('wheel', onWheel)
+  prefersDark.removeEventListener('change', syncStatusBar)
+  void backButtonListener?.remove()
 })
 </script>
 

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Capacitor } from '@capacitor/core'
+import { ScreenOrientation } from '@capacitor/screen-orientation'
 import {
   detectProtocol,
   isValidVideoUrl,
@@ -146,7 +148,7 @@ function setRate(r: Rate) {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   const cur = playerStore.current
   const ep = cur?.episode
   if (!ep || !cur) {
@@ -154,11 +156,13 @@ onMounted(() => {
     return
   }
   playingTitle.value = `${cur.vod.name} - ${ep.name}`
+  await lockLandscape()
   buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
 })
 
 onBeforeUnmount(() => {
   teardown()
+  void unlockOrientation()
 })
 
 watch(
@@ -170,6 +174,16 @@ watch(
     }
   },
 )
+
+async function lockLandscape() {
+  if (!Capacitor.isNativePlatform()) return
+  await ScreenOrientation.lock({ orientation: 'landscape' })
+}
+
+async function unlockOrientation() {
+  if (!Capacitor.isNativePlatform()) return
+  await ScreenOrientation.unlock()
+}
 
 function onBack() {
   persistProgress()
