@@ -659,7 +659,7 @@ git commit -m "feat(P8-5): Capacitor native HTTP bridge to bypass WebView CORS"
 
 ---
 
-- [ ] **Task 6.1: 配置 release 签名模板**
+- [x] **Task 6.1: 配置 release 签名模板**
 
 在 `apps/hplayer_android/android/app/build.gradle` 中配置 signingConfigs：
 
@@ -688,7 +688,7 @@ android {
 
 ---
 
-- [ ] **Task 6.2: 应用内更新检测**
+- [x] **Task 6.2: 应用内更新检测**
 
 集成 `@capawesome/capacitor-app-update`：
 
@@ -707,7 +707,7 @@ async function checkUpdate() {
 
 ---
 
-- [ ] **Task 6.3: commit P8-6**
+- [x] **Task 6.3: commit P8-6**
 
 ```bash
 git add .

@@ -10,12 +10,12 @@
 | 字段 | 值 |
 | --- | --- |
 | `current_phase` | **P8 V2.0 Capacitor Android（in_progress）** |
-| `current_agent` | **P8-5** |
-| `last_completed_task` | P8-5:Task 5.5 |
+| `current_agent` | **P8-6** |
+| `last_completed_task` | P8-6:Task 6.3 |
 | `last_commit_hash` | `d078dd0` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
-| `last_update` | 2026-06-19（P8-5 CORS 处理完成） |
+| `last_update` | 2026-06-19（P8-6 签名与更新检测完成） |
 
 ---
 

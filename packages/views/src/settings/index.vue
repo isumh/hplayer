@@ -1,6 +1,19 @@
 <script setup lang="ts">
+import { Capacitor } from '@capacitor/core'
+import { AppUpdate, AppUpdateAvailability } from '@capawesome/capacitor-app-update'
 import { exportBackup, importBackup, useSettingsStore, useSourceStore } from '@hplayer/core'
-import { Button, Cell, CellGroup, Field, NavBar, Picker, Popup, Switch, showToast } from 'vant'
+import {
+  Button,
+  Cell,
+  CellGroup,
+  Field,
+  NavBar,
+  Picker,
+  Popup,
+  Switch,
+  showConfirmDialog,
+  showToast,
+} from 'vant'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -22,6 +35,30 @@ function editSource(id: string) {
 
 function setTheme(theme: 'light' | 'dark' | 'auto') {
   settingsStore.setTheme(theme)
+}
+
+async function checkUpdate() {
+  if (!Capacitor.isNativePlatform()) {
+    showToast('检查更新仅支持原生应用')
+    return
+  }
+  try {
+    const info = await AppUpdate.getAppUpdateInfo()
+    if (info.updateAvailability === AppUpdateAvailability.UPDATE_AVAILABLE) {
+      const ok = await showConfirmDialog({
+        title: '发现新版本',
+        message: `当前版本：${info.currentVersionName}\n最新版本：${info.availableVersionName}\n是否前往应用商店更新？`,
+      })
+        .then(() => true)
+        .catch(() => false)
+      if (ok) await AppUpdate.openAppStore()
+    } else {
+      showToast('当前已是最新版本')
+    }
+  } catch (err) {
+    console.error('[checkUpdate]', err)
+    showToast('检查更新失败')
+  }
 }
 
 function deviceLabel(device: 'mobile' | 'desktop' | 'tablet'): string {
@@ -205,6 +242,7 @@ function handleImport(e: Event) {
 
     <div class="section">
       <CellGroup inset>
+        <Cell title="检查更新" clickable is-link @click="checkUpdate" />
         <Cell title="关于 hplayer" value="v0.1.0" />
         <Cell title="开源协议" value="MIT" />
       </CellGroup>
