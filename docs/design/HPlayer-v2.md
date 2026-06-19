@@ -9,7 +9,7 @@
 
 ## 0. 文档定位
 
-本文件是 HPlayer **v2.0 Android 版**的设计定稿。V2.0 在 V1.1 Web Mobile 基础上，通过 **Capacitor** 将现有 Vue 3 + Vite 产物打包为 Android APK，并补齐原生能力（持久化、后台播放、锁屏控制、状态栏/启动屏、应用内更新等）。
+本文件是 HPlayer **v2.0 Android 版**的设计定稿。V2.0 在 V1.1 Web Mobile 基础上，通过 **Capacitor** 将现有 Vue 3 + Vite 产物打包为 Android APK，并补齐原生能力（持久化、状态栏/启动屏、返回键/横屏、应用内更新等）。
 
 本文档明确：
 
@@ -26,7 +26,7 @@
 
 1. **原生 Android 形态**：将现有 Web 应用封装为 Android APK，保持现有页面结构、交互流程、数据模型不变。
 2. **本地持久化升级**：将 `localStorage` 迁移到 Capacitor SQLite，解决容量限制与数据可靠性问题。
-3. **原生播放体验**：后台播放 + 锁屏媒体控制 + 全屏横屏切换。
+3. **原生播放体验**：全屏横屏切换；后台音频播放保持与浏览器一致（V2.0 不实现锁屏/通知栏媒体控制）。
 4. **原生壳体验**：沉浸式状态栏、启动屏、返回键/手势适配、版本更新检测。
 5. **保持可维护**：Web 代码继续作为单一来源，Android 工程只作为「壳」存在，业务逻辑尽量留在 Web 层。
 
@@ -44,12 +44,11 @@
 | 4 | localStorage → SQLite 迁移 | `packages/core/src/utils/migrate.ts` + `@capacitor-community/sqlite` |
 | 5 | 持久化层抽象（Storage 接口） | `packages/core/src/utils/storage.ts` 替换为 Capacitor 实现 |
 | 6 | 状态栏/启动屏/导航栏 | `@capacitor/status-bar`、`@capacitor/splash-screen` |
-| 7 | 后台播放 + MediaSession | `@capacitor-community/mediainfo` / 自定义 Capacitor Plugin |
-| 8 | 屏幕方向控制 | `@capacitor/screen-orientation` |
-| 9 | 文件系统缓存 | `@capacitor/filesystem` |
-| 10 | 应用内更新检测 | `@capawesome/capacitor-app-update` |
-| 11 | release 签名配置模板（本地执行） | `apps/hplayer_android/android/` Gradle 工程 |
-| 12 | V2 构建脚本 | 根 `package.json`：`build:android`、`sync:android`、`open:android` |
+| 7 | 屏幕方向控制 | `@capacitor/screen-orientation` |
+| 8 | 文件系统缓存 | `@capacitor/filesystem` |
+| 9 | 应用内更新检测 | `@capawesome/capacitor-app-update` |
+| 10 | release 签名配置模板（本地执行） | `apps/hplayer_android/android/` Gradle 工程 |
+| 11 | V2 构建脚本 | 根 `package.json`：`build:android`、`sync:android`、`open:android` |
 
 ### 2.2 不包含（V2.0 不做）
 
@@ -124,12 +123,9 @@
 | 文件系统 | `@capacitor/filesystem` | ^7.0.0 | 缓存、导出备份 |
 | 屏幕方向 | `@capacitor/screen-orientation` | ^7.0.0 | 播放页强制横屏 |
 | 应用更新 | `@capawesome/capacitor-app-update` | ^7.0.0 | 检测 APK 更新 |
-| 后台任务 | `@capawesome/capacitor-background-task` | ^7.0.0 | 切后台保活播放（辅助） |
-| 媒体控制 | `@capacitor-community/mediainfo` | ^7.0.0 | 锁屏通知、播放/暂停/进度 |
+| 后台任务 | `@capawesome/capacitor-background-task` | ^7.0.0 | 切后台保活播放（辅助，V2.0 不保证效果） |
 | 震动 | `@capacitor/haptics` | ^7.0.0 | 关键操作反馈 |
 | 分享 | `@capacitor/share` | ^7.0.0 | 分享应用/备份文件 |
-
-> 后台播放 + MediaSession 也可能需要自定义 Capacitor Plugin 封装 Android `MediaBrowserServiceCompat`，作为兜底方案保留。
 
 ### 4.3 播放方案
 
@@ -308,11 +304,11 @@ Android WebView 同样受 CORS 限制，且无法像浏览器扩展那样绕过�
 - 普通页面：跟随系统（竖屏）。
 - 播放页：进入时强制横屏，退出时恢复竖屏。
 
-### 9.5 后台播放 + MediaSession
+### 9.5 后台播放（V2.0 不实现系统控制）
 
-- 使用 `@capacitor-community/mediainfo` 暴露播放元数据到系统通知与锁屏。
-- Web 层 `player/index.vue` 在播放/暂停/进度变化时调用 plugin。
-- 切后台保持音频播放：需 Android `audio` focus 与 foreground service，必要时自定义 plugin。
+- V2.0 不集成 MediaSession / 锁屏通知控制。
+- 后台音频行为由 WebView `<video>` / `<audio>` 元素决定，通常切后台后数分钟内可能被系统暂停。
+- 如需完整的后台播放 + 锁屏控制，作为 V2.x 增强项通过自定义 Capacitor Plugin 实现。
 
 ---
 
@@ -379,7 +375,7 @@ cd apps/hplayer_android/android
 | 首次启动 | Splash 显示 → 迁移 → 首页 |
 | 视频源添加 | 表单提交 → 持久化到 SQLite → 重启后仍在 |
 | 首页浏览 | 分类加载、列表分页、下拉刷新 |
-| 播放 | HLS/MP4 播放、横屏、锁屏控制、后台音频 |
+| 播放 | HLS/MP4 播放、横屏、后台音频（无锁屏控制） |
 | 历史/收藏 | 添加、删除、重启后保留 |
 | 主题切换 | 状态栏图标颜色同步 |
 | 返回键 | 播放页先退出全屏，首页提示退出 |
@@ -446,7 +442,7 @@ hplayer/
 
 - [ ] 状态栏/启动屏/导航栏
 - [ ] 播放页横屏
-- [ ] 后台播放 + MediaSession
+- [ ] 返回键适配
 - [ ] 文件系统缓存（可选）
 
 ### Phase 8.5：网络与 CORS
@@ -477,7 +473,7 @@ hplayer/
 | WebView HLS 播放失败 | 先验证 WebView 能力，再决定是否引入 ExoPlayer 原生桥接 |
 | 第三方源 CORS 在 WebView 仍失败 | 集成 Capacitor HTTP plugin 或提示用户源站不支持 |
 | SQLite 迁移失败导致数据丢失 | 迁移前备份 localStorage；幂等设计；失败保留原数据 |
-| 后台播放被系统杀 | 使用 foreground service + MediaSession；必要时引导用户关闭电池优化 |
+| 后台播放被系统杀 | V2.0 不保证；作为 V2.x 增强项实现 |
 | APK 签名配置泄露 | keystore 不提交仓库，通过本地环境变量或 `local.properties` 注入 |
 
 ---

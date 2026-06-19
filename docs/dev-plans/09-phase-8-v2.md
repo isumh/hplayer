@@ -21,14 +21,14 @@
 1. **Agent P8-1**：环境准备、Capacitor 工程初始化、`pnpm cap sync android` 成功。
 2. **Agent P8-2**：路由 hash → history 迁移、Vite 构建适配、WebView 可加载首页。
 3. **Agent P8-3**：抽象 storage 接口、SQLite 实现、V1 → V2 迁移。
-4. **Agent P8-4**：状态栏、启动屏、返回键、横屏、后台播放 + MediaSession。
+4. **Agent P8-4**：状态栏、启动屏、返回键、横屏（V2.0 不实现锁屏/通知栏媒体控制）。
 5. **Agent P8-5**：Capacitor HTTP plugin 评估与集成，处理 WebView CORS。
 6. **Agent P8-6**：release 签名配置模板（本地执行）、应用内更新检测。
 7. **Agent P8-7**：回归测试、文档更新、STATE.md 归档。
 
 ## 范围确认
 
-**包含**：Capacitor Android 壳、history 路由、SQLite 持久化、storage 抽象、状态栏/启动屏/返回键、横屏、后台播放、MediaSession、CORS 处理、release 签名配置模板（本地执行）、应用内更新。
+**包含**：Capacitor Android 壳、history 路由、SQLite 持久化、storage 抽象、状态栏/启动屏/返回键、横屏、CORS 处理、release 签名配置模板（本地执行）、应用内更新。
 
 **不包含**：iOS、TV、直播、云同步、登录、原生 ExoPlayer（可选后续增强）。
 
@@ -111,7 +111,6 @@ pnpm exec cap --version
     "@capacitor/share": "^7.0.0",
     "@capacitor/haptics": "^7.0.0",
     "@capacitor-community/sqlite": "^7.0.0",
-    "@capacitor-community/mediainfo": "^7.0.0",
     "@capawesome/capacitor-background-task": "^7.0.0",
     "@capawesome/capacitor-app-update": "^7.0.0"
   }
@@ -565,27 +564,11 @@ if (Capacitor.isNativePlatform()) {
 
 ---
 
-- [ ] **Task 4.5: 后台播放与 MediaSession**
+- [ ] **Task 4.5: 后台播放（V2.0 不实现系统控制）**
 
-在 `packages/views/src/player/index.vue` 中集成 `@capacitor-community/mediainfo`：
-
-```ts
-import { MediaInfo } from '@capacitor-community/mediainfo'
-
-async function updateMediaSession() {
-  if (!Capacitor.isNativePlatform()) return
-  await MediaInfo.setMediaInfo({
-    title: currentVod.value?.name,
-    artist: currentEpisode.value?.name,
-    album: sourceName.value,
-    artwork: [{ src: currentVod.value?.pic }],
-  })
-}
-```
-
-播放/暂停/进度变化时调用。
-
-> 若 `@capacitor-community/mediainfo` 在 Capacitor 7 下不可用或行为异常，改用自定义 plugin 作为兜底，本 Task 降级为「设计接口 + 预留调用点」。
+- V2.0 不集成 MediaSession / 锁屏通知控制。
+- 后台音频行为由 WebView `<video>` / `<audio>` 元素决定。
+- 如需完整后台播放 + 锁屏控制，作为 V2.x 增强项通过自定义 Capacitor Plugin 实现。
 
 ---
 
@@ -593,7 +576,7 @@ async function updateMediaSession() {
 
 ```bash
 git add .
-git commit -m "feat(P8-4): native shell experience - status bar, splash, orientation, back button, media session"
+git commit -m "feat(P8-4): native shell experience - status bar, splash, orientation, back button"
 ```
 
 ---
@@ -765,7 +748,7 @@ pnpm sync:android
 
 - 首次启动：Splash → 迁移 → 首页
 - 添加源 → 分类/列表加载
-- 详情 → 播放 → 横屏 → 锁屏控制
+- 详情 → 播放 → 横屏 → 后台音频（无锁屏控制）
 - 收藏/历史 → 杀进程 → 重启 → 数据保留
 - 主题切换 → 状态栏同步
 
@@ -812,7 +795,7 @@ git commit -m "docs(P8-7): finalize V2.0 Capacitor Android docs and state"
 | WebView HLS 播放异常 | 先验证，再引入 ExoPlayer 原生桥接 |
 | CORS 在 WebView 仍失败 | 使用 Capacitor HTTP plugin |
 | SQLite 迁移数据丢失 | 迁移前备份、幂等、失败保留原数据 |
-| 后台播放被杀 | foreground service + 引导关闭电池优化 |
+| 后台播放被杀 | V2.0 不保证；作为 V2.x 增强项实现 |
 
 ---
 
