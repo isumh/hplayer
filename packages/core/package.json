@@ -8,6 +8,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@capacitor/preferences": "^7.0.0",
+    "@capacitor-community/sqlite": "^7.0.0",
     "axios": "^1.7.0",
     "dayjs": "^1.11.0",
     "fast-xml-parser": "^4.5.6",

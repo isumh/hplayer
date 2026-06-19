@@ -1,30 +1,31 @@
+import { createLocalStorageAdapter, type StorageAdapter } from './storage-local'
+
 /**
- * 类型安全的 localStorage 封装；V1 持久化方案。
- * V2 将由 Capacitor SQLite 替代（见 migrate.ts）。
+ * 类型安全的存储封装。
+ * V1 默认使用 localStorage；V2 Android 端通过 switchStorage 切换到 SQLite 实现。
  */
+let adapter: StorageAdapter = createLocalStorageAdapter()
+
+export function switchStorage(newAdapter: StorageAdapter): void {
+  adapter = newAdapter
+}
+
+export function getStorageAdapter(): StorageAdapter {
+  return adapter
+}
+
 export const storage = {
   get<T>(key: string, fallback: T): T {
-    try {
-      const raw = localStorage.getItem(key)
-      if (raw === null) return fallback
-      return JSON.parse(raw) as T
-    } catch (err) {
-      console.warn(`[storage] failed to parse ${key}`, err)
-      return fallback
-    }
+    return adapter.get(key, fallback)
   },
   set<T>(key: string, value: T): void {
-    try {
-      localStorage.setItem(key, JSON.stringify(value))
-    } catch (err) {
-      console.error('[storage] set failed', err)
-    }
+    adapter.set(key, value)
   },
   remove(key: string): void {
-    localStorage.removeItem(key)
+    adapter.remove(key)
   },
   clearAll(): void {
-    localStorage.clear()
+    adapter.clearAll()
   },
 }
 
@@ -38,3 +39,5 @@ export const STORAGE_KEYS = {
   settings: 'hplayer:settings',
   playbackRate: 'hplayer:playbackRate',
 } as const
+
+export type { StorageAdapter }
