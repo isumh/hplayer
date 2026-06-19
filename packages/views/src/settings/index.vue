@@ -259,7 +259,11 @@ function handleImport(e: Event) {
 </template>
 
 <style scoped>
-.settings { padding-top: 46px; }
+.settings {
+  padding-top: 46px;
+  padding-top: calc(46px + constant(safe-area-inset-top));
+  padding-top: calc(46px + env(safe-area-inset-top));
+}
 .section { margin-bottom: 16px; }
 .section-title { padding: 8px 16px; font-size: 12px; color: var(--van-text-color-2); }
 .add-btn { padding: 12px 16px; }

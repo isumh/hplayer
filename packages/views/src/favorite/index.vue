@@ -113,7 +113,13 @@ function fmtTime(ts: number): string {
 </template>
 
 <style scoped>
-.fav-page { padding-top: 46px; background: var(--van-background-2); min-height: 100vh; }
+.fav-page {
+  padding-top: 46px;
+  padding-top: calc(46px + constant(safe-area-inset-top));
+  padding-top: calc(46px + env(safe-area-inset-top));
+  background: var(--van-background-2);
+  min-height: 100vh;
+}
 .list { list-style: none; padding: 0; margin: 0; }
 .row-item + .row-item { border-top: 1px solid var(--van-border-color); }
 .row { padding: 10px 12px; cursor: pointer; }

@@ -102,7 +102,11 @@ onMounted(load)
 </template>
 
 <style scoped>
-.detail { padding-top: 46px; }
+.detail {
+  padding-top: 46px;
+  padding-top: calc(46px + constant(safe-area-inset-top));
+  padding-top: calc(46px + env(safe-area-inset-top));
+}
 .header { display: flex; gap: 12px; padding: 12px; }
 .poster { width: 120px; border-radius: 6px; }
 .meta { flex: 1; display: flex; flex-direction: column; gap: 4px; }

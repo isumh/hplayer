@@ -59,6 +59,14 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.search-bar { padding: 8px 12px; display: flex; flex-direction: column; gap: 8px; background: var(--van-background); }
+.search-bar {
+  padding: 8px 12px;
+  padding-top: calc(8px + constant(safe-area-inset-top));
+  padding-top: calc(8px + env(safe-area-inset-top));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--van-background);
+}
 .mode-group { justify-content: center; }
 </style>

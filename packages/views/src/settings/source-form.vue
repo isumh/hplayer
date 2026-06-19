@@ -24,6 +24,10 @@ function onBack() {
 </template>
 
 <style scoped>
-.source-form-page { padding-top: 46px; }
+.source-form-page {
+  padding-top: 46px;
+  padding-top: calc(46px + constant(safe-area-inset-top));
+  padding-top: calc(46px + env(safe-area-inset-top));
+}
 .form-wrap { padding: 12px 0; }
 </style>

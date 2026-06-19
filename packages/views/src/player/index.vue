@@ -219,6 +219,8 @@ function onBack() {
 <style scoped>
 .player-page {
   padding-top: 46px;
+  padding-top: calc(46px + constant(safe-area-inset-top));
+  padding-top: calc(46px + env(safe-area-inset-top));
   min-height: 100vh;
   background: black;
 }

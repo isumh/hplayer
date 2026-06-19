@@ -36,6 +36,8 @@ function openHistory() {
   align-items: center;
   height: 44px;
   padding: 0 12px;
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
   background: var(--van-nav-bar-background);
   border-bottom: 1px solid var(--van-border-color);
 }
