@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Capacitor } from '@capacitor/core'
 import type { VideoSource } from '@hplayer/core'
 import { clampPageSize, useSourceStore } from '@hplayer/core'
 import {
@@ -49,7 +50,21 @@ watch(
   { immediate: true },
 )
 
-function submit() {
+async function probeCors(url: string): Promise<boolean> {
+  // 原生环境通过 CapacitorHttp 请求，不存在 WebView CORS 问题
+  if (Capacitor.isNativePlatform()) return true
+  try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 5000)
+    await fetch(url, { method: 'GET', mode: 'cors', signal: controller.signal })
+    clearTimeout(timer)
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function submit() {
   if (!form.value.baseUrl.trim()) return showToast('请输入接口地址')
   if (!form.value.name.trim()) return showToast('请输入名称')
   const cleaned: Omit<VideoSource, 'id' | 'createdAt' | 'order'> = {
@@ -57,6 +72,18 @@ function submit() {
     name: form.value.name.trim(),
     baseUrl: form.value.baseUrl.trim().replace(/\/+$/, ''),
     pageSize: clampPageSize(form.value.pageSize, 20),
+  }
+  // 非原生环境下探测源站 CORS，失败时提示用户仍要保存
+  const corsOk = await probeCors(cleaned.baseUrl)
+  if (!corsOk) {
+    const keep = await showConfirmDialog({
+      title: '跨域提示',
+      message:
+        '该源站在当前浏览器/WebView 中可能存在 CORS 限制，保存后可能无法正常访问。是否继续保存？',
+    })
+      .then(() => true)
+      .catch(() => false)
+    if (!keep) return
   }
   if (props.sourceId) {
     store.update(props.sourceId, cleaned)

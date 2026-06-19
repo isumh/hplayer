@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { cmsGet } from '../api/client'
 import { T1JsonAdapter } from './t1-json'
 
 vi.mock('../api/client', () => ({
+  cmsGet: vi.fn(),
   http: {
     get: vi.fn(),
   },
 }))
 
-import { http } from '../api/client'
-
-const httpGet = http.get as unknown as ReturnType<typeof vi.fn>
+const cmsGetMock = cmsGet as unknown as ReturnType<typeof vi.fn>
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -28,7 +28,7 @@ const baseSource = {
 
 describe('T1JsonAdapter getList', () => {
   it('解析 mac-cms JSON 响应', async () => {
-    httpGet.mockResolvedValueOnce({
+    cmsGetMock.mockResolvedValueOnce({
       data: {
         code: 1,
         page: 1,
@@ -58,7 +58,7 @@ describe('T1JsonAdapter getList', () => {
   })
 
   it('空 list 返回空数组而非抛错', async () => {
-    httpGet.mockResolvedValueOnce({
+    cmsGetMock.mockResolvedValueOnce({
       data: { code: 1, page: 1, pagecount: 0, total: 0, list: [] },
     })
     const a = new T1JsonAdapter()
@@ -69,7 +69,7 @@ describe('T1JsonAdapter getList', () => {
   })
 
   it('list 字段缺失时降级为空数组', async () => {
-    httpGet.mockResolvedValueOnce({ data: { code: 1 } })
+    cmsGetMock.mockResolvedValueOnce({ data: { code: 1 } })
     const a = new T1JsonAdapter()
     a.init(baseSource)
     const res = await a.getList({ categoryId: 1, page: 1 })
@@ -77,14 +77,14 @@ describe('T1JsonAdapter getList', () => {
   })
 
   it('使用 baseUrl 拼接查询参数', async () => {
-    httpGet.mockResolvedValueOnce({
+    cmsGetMock.mockResolvedValueOnce({
       data: { code: 1, list: [] },
     })
     const a = new T1JsonAdapter()
     a.init({ ...baseSource, baseUrl: 'https://x.com/api/' })
     await a.getList({ categoryId: 5, page: 2, pageSize: 30 })
-    expect(httpGet).toHaveBeenCalledTimes(1)
-    const [url] = httpGet.mock.calls[0] as [string]
+    expect(cmsGetMock).toHaveBeenCalledTimes(1)
+    const [url] = cmsGetMock.mock.calls[0] as [string]
     expect(url).toMatch(/^https:\/\/x\.com\/api\?/)
     expect(url).toContain('ac=videolist')
     expect(url).toContain('t=5')
@@ -95,7 +95,7 @@ describe('T1JsonAdapter getList', () => {
 
 describe('T1JsonAdapter getDetail', () => {
   it('解析详情并切分 playFrom/playUrl', async () => {
-    httpGet.mockResolvedValueOnce({
+    cmsGetMock.mockResolvedValueOnce({
       data: {
         code: 1,
         list: [
@@ -122,7 +122,7 @@ describe('T1JsonAdapter getDetail', () => {
   })
 
   it('空 list 抛错', async () => {
-    httpGet.mockResolvedValueOnce({ data: { code: 1, list: [] } })
+    cmsGetMock.mockResolvedValueOnce({ data: { code: 1, list: [] } })
     const a = new T1JsonAdapter()
     a.init(baseSource)
     await expect(a.getDetail(999)).rejects.toThrow('detail not found')
@@ -131,7 +131,7 @@ describe('T1JsonAdapter getDetail', () => {
 
 describe('T1JsonAdapter getCategories', () => {
   it('解析 class 字段', async () => {
-    httpGet.mockResolvedValueOnce({
+    cmsGetMock.mockResolvedValueOnce({
       data: {
         class: [
           { type_id: 1, type_name: '电影' },
@@ -148,7 +148,7 @@ describe('T1JsonAdapter getCategories', () => {
   })
 
   it('缺 class 字段返回空数组', async () => {
-    httpGet.mockResolvedValueOnce({ data: {} })
+    cmsGetMock.mockResolvedValueOnce({ data: {} })
     const a = new T1JsonAdapter()
     a.init(baseSource)
     const cats = await a.getCategories()
@@ -158,7 +158,7 @@ describe('T1JsonAdapter getCategories', () => {
 
 describe('T1JsonAdapter search', () => {
   it('搜索参数走 wd 字段', async () => {
-    httpGet.mockResolvedValueOnce({
+    cmsGetMock.mockResolvedValueOnce({
       data: {
         code: 1,
         page: 1,
@@ -170,7 +170,7 @@ describe('T1JsonAdapter search', () => {
     const a = new T1JsonAdapter()
     a.init(baseSource)
     const res = await a.search({ keyword: '关键字', page: 1 })
-    const [url] = httpGet.mock.calls[0] as [string]
+    const [url] = cmsGetMock.mock.calls[0] as [string]
     expect(url).toContain('wd=')
     expect(res.list[0]?.name).toBe('匹配')
   })

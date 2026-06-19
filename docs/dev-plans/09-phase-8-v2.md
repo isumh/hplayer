@@ -591,7 +591,7 @@ git commit -m "feat(P8-4): native shell experience - status bar, splash, orienta
 
 ---
 
-- [ ] **Task 5.1: 评估 Capacitor HTTP plugin**
+- [x] **Task 5.1: 评估 Capacitor HTTP plugin**
 
 检查 `@capacitor-community/http` 或 Capacitor 官方 HTTP 插件在 7.x 下的可用性。
 
@@ -603,7 +603,7 @@ pnpm --filter hplayer_android add @capacitor-community/http
 
 ---
 
-- [ ] **Task 5.2: 原生请求适配层**
+- [x] **Task 5.2: 原生请求适配层**
 
 在 `packages/core/src/api/client.ts` 中：
 
@@ -621,7 +621,7 @@ export async function nativeGet<T>(url: string, params?: Record<string, unknown>
 
 ---
 
-- [ ] **Task 5.3: adapter 层透明切换**
+- [x] **Task 5.3: adapter 层透明切换**
 
 修改 `packages/core/src/adapter/index.ts` 或 `client.ts`，让 `getAdapter(source).getList/search/getDetail/getCategories` 在 Native 下自动走原生请求。
 
@@ -629,7 +629,7 @@ export async function nativeGet<T>(url: string, params?: Record<string, unknown>
 
 ---
 
-- [ ] **Task 5.4: 源站 CORS 检测提示**
+- [x] **Task 5.4: 源站 CORS 检测提示**
 
 在 `SourceForm.vue` 保存源时，可选发送一个探测请求：
 
@@ -638,7 +638,7 @@ export async function nativeGet<T>(url: string, params?: Record<string, unknown>
 
 ---
 
-- [ ] **Task 5.5: commit P8-5**
+- [x] **Task 5.5: commit P8-5**
 
 ```bash
 git add .

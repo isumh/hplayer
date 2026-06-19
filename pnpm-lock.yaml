@@ -211,6 +211,9 @@ importers:
       '@capacitor-community/sqlite':
         specifier: ^7.0.0
         version: 7.0.3(@capacitor/core@7.6.7)
+      '@capacitor/core':
+        specifier: ^7.0.0
+        version: 7.6.7
       '@capacitor/preferences':
         specifier: ^7.0.0
         version: 7.0.4(@capacitor/core@7.6.7)
@@ -247,6 +250,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@capacitor/core':
+        specifier: ^7.0.0
+        version: 7.6.7
       '@hplayer/core':
         specifier: workspace:*
         version: link:../core

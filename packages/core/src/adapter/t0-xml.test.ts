@@ -1,12 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { http } from '../api/client'
+import { cmsGet } from '../api/client'
 import { T0XmlAdapter } from './t0-xml'
 
 vi.mock('../api/client', () => ({
+  cmsGet: vi.fn(),
   http: {
     get: vi.fn(),
   },
 }))
+
+const cmsGetMock = cmsGet as unknown as ReturnType<typeof vi.fn>
 
 function createAdapter(): T0XmlAdapter {
   const a = new T0XmlAdapter()
@@ -24,7 +27,7 @@ function createAdapter(): T0XmlAdapter {
 }
 
 function mockGet(xml: string) {
-  ;(http.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+  cmsGetMock.mockResolvedValueOnce({
     data: xml,
   })
 }
@@ -72,7 +75,7 @@ describe('T0XmlAdapter', () => {
     expect(cats).toHaveLength(2)
     expect(cats[0]).toEqual({ id: '1', name: '电影', sourceId: '' })
     expect(cats[1]).toEqual({ id: '2', name: '电视剧', sourceId: '' })
-    expect(http.get).toHaveBeenCalledWith(
+    expect(cmsGetMock).toHaveBeenCalledWith(
       'https://xml.example?ac=list',
       expect.objectContaining({ responseType: 'text' }),
     )
@@ -131,7 +134,7 @@ describe('T0XmlAdapter', () => {
     expect(res.list).toHaveLength(1)
     expect(res.list[0]?.id).toBe('456')
     expect(res.list[0]?.name).toBe('搜索影片')
-    expect(http.get).toHaveBeenCalledWith(
+    expect(cmsGetMock).toHaveBeenCalledWith(
       expect.stringContaining('wd=%E6%90%9C%E7%B4%A2'),
       expect.objectContaining({ responseType: 'text' }),
     )

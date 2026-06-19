@@ -1,4 +1,4 @@
-import { http } from '../api/client'
+import { cmsGet } from '../api/client'
 import type { VideoSource } from '../types/source'
 import type { Category, ListPage, VodDetail, VodItem } from '../types/vod'
 import { clampPageSize } from '../utils/page-size'
@@ -94,7 +94,7 @@ export class T1JsonAdapter implements CmsAdapter {
   private async get<T>(params: Record<string, string | number>): Promise<T> {
     const qs = new URLSearchParams()
     for (const [k, v] of Object.entries(params)) qs.set(k, String(v))
-    const { data } = await http.get<T>(`${this.baseUrl}?${qs.toString()}`)
+    const { data } = await cmsGet<T>(`${this.baseUrl}?${qs.toString()}`)
     return data
   }
 

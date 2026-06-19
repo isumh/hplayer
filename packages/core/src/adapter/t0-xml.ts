@@ -1,5 +1,5 @@
 import { XMLParser } from 'fast-xml-parser'
-import { http } from '../api/client'
+import { cmsGet } from '../api/client'
 import type { VideoSource } from '../types/source'
 import type { Category, Episode, ListPage, PlayLine, VodDetail, VodItem } from '../types/vod'
 import { clampPageSize } from '../utils/page-size'
@@ -130,7 +130,7 @@ export class T0XmlAdapter implements CmsAdapter {
     const qs = new URLSearchParams()
     for (const [k, v] of Object.entries(params)) qs.set(k, String(v))
     const url = `${this.baseUrl}?${qs.toString()}`
-    const { data } = await http.get<string>(url, { responseType: 'text' })
+    const { data } = await cmsGet<string>(url, { responseType: 'text' })
     return this.parseXml(data)
   }
 
