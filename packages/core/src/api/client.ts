@@ -14,6 +14,16 @@ export const http: AxiosInstance = axios.create({
 })
 
 http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  // 开发环境代理：浏览器中将电影天堂 XML 源映射到本地代理路径，绕过 CORS
+  // Node 测试环境保持绝对 URL，避免 Invalid URL
+  const viteEnv = (import.meta as unknown as { env?: { DEV?: boolean } }).env
+  if (
+    typeof window !== 'undefined' &&
+    viteEnv?.DEV === true &&
+    config.url?.startsWith('http://caiji.dyttzyapi.com/api.php/provide/vod')
+  ) {
+    config.url = config.url.replace('http://caiji.dyttzyapi.com', '')
+  }
   // 每次请求都换 UA，提升视频源数据获取成功率
   config.headers.set('User-Agent', nextUA())
   return config

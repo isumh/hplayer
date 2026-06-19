@@ -9,13 +9,13 @@
 
 | 字段 | 值 |
 | --- | --- |
-| `current_phase` | **done（V1.0 MVP 完成）** |
+| `current_phase` | **done（V1.1 增强完成）** |
 | `current_agent` | — |
-| `last_completed_task` | P6-1:Task 6.6（最终 commit） |
-| `last_commit_hash` | `33e5510` |
+| `last_completed_task` | P7-2:Task 2.8（最终 commit） |
+| `last_commit_hash` | `115fb22` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
-| `last_update` | 2026-06-18（V1.0 MVP 收尾完成） |
+| `last_update` | 2026-06-19（P7 V1.1 增强收尾完成） |
 
 ---
 
@@ -29,17 +29,18 @@
 | P3 UI 组件 | completed | 17/17 | — | `58bf2b4` |
 | P4 页面 + 路由 | completed | 17/17 | — | `a8bd4ca` |
 | P5 集成测试 | completed | 9/9 | — | `f251be4` |
-| P6 质量门禁 | **completed** | **6/6** | — | `33e5510` |
+| P6 质量门禁 | completed | 6/6 | — | `33e5510` |
+| P7 V1.1 增强 | **completed** | **16/16** | — | `115fb22` |
 
-**任务总数**：23 + 24 + 8 + 17 + 17 + 9 + 6 = **104 个 task** 全部完成。
+**任务总数**：23 + 24 + 8 + 17 + 17 + 9 + 6 + 16 = **120 个 task** 全部完成。
 
-**🎉 hplayer V1.0 MVP 实施完成**
+**🎉 hplayer V1.0 MVP + V1.1 增强实施完成**
 
 ## V1.1 计划入口
 
 - 设计文档：[docs/design/HPlayer-v1.1.md](../design/HPlayer-v1.1.md)
 - 开发计划：[docs/dev-plans/08-phase-7-v1.1.md](08-phase-7-v1.1.md)
-- 状态：pending，待开始 P7-1 批次
+- 状态：completed，P7-1 / P7-2 全部完成
 
 ---
 

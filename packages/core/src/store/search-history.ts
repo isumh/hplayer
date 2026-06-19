@@ -25,7 +25,8 @@ export const useSearchHistoryStore = defineStore('search-history', () => {
     const idx = items.value.findIndex((i) => i.keyword === trimmed)
     const lastAccessTime = Date.now()
     if (idx !== -1) {
-      items.value[idx]!.lastAccessTime = lastAccessTime
+      const item = items.value[idx]
+      if (item) item.lastAccessTime = lastAccessTime
     } else {
       items.value.unshift({ keyword: trimmed, lastAccessTime })
     }

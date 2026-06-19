@@ -4,7 +4,7 @@ import type { VideoSource } from '../types/source'
 import { STORAGE_KEYS, storage } from '../utils/storage'
 
 function uuid(): string {
-  return 'src-' + Math.random().toString(36).slice(2, 11) + Date.now().toString(36)
+  return `src-${Math.random().toString(36).slice(2, 11)}${Date.now().toString(36)}`
 }
 
 export const useSourceStore = defineStore('source', () => {
@@ -16,7 +16,7 @@ export const useSourceStore = defineStore('source', () => {
   const activeSource = computed<VideoSource | null>(() => {
     if (activeSourceId.value) {
       const found = list.value.find((s) => s.id === activeSourceId.value)
-      if (found && found.enabled) return found
+      if (found?.enabled) return found
     }
     // 回退：order 最小且 enabled 的源
     const enabled = list.value.filter((s) => s.enabled).sort((a, b) => a.order - b.order)
@@ -50,7 +50,9 @@ export const useSourceStore = defineStore('source', () => {
   function update(id: string, patch: Partial<Omit<VideoSource, 'id' | 'createdAt'>>): void {
     const idx = list.value.findIndex((s) => s.id === id)
     if (idx === -1) return
-    list.value[idx] = { ...list.value[idx]!, ...patch }
+    const current = list.value[idx]
+    if (!current) return
+    list.value[idx] = { ...current, ...patch }
     persist()
   }
 

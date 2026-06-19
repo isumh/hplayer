@@ -37,7 +37,9 @@ export async function aggregateSearch(
         list.push({ ...it, sourceName: source.name })
       })
     } else {
-      const source = enabled[settled.indexOf(r)]!
+      const index = settled.indexOf(r)
+      const source = enabled[index]
+      if (!source) continue
       errors.push({
         sourceId: source.id,
         sourceName: source.name,

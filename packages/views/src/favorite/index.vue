@@ -28,7 +28,7 @@ function isInsideAnyCell(target: EventTarget | null): boolean {
   if (!(target instanceof Node)) return false
   for (const inst of cells.values()) {
     const el = (inst as unknown as { $el?: HTMLElement }).$el
-    if (el && el.contains(target)) return true
+    if (el?.contains(target)) return true
   }
   return false
 }

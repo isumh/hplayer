@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import type { VodItem } from '@hplayer/core'
-// biome-ignore lint/correctness/noUnusedImports: used in <template>
 import { DynamicScroller, DynamicScrollerItem } from 'vue-virtual-scroller'
 import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
-// biome-ignore lint/correctness/noUnusedImports: used in <template>
 import VodCard from './VodCard.vue'
-// biome-ignore lint/correctness/noUnusedImports: used in <template>
 import VodList from './VodList.vue'
 
 const props = defineProps<{
@@ -23,21 +20,17 @@ const emit = defineEmits<{
   (e: 'play', item: VodItem): void
 }>()
 
-// biome-ignore lint/correctness/noUnusedVariables: used in <template>
 function onLoad() {
   if (props.loading || props.finished) return
   emit('load')
 }
 
-// biome-ignore lint/correctness/noUnusedVariables: used in <template>
 function onSelect(item: VodItem) {
   emit('select', item)
 }
-// biome-ignore lint/correctness/noUnusedVariables: used in <template>
 function onPlay(item: VodItem) {
   emit('play', item)
 }
-// biome-ignore lint/correctness/noUnusedVariables: used in <template>
 function onRefresh() {
   emit('refresh')
 }

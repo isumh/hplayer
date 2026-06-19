@@ -146,9 +146,7 @@ function goAddSource() {
 }
 
 // 渲染判断：基于"业务数据存在性"而非 loading ref（避免分类未加载完时骨架不显示）
-// biome-ignore lint/correctness/noUnusedVariables: used in <template> below
 const showCatSkeleton = computed(() => !categories.value.length && !error.value)
-// biome-ignore lint/correctness/noUnusedVariables: used in <template> below
 const showGridSkeleton = computed(() => !items.value.length && !error.value)
 
 // 三种空态：加载失败 / 有源但无数据 / 无源

@@ -6,7 +6,6 @@ import {
   useSourceStore,
   type VodItem,
 } from '@hplayer/core'
-// biome-ignore lint/correctness/noUnusedImports: used in <template>
 import { EmptyState, SearchBar, SearchHistory, SearchResultList } from '@hplayer/ui'
 import { closeToast, showToast } from 'vant'
 import { computed, ref, watch } from 'vue'
@@ -25,7 +24,6 @@ const finished = ref(false)
 const loading = ref(false)
 const searched = ref(false)
 const VIRTUAL_LIST_THRESHOLD = 100
-// biome-ignore lint/correctness/noUnusedVariables: used in <template>
 const enableVirtual = computed(
   () => mode.value === 'aggregate' && items.value.length > VIRTUAL_LIST_THRESHOLD,
 )
@@ -79,7 +77,6 @@ function onHistorySelect(kw: string) {
   doSearch(kw)
 }
 
-// biome-ignore lint/correctness/noUnusedVariables: used in <template>
 function goDetail(it: VodItem) {
   router.push({ path: `/detail/${it.id}`, query: { sourceId: it.sourceId } })
 }

@@ -105,6 +105,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.0
         version: 10.5.0(postcss@8.5.15)
+      http-proxy-agent:
+        specifier: 7.0.2
+        version: 7.0.2
       jsdom:
         specifier: ^25.0.0
         version: 25.0.1

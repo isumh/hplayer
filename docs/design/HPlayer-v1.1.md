@@ -3,7 +3,7 @@
 > 文档版本：v1.1-design
 > 编写日期：2026-06-18
 > 前置参考：[HPlayer-v1.md](./HPlayer-v1.md)
-> 状态：批次 2 已完成，待 commit
+> 状态：completed，P7 V1.1 全部完成
 
 ## 0. 文档定位
 
@@ -333,14 +333,14 @@ hplayer/
 
 ### 批次 1：数据与测试层
 
-- [ ] Task 1.1：引入 `fast-xml-parser`，实现 `T0XmlAdapter`
-- [ ] Task 1.2：`t0-xml.test.ts` 单元/集成测试通过
-- [ ] Task 1.3：补 `favorite.test.ts`
-- [ ] Task 1.4：补 `player.test.ts`
-- [ ] Task 1.5：补 `preview.test.ts`
-- [ ] Task 1.6：补 `settings.test.ts`
-- [ ] Task 1.7：覆盖率复核（目标 ≥ 90%）
-- [ ] Task 1.8：commit
+- [x] Task 1.1：引入 `fast-xml-parser`，实现 `T0XmlAdapter`
+- [x] Task 1.2：`t0-xml.test.ts` 单元/集成测试通过
+- [x] Task 1.3：补 `favorite.test.ts`
+- [x] Task 1.4：补 `player.test.ts`
+- [x] Task 1.5：补 `preview.test.ts`
+- [x] Task 1.6：补 `settings.test.ts`
+- [x] Task 1.7：覆盖率复核（目标 ≥ 90%）
+- [x] Task 1.8：commit
 
 ### 批次 2：交互与 E2E 层
 
@@ -351,7 +351,7 @@ hplayer/
 - [x] Task 2.5：通过 MCP Playwright 注入测试源（localStorage）
 - [x] Task 2.6：通过 MCP Playwright 执行 core-flow 验证
 - [x] Task 2.7：E2E 本地通过，文档更新为 MCP 方案
-- [ ] Task 2.8：commit
+- [x] Task 2.8：commit
 
 ## 13. 风险与对冲
 

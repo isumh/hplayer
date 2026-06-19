@@ -5,7 +5,7 @@ import { STORAGE_KEYS, storage } from '../utils/storage'
 import { isExpired } from '../utils/time'
 
 function uuid(): string {
-  return 'his-' + Math.random().toString(36).slice(2, 11) + Date.now().toString(36)
+  return `his-${Math.random().toString(36).slice(2, 11)}${Date.now().toString(36)}`
 }
 
 export const useHistoryStore = defineStore('history', () => {

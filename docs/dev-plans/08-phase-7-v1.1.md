@@ -8,7 +8,7 @@
 
 - [x] pending
 - [x] in_progress
-- [ ] completed
+- [x] completed
 
 ## 依赖
 
@@ -55,7 +55,7 @@
 
 ---
 
-- [ ] **Task 1.1: 安装 fast-xml-parser 并实现 T0XmlAdapter**
+- [x] **Task 1.1: 安装 fast-xml-parser 并实现 T0XmlAdapter**
 
 安装 `fast-xml-parser` 到 `packages/core`：
 
@@ -77,7 +77,7 @@ pnpm --filter @hplayer/core add fast-xml-parser
 
 ---
 
-- [ ] **Task 1.2: T0_XML 测试**
+- [x] **Task 1.2: T0_XML 测试**
 
 创建 `packages/core/src/adapter/t0-xml.test.ts`：
 
@@ -93,7 +93,7 @@ pnpm --filter @hplayer/core add fast-xml-parser
 
 ---
 
-- [ ] **Task 1.3: favorite store 单元测试**
+- [x] **Task 1.3: favorite store 单元测试**
 
 创建 `packages/core/src/store/favorite.test.ts`：
 
@@ -106,7 +106,7 @@ pnpm --filter @hplayer/core add fast-xml-parser
 
 ---
 
-- [ ] **Task 1.4: player store 单元测试**
+- [x] **Task 1.4: player store 单元测试**
 
 创建 `packages/core/src/store/player.test.ts`：
 
@@ -117,7 +117,7 @@ pnpm --filter @hplayer/core add fast-xml-parser
 
 ---
 
-- [ ] **Task 1.5: preview store 单元测试**
+- [x] **Task 1.5: preview store 单元测试**
 
 创建 `packages/core/src/store/preview.test.ts`：
 
@@ -128,7 +128,7 @@ pnpm --filter @hplayer/core add fast-xml-parser
 
 ---
 
-- [ ] **Task 1.6: settings store 单元测试**
+- [x] **Task 1.6: settings store 单元测试**
 
 创建 `packages/core/src/store/settings.test.ts`：
 
@@ -139,7 +139,7 @@ pnpm --filter @hplayer/core add fast-xml-parser
 
 ---
 
-- [ ] **Task 1.7: 覆盖率复核**
+- [x] **Task 1.7: 覆盖率复核**
 
 运行：
 
@@ -155,7 +155,7 @@ pnpm test --coverage
 
 ---
 
-- [ ] **Task 1.8: commit 批次 1**
+- [x] **Task 1.8: commit 批次 1**
 
 ```bash
 git add .
@@ -179,7 +179,7 @@ git commit -m "feat(P7-1): T0_XML adapter + core store unit tests (coverage >= 9
 
 ---
 
-- [ ] **Task 2.1: 安装 vue-virtual-scroller**
+- [x] **Task 2.1: 安装 vue-virtual-scroller**
 
 ```bash
 pnpm --filter @hplayer/ui add vue-virtual-scroller
@@ -189,7 +189,7 @@ pnpm --filter @hplayer/ui add vue-virtual-scroller
 
 ---
 
-- [ ] **Task 2.2: 实现 SearchResultList.vue**
+- [x] **Task 2.2: 实现 SearchResultList.vue**
 
 创建 `packages/ui/src/business/SearchResultList.vue`：
 
@@ -202,7 +202,7 @@ pnpm --filter @hplayer/ui add vue-virtual-scroller
 
 ---
 
-- [ ] **Task 2.3: 搜索页接入虚拟列表**
+- [x] **Task 2.3: 搜索页接入虚拟列表**
 
 修改 `packages/views/src/search/index.vue`：
 
@@ -267,7 +267,7 @@ pnpm add -D -w @playwright/test@1.57.0 playwright@1.57.0
 
 ---
 
-- [ ] **Task 2.8: commit 批次 2**
+- [x] **Task 2.8: commit 批次 2**
 
 ```bash
 git add .

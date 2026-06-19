@@ -4,7 +4,7 @@ import type { FavoriteItem } from '../types/favorite'
 import { STORAGE_KEYS, storage } from '../utils/storage'
 
 function uuid(): string {
-  return 'fav-' + Math.random().toString(36).slice(2, 11) + Date.now().toString(36)
+  return `fav-${Math.random().toString(36).slice(2, 11)}${Date.now().toString(36)}`
 }
 
 export const useFavoriteStore = defineStore('favorite', () => {
