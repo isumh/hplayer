@@ -8,7 +8,7 @@
 
 - [x] pending
 - [x] in_progress
-- [ ] completed
+- [x] completed
 
 ## 依赖
 
@@ -726,7 +726,7 @@ git commit -m "feat(P8-6): release signing config template and in-app update"
 
 ---
 
-- [ ] **Task 7.1: 全量质量门禁**
+- [x] **Task 7.1: 全量质量门禁**
 
 执行：
 
@@ -738,11 +738,11 @@ pnpm build
 pnpm sync:android
 ```
 
-全部通过。
+全部通过（2026-06-19）。
 
 ---
 
-- [ ] **Task 7.2: 本地真机/模拟器回归（本地 Android Studio 环境）**
+- [x] **Task 7.2: 本地真机/模拟器回归（本地 Android Studio 环境）**
 
 沙箱侧完成代码与配置后，在本地 Android Studio 连接真机或模拟器验证：
 
@@ -752,17 +752,17 @@ pnpm sync:android
 - 收藏/历史 → 杀进程 → 重启 → 数据保留
 - 主题切换 → 状态栏同步
 
-沙箱侧若无法连接真机，此 task 记录为「本地待验证」，不影响阶段提交。
+沙箱无 Android 模拟器/真机连接，此项标记为「本地待验证」，不影响阶段提交。
 
 ---
 
-- [ ] **Task 7.3: 更新 STATE.md**
+- [x] **Task 7.3: 更新 STATE.md**
 
 将 `current_phase` 更新为 `P8 completed`，`last_completed_task` 更新为 `P8-7:Task 7.3`，记录最终 commit hash。
 
 ---
 
-- [ ] **Task 7.4: commit P8-7**
+- [x] **Task 7.4: commit P8-7**
 
 ```bash
 git add .

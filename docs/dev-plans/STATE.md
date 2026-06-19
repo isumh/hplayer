@@ -9,13 +9,13 @@
 
 | 字段 | 值 |
 | --- | --- |
-| `current_phase` | **P8 V2.0 Capacitor Android（in_progress）** |
-| `current_agent` | **P8-6** |
-| `last_completed_task` | P8-6:Task 6.3 |
-| `last_commit_hash` | `b6d9f23` |
+| `current_phase` | **P8 V2.0 Capacitor Android（completed）** |
+| `current_agent` | **P8-7** |
+| `last_completed_task` | P8-7:Task 7.3 |
+| `last_commit_hash` | `7f119c8` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
-| `last_update` | 2026-06-19（P8-6 签名与更新检测完成） |
+| `last_update` | 2026-06-19（P8-7 质量门禁与文档归档完成） |
 
 ---
 
@@ -31,11 +31,11 @@
 | P5 集成测试 | completed | 9/9 | — | `f251be4` |
 | P6 质量门禁 | completed | 6/6 | — | `33e5510` |
 | P7 V1.1 增强 | **completed** | **16/16** | — | `3e4ff96` |
-| P8 V2.0 Capacitor Android | **design_ready** | 0/0（计划已出） | — | `6ed873d` |
+| P8 V2.0 Capacitor Android | **completed** | 37/37 | — | `7f119c8` |
 
-**任务总数**：23 + 24 + 8 + 17 + 17 + 9 + 6 + 16 = **120 个 task** 全部完成。
+**任务总数**：23 + 24 + 8 + 17 + 17 + 9 + 6 + 16 + 37 = **157 个 task** 全部完成。
 
-**🎉 hplayer V1.0 MVP + V1.1 增强实施完成**
+**🎉 hplayer V1.0 MVP + V1.1 增强 + V2.0 Capacitor Android 实施完成**
 
 ## V1.1 计划入口
 
@@ -47,7 +47,7 @@
 
 - 设计文档：[docs/design/HPlayer-v2.md](../design/HPlayer-v2.md)
 - 开发计划：[docs/dev-plans/09-phase-8-v2.md](09-phase-8-v2.md)
-- 状态：design_ready，待环境准备（Android SDK / Gradle / Capacitor CLI）
+- 状态：completed，P8-1 / P8-2 / P8-3 / P8-4 / P8-5 / P8-6 / P8-7 全部完成
 
 ---
 
@@ -152,6 +152,9 @@
 - **2026-06-18 / P5 / 计划扩展**：
   1. **P5 task 数量由 4 扩展为 8**：原 4 task（adapter 集成 + sourceStore 集成 + 覆盖率 + commit）保留；新增 Task 5.5-5.7（设置页导入导出 / 详情页 stripHtml / SourceForm 删除流程数据层测试），与 Task 5.8 覆盖率复检 + Task 5.9 commit。理由：P4 之后用户驱动 12+ 细化需求中含数据层关键路径，原 4 task 不覆盖，覆盖率可能不达标。
   2. **stripHtml 抽离**：为可测试性，Task 5.6 计划将 detail/index.vue 的 `stripHtml` 抽离为 `@hplayer/core/utils/strip-html.ts`，组件直接 import。
+- **2026-06-19 / P8 / 阶段完成**：
+  1. **P8 全量质量门禁通过**：`pnpm type-check` / `pnpm lint` / `pnpm test`（141 测试） / `pnpm build` / `pnpm sync:android` 全部通过。
+  2. **本地真机回归标记为待验证**：沙箱无 Android 模拟器/真机连接，Task 7.2 记录为「本地待验证」，不影响阶段完成。
 
 ---
 

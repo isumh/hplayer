@@ -18,6 +18,24 @@ pnpm lint
 
 > 当前项目 `package.json` 中未定义 `pnpm check`，因此使用 `pnpm type-check` 替代。
 
+### Capacitor Android 发布前检查
+
+涉及 `apps/hplayer_android` 或 Capacitor 配置的修改，在常规检查之后追加：
+
+```bash
+pnpm build
+pnpm sync:android
+```
+
+完整回归流水线：
+
+```bash
+pnpm type-check && pnpm lint && pnpm test && pnpm build && pnpm sync:android
+```
+
+- `pnpm build`：构建 Web 产物到 `apps/hplayer_web/dist/`。
+- `pnpm sync:android`：将 Web 产物同步到 `apps/hplayer_android/android/app/src/main/assets/public/`。
+
 ---
 
 ## 2. Playwright 安装配置（本机环境）
