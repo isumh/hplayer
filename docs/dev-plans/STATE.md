@@ -9,10 +9,10 @@
 
 | 字段 | 值 |
 | --- | --- |
-| `current_phase` | **done（V1.1 增强完成）** |
+| `current_phase` | **P8 V2.0 Capacitor Android（设计/计划已就绪，待环境准备）** |
 | `current_agent` | — |
 | `last_completed_task` | P7-2:Task 2.8（最终 commit） |
-| `last_commit_hash` | `3e4ff96` |
+| `last_commit_hash` | `6ed873d` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
 | `last_update` | 2026-06-19（P7 V1.1 增强收尾完成） |
@@ -31,6 +31,7 @@
 | P5 集成测试 | completed | 9/9 | — | `f251be4` |
 | P6 质量门禁 | completed | 6/6 | — | `33e5510` |
 | P7 V1.1 增强 | **completed** | **16/16** | — | `3e4ff96` |
+| P8 V2.0 Capacitor Android | **design_ready** | 0/0（计划已出） | — | `6ed873d` |
 
 **任务总数**：23 + 24 + 8 + 17 + 17 + 9 + 6 + 16 = **120 个 task** 全部完成。
 
@@ -41,6 +42,12 @@
 - 设计文档：[docs/design/HPlayer-v1.1.md](../design/HPlayer-v1.1.md)
 - 开发计划：[docs/dev-plans/08-phase-7-v1.1.md](08-phase-7-v1.1.md)
 - 状态：completed，P7-1 / P7-2 全部完成
+
+## V2.0 计划入口
+
+- 设计文档：[docs/design/HPlayer-v2.md](../design/HPlayer-v2.md)
+- 开发计划：[docs/dev-plans/09-phase-8-v2.md](09-phase-8-v2.md)
+- 状态：design_ready，待环境准备（Android SDK / Gradle / Capacitor CLI）
 
 ---
 
