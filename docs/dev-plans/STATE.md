@@ -12,7 +12,7 @@
 | `current_phase` | **P8 V2.0 Capacitor Android（in_progress）** |
 | `current_agent` | **P8-5** |
 | `last_completed_task` | P8-5:Task 5.5 |
-| `last_commit_hash` | `c2c6671` |
+| `last_commit_hash` | `d078dd0` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
 | `last_update` | 2026-06-19（P8-5 CORS 处理完成） |
