@@ -121,6 +121,8 @@ pnpm open:android
 
 项目已配置 CI 工作流 [`.github/workflows/build-apk.yml`](.github/workflows/build-apk.yml)，无需本地 Android 环境即可自动构建 release APK。
 
+完整操作指南（Token 生成、权限配置、本地签名、Secrets 配置）见 [`docs/github-actions-apk-guide.md`](docs/github-actions-apk-guide.md)。
+
 #### 1. 生成本地 release 签名文件
 
 ```bash
