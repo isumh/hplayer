@@ -3,6 +3,7 @@ import { http } from '../api/client'
 import type { VideoSource } from '../types/source'
 import type { Category, Episode, ListPage, PlayLine, VodDetail, VodItem } from '../types/vod'
 import { clampPageSize } from '../utils/page-size'
+import { isValidVideoUrl } from '../utils/play-url'
 import type { CmsAdapter, GetListParams, SearchParams } from './types'
 
 interface XmlVideo {
@@ -74,10 +75,12 @@ function parsePlayLists(dl: XmlVideo['dl']): {
     playList[name] = text
       .split('#')
       .map((seg) => {
-        const [n, u] = seg.split('$')
-        return { name: (n ?? '').trim(), url: (u ?? '').trim() }
+        const idx = seg.indexOf('$')
+        const n = idx === -1 ? seg : seg.slice(0, idx)
+        const u = idx === -1 ? '' : seg.slice(idx + 1)
+        return { name: n.trim(), url: u.trim() }
       })
-      .filter((e) => e.url)
+      .filter((e) => isValidVideoUrl(e.url))
   }
 
   return { playFrom, playList }

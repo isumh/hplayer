@@ -45,7 +45,7 @@ async function loadCategories() {
     const list = await adapterProxy.getCategories(sourceStore.activeSource)
     categories.value = list
     // 默认选中第一个分类（如已选过，保持现状）
-    if (list.length && (activeCategoryId.value === null || activeCategoryId.value === undefined)) {
+    if (list.length && activeCategoryId.value == null) {
       const first = list[0]
       if (first) {
         activeCategoryId.value = first.id

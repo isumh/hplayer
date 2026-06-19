@@ -8,7 +8,8 @@ export const storage = {
       const raw = localStorage.getItem(key)
       if (raw === null) return fallback
       return JSON.parse(raw) as T
-    } catch {
+    } catch (err) {
+      console.warn(`[storage] failed to parse ${key}`, err)
       return fallback
     }
   },

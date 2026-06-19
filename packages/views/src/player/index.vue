@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import {
   detectProtocol,
-  type Episode,
+  isValidVideoUrl,
   STORAGE_KEYS,
   storage,
   useHistoryStore,
   usePlayerStore,
-  type VodDetail,
 } from '@hplayer/core'
 import { NavBar } from '@hplayer/ui'
 import Artplayer from 'artplayer'
@@ -26,11 +25,14 @@ const playingTitle = ref('')
 // 播放器可用倍速档位（与 ArtPlayer settings 菜单同步）
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3] as const
 type Rate = (typeof RATES)[number]
+
+function isRate(value: number): value is Rate {
+  return (RATES as readonly number[]).includes(value)
+}
+
 // 默认 1x；从 localStorage 读取上次选择，没有则回退 1
 const savedRate = storage.get<number>(STORAGE_KEYS.playbackRate, 1)
-const currentRate = ref<Rate>(
-  (RATES as readonly number[]).includes(savedRate) ? (savedRate as Rate) : 1,
-)
+const currentRate = ref<Rate>(isRate(savedRate) ? savedRate : 1)
 
 let art: Artplayer | null = null
 let hls: Hls | null = null
@@ -63,14 +65,12 @@ function persistProgress() {
   })
 }
 
-function getEp(): Episode | null {
-  const cur = playerStore.current
-  if (!cur || !cur.episode) return null
-  return cur.episode
-}
-
 function buildPlayer(url: string, title: string, poster: string) {
   if (!containerRef.value) return
+  if (!isValidVideoUrl(url)) {
+    error.value = '不安全的播放地址'
+    return
+  }
   teardown()
   const protocol = detectProtocol(url)
   const useHls = protocol === 'hls' && Hls.isSupported()
@@ -104,8 +104,8 @@ function buildPlayer(url: string, title: string, poster: string) {
   art.on('video:ratechange', () => {
     if (!art) return
     const r = art.playbackRate
-    if (RATES.includes(r as Rate)) {
-      currentRate.value = r as Rate
+    if (isRate(r)) {
+      currentRate.value = r
       storage.set(STORAGE_KEYS.playbackRate, r)
     }
   })
@@ -147,15 +147,14 @@ function setRate(r: Rate) {
 }
 
 onMounted(() => {
-  const ep = getEp()
-  if (!ep || !playerStore.current) {
+  const cur = playerStore.current
+  const ep = cur?.episode
+  if (!ep || !cur) {
     error.value = '无效播放会话'
     return
   }
-  const cur = playerStore.current
-  const vod = cur.vod as VodDetail
-  playingTitle.value = `${vod.name} - ${ep.name}`
-  buildPlayer(ep.url, vod.name, vod.pic)
+  playingTitle.value = `${cur.vod.name} - ${ep.name}`
+  buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
 })
 
 onBeforeUnmount(() => {
@@ -167,8 +166,7 @@ watch(
   (ep) => {
     const cur = playerStore.current
     if (ep && cur?.episode) {
-      const vod = cur.vod as VodDetail
-      buildPlayer(cur.episode.url, vod.name, vod.pic)
+      buildPlayer(cur.episode.url, cur.vod.name, cur.vod.pic)
     }
   },
 )

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Radio, RadioGroup, Search } from 'vant'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{ modelValue: string; mode: 'single' | 'aggregate'; sourceName?: string }>(),
@@ -42,6 +42,10 @@ function onSubmit() {
   if (timer) clearTimeout(timer)
   emit('search', local.value.trim())
 }
+
+onBeforeUnmount(() => {
+  if (timer) clearTimeout(timer)
+})
 </script>
 
 <template>

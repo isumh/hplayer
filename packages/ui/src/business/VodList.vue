@@ -11,7 +11,7 @@ const props = defineProps<{
   finished: boolean
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'load'): void
   (e: 'refresh'): void
   (e: 'select', item: VodItem): void
@@ -28,32 +28,19 @@ watch(
     if (prev && !cur) refreshing.value = false
   },
 )
-
-function onLoad() {
-  emit('load')
-}
-function onRefresh() {
-  emit('refresh')
-}
-function onSelect(it: VodItem) {
-  emit('select', it)
-}
-function onPlay(it: VodItem) {
-  emit('play', it)
-}
 </script>
 
 <template>
-  <PullRefresh v-model="refreshing" @refresh="onRefresh">
-    <List :loading="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
+  <PullRefresh v-model="refreshing" @refresh="$emit('refresh')">
+    <List :loading="loading" :finished="finished" finished-text="没有更多了" @load="$emit('load')">
       <div class="grid">
         <VodCard
           v-for="item in items"
           :key="`${item.sourceId}-${item.id}`"
           :item="item"
           :source-name="sourceName ?? ''"
-          @select="onSelect"
-          @play="onPlay"
+          @select="(it: VodItem) => $emit('select', it)"
+          @play="(it: VodItem) => $emit('play', it)"
         />
       </div>
     </List>

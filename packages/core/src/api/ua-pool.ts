@@ -19,7 +19,7 @@ const DEFAULT_POOL_SIZE = 5
 export class UAPool {
   private list: UserAgent[]
   private idx = 0
-  private readonly size: number
+  private size: number
   private readonly device: DeviceType
 
   constructor(size: number = DEFAULT_POOL_SIZE, device: DeviceType = 'mobile') {
@@ -32,7 +32,7 @@ export class UAPool {
    * 重新生成池（设备类型变更或重置时调用）
    */
   reset(size?: number, device?: DeviceType): void {
-    if (size !== undefined) this.size
+    if (size !== undefined) this.size = size
     this.list = this.regenerate(size ?? this.size, device ?? this.device)
     this.idx = 0
   }

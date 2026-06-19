@@ -1,6 +1,14 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import { nextUA } from './ua-pool'
 
+const DYTT_PROXY_TARGET = 'http://caiji.dyttzyapi.com'
+const DYTT_PROXY_PATH = '/api.php/provide/vod'
+
+function isDevEnv(): boolean {
+  const viteEnv = (import.meta as unknown as { env?: { DEV?: boolean } }).env
+  return viteEnv?.DEV === true
+}
+
 /**
  * 全局 Axios 实例，用于 CMS 适配器。
  * 浏览器直连第三方源，无后端。
@@ -16,13 +24,12 @@ export const http: AxiosInstance = axios.create({
 http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // 开发环境代理：浏览器中将电影天堂 XML 源映射到本地代理路径，绕过 CORS
   // Node 测试环境保持绝对 URL，避免 Invalid URL
-  const viteEnv = (import.meta as unknown as { env?: { DEV?: boolean } }).env
   if (
     typeof window !== 'undefined' &&
-    viteEnv?.DEV === true &&
-    config.url?.startsWith('http://caiji.dyttzyapi.com/api.php/provide/vod')
+    isDevEnv() &&
+    config.url?.startsWith(`${DYTT_PROXY_TARGET}${DYTT_PROXY_PATH}`)
   ) {
-    config.url = config.url.replace('http://caiji.dyttzyapi.com', '')
+    config.url = config.url.slice(DYTT_PROXY_TARGET.length)
   }
   // 每次请求都换 UA，提升视频源数据获取成功率
   config.headers.set('User-Agent', nextUA())

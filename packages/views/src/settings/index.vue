@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { exportBackup, importBackup, useSettingsStore, useSourceStore } from '@hplayer/core'
-import { Button, Cell, CellGroup, NavBar, Switch, showToast } from 'vant'
+import { Button, Cell, CellGroup, Field, NavBar, Picker, Popup, Switch, showToast } from 'vant'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -24,11 +24,62 @@ function setTheme(theme: 'light' | 'dark' | 'auto') {
   settingsStore.setTheme(theme)
 }
 
+function deviceLabel(device: 'mobile' | 'desktop' | 'tablet'): string {
+  if (device === 'mobile') return '移动端'
+  if (device === 'desktop') return '桌面端'
+  return '平板'
+}
+
 function setDevice(device: 'mobile' | 'desktop' | 'tablet') {
   settingsStore.setDeviceType(device)
-  showToast(
-    `已切换至${device === 'mobile' ? '移动端' : device === 'desktop' ? '桌面端' : '平板'} UA`,
-  )
+  showToast(`已切换至${deviceLabel(device)} UA`)
+}
+
+const showThemePicker = ref(false)
+const showDevicePicker = ref(false)
+
+const themeColumns = [
+  { text: '亮色', value: 'light' },
+  { text: '暗色', value: 'dark' },
+  { text: '跟随系统', value: 'auto' },
+]
+
+const deviceColumns = [
+  { text: '移动端', value: 'mobile', label: 'iPhone / Android（推荐）' },
+  { text: '桌面端', value: 'desktop', label: 'Windows / Mac / Linux' },
+  { text: '平板', value: 'tablet', label: 'iPad / Android Tablet' },
+]
+
+const themeResult = computed(() => {
+  const item = themeColumns.find((c) => c.value === settingsStore.settings.theme)
+  return item?.text ?? '跟随系统'
+})
+
+const deviceResult = computed(() => {
+  const item = deviceColumns.find((c) => c.value === settingsStore.settings.deviceType)
+  return item?.text ?? '移动端'
+})
+
+const themePickerValue = computed(() => {
+  const value = settingsStore.settings.theme
+  return themeColumns.some((c) => c.value === value) ? [value] : ['auto']
+})
+
+const devicePickerValue = computed(() => {
+  const value = settingsStore.settings.deviceType
+  return deviceColumns.some((c) => c.value === value) ? [value] : ['mobile']
+})
+
+function onThemeConfirm({ selectedValues }: { selectedValues: (string | number)[] }) {
+  const value = selectedValues[0] as 'light' | 'dark' | 'auto'
+  setTheme(value)
+  showThemePicker.value = false
+}
+
+function onDeviceConfirm({ selectedValues }: { selectedValues: (string | number)[] }) {
+  const value = selectedValues[0] as 'mobile' | 'desktop' | 'tablet'
+  setDevice(value)
+  showDevicePicker.value = false
 }
 
 function exportData() {
@@ -112,61 +163,50 @@ function handleImport(e: Event) {
       </CellGroup>
     </div>
 
-    <div class="section">
-      <div class="section-title">主题</div>
-      <CellGroup inset>
-        <Cell
-          title="亮色"
-          clickable
-          @click="setTheme('light')"
-          :icon="settingsStore.settings.theme === 'light' ? 'success' : ''"
+    <CellGroup inset>
+      <Field
+        :model-value="themeResult"
+        is-link
+        readonly
+        input-align="right"
+        name="theme"
+        label="主题"
+        placeholder="点击选择主题"
+        @click="showThemePicker = true"
+      />
+      <Popup v-model:show="showThemePicker" destroy-on-close position="bottom">
+        <Picker
+          :columns="themeColumns"
+          :model-value="themePickerValue"
+          @confirm="onThemeConfirm"
+          @cancel="showThemePicker = false"
         />
-        <Cell
-          title="暗色"
-          clickable
-          @click="setTheme('dark')"
-          :icon="settingsStore.settings.theme === 'dark' ? 'success' : ''"
-        />
-        <Cell
-          title="跟随系统"
-          clickable
-          @click="setTheme('auto')"
-          :icon="settingsStore.settings.theme === 'auto' ? 'success' : ''"
-        />
-      </CellGroup>
-    </div>
+      </Popup>
 
-    <div class="section">
-      <div class="section-title">UA 设备类型</div>
-      <CellGroup inset>
-        <Cell
-          title="移动端"
-          label="iPhone / Android（推荐）"
-          clickable
-          @click="setDevice('mobile')"
-          :icon="settingsStore.settings.deviceType === 'mobile' ? 'success' : ''"
+      <Field
+        :model-value="deviceResult"
+        is-link
+        readonly
+        input-align="right"
+        name="device"
+        label="UA 设备类型"
+        placeholder="点击选择设备类型"
+        @click="showDevicePicker = true"
+      />
+      <Popup v-model:show="showDevicePicker" destroy-on-close position="bottom">
+        <Picker
+          :columns="deviceColumns"
+          :model-value="devicePickerValue"
+          @confirm="onDeviceConfirm"
+          @cancel="showDevicePicker = false"
         />
-        <Cell
-          title="桌面端"
-          label="Windows / Mac / Linux"
-          clickable
-          @click="setDevice('desktop')"
-          :icon="settingsStore.settings.deviceType === 'desktop' ? 'success' : ''"
-        />
-        <Cell
-          title="平板"
-          label="iPad / Android Tablet"
-          clickable
-          @click="setDevice('tablet')"
-          :icon="settingsStore.settings.deviceType === 'tablet' ? 'success' : ''"
-        />
-      </CellGroup>
-    </div>
+      </Popup>
+    </CellGroup>
 
     <div class="section">
       <CellGroup inset>
-        <Cell title="关于 hplayer" label="v0.1.0" />
-        <Cell title="开源协议" label="MIT" />
+        <Cell title="关于 hplayer" value="v0.1.0" />
+        <Cell title="开源协议" value="MIT" />
       </CellGroup>
     </div>
 

@@ -104,7 +104,7 @@ describe('T1JsonAdapter getDetail', () => {
             vod_name: '详情剧',
             vod_pic: 'https://x.com/d.jpg',
             vod_play_from: '线路1$$$线路2',
-            vod_play_url: '第1集$url1#第2集$url2$$$第1集$url3',
+            vod_play_url: '第1集$https://x.com/url1#第2集$https://x.com/url2$$$第1集$https://x.com/url3',
           },
         ],
       },
@@ -117,8 +117,8 @@ describe('T1JsonAdapter getDetail', () => {
     expect(res.playFrom[0]?.name).toBe('线路1')
     expect(res.playFrom[1]?.name).toBe('线路2')
     expect(res.playList['线路1']).toHaveLength(2)
-    expect(res.playList['线路1']?.[0]?.url).toBe('url1')
-    expect(res.playList['线路2']?.[0]?.url).toBe('url3')
+    expect(res.playList['线路1']?.[0]?.url).toBe('https://x.com/url1')
+    expect(res.playList['线路2']?.[0]?.url).toBe('https://x.com/url3')
   })
 
   it('空 list 抛错', async () => {

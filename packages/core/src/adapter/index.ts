@@ -26,7 +26,7 @@ export function getAdapter(source: VideoSource): CmsAdapter {
 }
 
 export function clearAdapterCache(sourceId?: string): void {
-  if (sourceId) cache.clear()
+  if (sourceId) cache.delete(sourceId)
   else cache.clear()
 }
 

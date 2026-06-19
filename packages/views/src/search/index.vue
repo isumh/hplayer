@@ -17,6 +17,10 @@ const searchHistoryStore = useSearchHistoryStore()
 
 const keyword = ref('')
 const mode = ref<'single' | 'aggregate'>('single')
+const sourceName = computed(() => {
+  if (mode.value !== 'single') return ''
+  return sourceStore.activeSource?.name ?? ''
+})
 type SearchResult = VodItem & { sourceName?: string }
 const items = ref<SearchResult[]>([])
 const page = ref(1)
@@ -88,12 +92,12 @@ watch(mode, () => {
 
 <template>
   <div class="search-page">
-    <SearchBar v-model="keyword" v-model:mode="mode" :source-name="sourceStore.activeSource?.name ?? ''" @search="doSearch" />
+    <SearchBar v-model="keyword" v-model:mode="mode" :source-name="sourceName" @search="doSearch" />
     <SearchHistory v-if="!searched" @select="onHistorySelect" />
     <SearchResultList
       v-else-if="items.length"
       :items="items"
-      :source-name="(mode === 'single' ? sourceStore.activeSource?.name : '') ?? ''"
+      :source-name="sourceName"
       :loading="loading"
       :finished="finished"
       :enable-virtual="enableVirtual"

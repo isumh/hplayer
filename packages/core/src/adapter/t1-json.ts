@@ -2,6 +2,7 @@ import { http } from '../api/client'
 import type { VideoSource } from '../types/source'
 import type { Category, ListPage, VodDetail, VodItem } from '../types/vod'
 import { clampPageSize } from '../utils/page-size'
+import { isValidVideoUrl } from '../utils/play-url'
 import type { CmsAdapter, GetListParams, SearchParams } from './types'
 
 interface MacCmsListItem {
@@ -70,10 +71,12 @@ function parsePlayLists(
     playList[name] = lineRaw
       .split('#')
       .map((seg) => {
-        const [n, u] = seg.split('$')
-        return { name: (n ?? '').trim(), url: (u ?? '').trim() }
+        const idx = seg.indexOf('$')
+        const n = idx === -1 ? seg : seg.slice(0, idx)
+        const u = idx === -1 ? '' : seg.slice(idx + 1)
+        return { name: n.trim(), url: u.trim() }
       })
-      .filter((e) => e.url)
+      .filter((e) => isValidVideoUrl(e.url))
   })
   return { playFromArr: fromArr.map((n) => ({ name: n })), playList }
 }

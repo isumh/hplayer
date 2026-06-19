@@ -8,6 +8,14 @@ function uuid(): string {
   return `his-${Math.random().toString(36).slice(2, 11)}${Date.now().toString(36)}`
 }
 
+function historyKey(item: {
+  sourceId: string
+  vod: { id: string | number }
+  episode?: { url?: string }
+}): string {
+  return `${item.sourceId}::${item.vod.id}::${item.episode?.url ?? ''}`
+}
+
 export const useHistoryStore = defineStore('history', () => {
   const items = ref<HistoryItem[]>(storage.get<HistoryItem[]>(STORAGE_KEYS.history, []))
 
@@ -22,10 +30,8 @@ export const useHistoryStore = defineStore('history', () => {
   }
 
   function touch(item: Omit<HistoryItem, 'id' | 'lastWatchTime'>): void {
-    const key = `${item.sourceId}::${item.vod.id}::${item.episode?.url ?? ''}`
-    const existing = items.value.find(
-      (i) => `${i.sourceId}::${i.vod.id}::${i.episode?.url ?? ''}` === key,
-    )
+    const key = historyKey(item)
+    const existing = items.value.find((i) => historyKey(i) === key)
     const lastWatchTime = Date.now()
     if (existing) {
       Object.assign(existing, item, { lastWatchTime })

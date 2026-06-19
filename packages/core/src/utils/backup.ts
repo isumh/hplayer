@@ -21,6 +21,22 @@ export interface BackupFile {
  */
 export const BACKUP_VERSION = 'v0.1.0'
 
+function isValidFavorite(item: unknown): item is FavoriteItem {
+  const it = item as Partial<FavoriteItem> | undefined
+  return !!it && typeof it.sourceId === 'string' && !!it.vod && typeof it.vod.id === 'string'
+}
+
+function isValidHistory(item: unknown): item is HistoryItem {
+  const it = item as Partial<HistoryItem> | undefined
+  return (
+    !!it &&
+    typeof it.id === 'string' &&
+    typeof it.sourceId === 'string' &&
+    !!it.vod &&
+    typeof it.vod.id === 'string'
+  )
+}
+
 /**
  * 从 localStorage 读取所有用户数据并序列化为 JSON 字符串
  */
@@ -44,8 +60,12 @@ export function importBackup(raw: string): boolean {
     const data = JSON.parse(raw) as Partial<BackupFile>
     if (!data.sources || !Array.isArray(data.sources)) return false
     storage.set(STORAGE_KEYS.sources, data.sources)
-    if (Array.isArray(data.favorites)) storage.set(STORAGE_KEYS.favorites, data.favorites)
-    if (Array.isArray(data.history)) storage.set(STORAGE_KEYS.history, data.history)
+    const validFavorites = Array.isArray(data.favorites)
+      ? data.favorites.filter(isValidFavorite)
+      : []
+    const validHistory = Array.isArray(data.history) ? data.history.filter(isValidHistory) : []
+    storage.set(STORAGE_KEYS.favorites, validFavorites)
+    storage.set(STORAGE_KEYS.history, validHistory)
     return true
   } catch {
     return false

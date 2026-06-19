@@ -24,16 +24,6 @@ function onLoad() {
   if (props.loading || props.finished) return
   emit('load')
 }
-
-function onSelect(item: VodItem) {
-  emit('select', item)
-}
-function onPlay(item: VodItem) {
-  emit('play', item)
-}
-function onRefresh() {
-  emit('refresh')
-}
 </script>
 
 <template>
@@ -45,9 +35,9 @@ function onRefresh() {
       :loading="loading"
       :finished="finished"
       @load="onLoad"
-      @refresh="onRefresh"
-      @select="onSelect"
-      @play="onPlay"
+      @refresh="$emit('refresh')"
+      @select="(it: VodItem) => $emit('select', it)"
+      @play="(it: VodItem) => $emit('play', it)"
     />
     <template v-else>
       <DynamicScroller
@@ -61,7 +51,12 @@ function onRefresh() {
         <template #default="{ item, index, active }">
           <DynamicScrollerItem :item="item" :active="active" :data-index="index">
             <div class="virtual-item">
-              <VodCard :item="item" :source-name="sourceName ?? ''" @select="onSelect" @play="onPlay" />
+              <VodCard
+                :item="item"
+                :source-name="sourceName ?? ''"
+                @select="(it: VodItem) => $emit('select', it)"
+                @play="(it: VodItem) => $emit('play', it)"
+              />
             </div>
           </DynamicScrollerItem>
         </template>

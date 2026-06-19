@@ -4,6 +4,8 @@ import type { SearchHistoryItem } from '../types/search'
 import { STORAGE_KEYS, storage } from '../utils/storage'
 import { isExpired } from '../utils/time'
 
+const MAX_KEYWORD_LENGTH = 100
+
 export const useSearchHistoryStore = defineStore('search-history', () => {
   const items = ref<SearchHistoryItem[]>(
     storage.get<SearchHistoryItem[]>(STORAGE_KEYS.searchHistory, []),
@@ -20,7 +22,7 @@ export const useSearchHistoryStore = defineStore('search-history', () => {
   }
 
   function touch(keyword: string): void {
-    const trimmed = keyword.trim()
+    const trimmed = keyword.trim().slice(0, MAX_KEYWORD_LENGTH)
     if (!trimmed) return
     const idx = items.value.findIndex((i) => i.keyword === trimmed)
     const lastAccessTime = Date.now()

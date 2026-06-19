@@ -2,20 +2,17 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Episode, VodItem } from '../types/vod'
 
-export const usePlayerStore = defineStore('player', () => {
-  const current = ref<{
-    vod: VodItem
-    sourceId: string
-    episode?: Episode
-    startAt?: number
-  } | null>(null)
+interface PlayerPayload {
+  vod: VodItem
+  sourceId: string
+  episode?: Episode
+  startAt?: number
+}
 
-  function setCurrent(payload: {
-    vod: VodItem
-    sourceId: string
-    episode?: Episode
-    startAt?: number
-  }): void {
+export const usePlayerStore = defineStore('player', () => {
+  const current = ref<PlayerPayload | null>(null)
+
+  function setCurrent(payload: PlayerPayload): void {
     current.value = payload
   }
 

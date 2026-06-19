@@ -1,3 +1,4 @@
+// 仅本地 E2E mock 使用，禁止用于生产环境
 import { createServer } from 'http'
 
 const categoriesXml = `<?xml version="1.0" encoding="utf-8"?>
