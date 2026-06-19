@@ -12,7 +12,7 @@
 | `current_phase` | **done（V1.1 增强完成）** |
 | `current_agent` | — |
 | `last_completed_task` | P7-2:Task 2.8（最终 commit） |
-| `last_commit_hash` | `115fb22` |
+| `last_commit_hash` | `3e4ff96` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
 | `last_update` | 2026-06-19（P7 V1.1 增强收尾完成） |
@@ -30,7 +30,7 @@
 | P4 页面 + 路由 | completed | 17/17 | — | `a8bd4ca` |
 | P5 集成测试 | completed | 9/9 | — | `f251be4` |
 | P6 质量门禁 | completed | 6/6 | — | `33e5510` |
-| P7 V1.1 增强 | **completed** | **16/16** | — | `115fb22` |
+| P7 V1.1 增强 | **completed** | **16/16** | — | `3e4ff96` |
 
 **任务总数**：23 + 24 + 8 + 17 + 17 + 9 + 6 + 16 = **120 个 task** 全部完成。
 
