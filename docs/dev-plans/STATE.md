@@ -9,10 +9,10 @@
 
 | 字段 | 值 |
 | --- | --- |
-| `current_phase` | **P8 V2.0 Capacitor Android（设计/计划已就绪，待环境准备）** |
-| `current_agent` | — |
-| `last_completed_task` | P7-2:Task 2.8（最终 commit） |
-| `last_commit_hash` | `bdf9a50` |
+| `current_phase` | **P8 V2.0 Capacitor Android（in_progress）** |
+| `current_agent` | **P8-1** |
+| `last_completed_task` | P8-1:Task 1.7 |
+| `last_commit_hash` | `f4dc82e` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
 | `last_update` | 2026-06-19（P7 V1.1 增强收尾完成） |
