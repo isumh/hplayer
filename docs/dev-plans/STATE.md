@@ -12,7 +12,7 @@
 | `current_phase` | **P8 V2.0 Capacitor Android（completed）** |
 | `current_agent` | **P8-7** |
 | `last_completed_task` | P8-7:Task 7.3 |
-| `last_commit_hash` | `7f119c8` |
+| `last_commit_hash` | `e3f0081` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
 | `last_update` | 2026-06-19（P8-7 质量门禁与文档归档完成） |
@@ -31,7 +31,7 @@
 | P5 集成测试 | completed | 9/9 | — | `f251be4` |
 | P6 质量门禁 | completed | 6/6 | — | `33e5510` |
 | P7 V1.1 增强 | **completed** | **16/16** | — | `3e4ff96` |
-| P8 V2.0 Capacitor Android | **completed** | 37/37 | — | `7f119c8` |
+| P8 V2.0 Capacitor Android | **completed** | 37/37 | — | `e3f0081` |
 
 **任务总数**：23 + 24 + 8 + 17 + 17 + 9 + 6 + 16 + 37 = **157 个 task** 全部完成。
 
