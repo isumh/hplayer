@@ -11,8 +11,8 @@
 | --- | --- |
 | `current_phase` | **P8 V2.0 Capacitor Android（in_progress）** |
 | `current_agent` | **P8-1** |
-| `last_completed_task` | P8-1:Task 1.7 |
-| `last_commit_hash` | `f4dc82e` |
+| `last_completed_task` | P8-1:Task 1.7 + scope alignment |
+| `last_commit_hash` | `15fde97` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
 | `last_update` | 2026-06-19（P7 V1.1 增强收尾完成） |
