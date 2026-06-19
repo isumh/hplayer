@@ -56,6 +56,9 @@ async function syncStatusBar() {
   const isDark =
     settingsStore.settings.theme === 'dark' ||
     (settingsStore.settings.theme === 'auto' && prefersDark.matches)
+  // Android WebView 对 env(safe-area-inset-top) 支持不稳定，
+  // 关闭状态栏覆盖 WebView，使内容从状态栏下方开始渲染，避免顶部按钮被遮挡。
+  await StatusBar.setOverlaysWebView({ overlay: false })
   await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light })
   await StatusBar.setBackgroundColor({ color: isDark ? '#0a0a0a' : '#ffffff' })
 }
