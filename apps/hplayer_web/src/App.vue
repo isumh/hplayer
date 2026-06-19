@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { useHistoryStore, usePreviewStore, useSearchHistoryStore } from '@hplayer/core'
+import { useHistoryStore, usePreviewStore, useSearchHistoryStore, useSettingsStore } from '@hplayer/core'
+import { Capacitor } from '@capacitor/core'
+import { SplashScreen } from '@capacitor/splash-screen'
+import { StatusBar, Style } from '@capacitor/status-bar'
 import { ImagePreview } from 'vant'
-import { onBeforeUnmount, onMounted } from 'vue'
+import { onBeforeUnmount, onMounted, watch } from 'vue'
 
 const historyStore = useHistoryStore()
 const searchHistoryStore = useSearchHistoryStore()
 const previewStore = usePreviewStore()
+const settingsStore = useSettingsStore()
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
 
 // 滚轮缩放：Vant 4 ImagePreview 默认不支持 mouse wheel zoom，
 // 这里全局监听 wheel 事件 + 修改图片 transform 的 scale 部分（保留 translate 避免破坏双击/双指缩放的状态）
@@ -38,11 +43,27 @@ function resetWheelScale() {
   if (img) img.style.transform = ''
 }
 
+async function syncStatusBar() {
+  if (!Capacitor.isNativePlatform()) return
+  const isDark =
+    settingsStore.settings.theme === 'dark' ||
+    (settingsStore.settings.theme === 'auto' && prefersDark.matches)
+  await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light })
+  await StatusBar.setBackgroundColor({ color: isDark ? '#0a0a0a' : '#ffffff' })
+}
+
 onMounted(() => {
   historyStore.cleanup()
   searchHistoryStore.cleanup()
   window.addEventListener('wheel', onWheel, { passive: false })
+
+  if (Capacitor.isNativePlatform()) {
+    SplashScreen.hide()
+    syncStatusBar()
+  }
 })
+
+watch(() => settingsStore.settings.theme, syncStatusBar)
 
 onBeforeUnmount(() => {
   window.removeEventListener('wheel', onWheel)

@@ -90,6 +90,42 @@ importers:
 
   apps/hplayer_web:
     dependencies:
+      '@capacitor-community/sqlite':
+        specifier: ^7.0.0
+        version: 7.0.3(@capacitor/core@7.6.7)
+      '@capacitor/app':
+        specifier: ^7.0.0
+        version: 7.1.2(@capacitor/core@7.6.7)
+      '@capacitor/core':
+        specifier: ^7.0.0
+        version: 7.6.7
+      '@capacitor/filesystem':
+        specifier: ^7.0.0
+        version: 7.1.8(@capacitor/core@7.6.7)
+      '@capacitor/haptics':
+        specifier: ^7.0.0
+        version: 7.0.5(@capacitor/core@7.6.7)
+      '@capacitor/preferences':
+        specifier: ^7.0.0
+        version: 7.0.4(@capacitor/core@7.6.7)
+      '@capacitor/screen-orientation':
+        specifier: ^7.0.0
+        version: 7.0.4(@capacitor/core@7.6.7)
+      '@capacitor/share':
+        specifier: ^7.0.0
+        version: 7.0.4(@capacitor/core@7.6.7)
+      '@capacitor/splash-screen':
+        specifier: ^7.0.0
+        version: 7.0.5(@capacitor/core@7.6.7)
+      '@capacitor/status-bar':
+        specifier: ^7.0.0
+        version: 7.0.6(@capacitor/core@7.6.7)
+      '@capawesome/capacitor-app-update':
+        specifier: ^7.0.0
+        version: 7.2.0(@capacitor/core@7.6.7)
+      '@capawesome/capacitor-background-task':
+        specifier: ^7.0.0
+        version: 7.0.1(@capacitor/core@7.6.7)
       '@hplayer/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -352,6 +388,11 @@ packages:
     resolution: {integrity: sha512-YXJoXhjgVTczgwJrcm0b2ZTdAOYgY7UXRYgsOZtpA6CHJQFRcssEdXnzPkfaMYkK4AqfzrlDqDxe5UeZT7ZS4w==}
     peerDependencies:
       '@capacitor/core': ^7.6.0
+
+  '@capacitor/app@7.1.2':
+    resolution: {integrity: sha512-d4I/oF/PRu4megL7/IGKYfe5j7yzSON1FRFgq6kH+m5kH6g7V+wyjHRLauCzGNjdRx4S+nWOumINds0qcRBtKg==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
 
   '@capacitor/cli@7.6.7':
     resolution: {integrity: sha512-nV9j1+431/rsiabGs1UK0SbETrl2JfAf3SSlsM9RbMMjAL7WmruxnlJcbB9IXPoa6L99GljSO5q/9UCNvYz6Ag==}
@@ -2435,6 +2476,10 @@ snapshots:
       jeep-sqlite: 2.8.0
 
   '@capacitor/android@7.6.7(@capacitor/core@7.6.7)':
+    dependencies:
+      '@capacitor/core': 7.6.7
+
+  '@capacitor/app@7.1.2(@capacitor/core@7.6.7)':
     dependencies:
       '@capacitor/core': 7.6.7
 
