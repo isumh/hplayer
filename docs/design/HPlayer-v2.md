@@ -48,7 +48,7 @@
 | 8 | 屏幕方向控制 | `@capacitor/screen-orientation` |
 | 9 | 文件系统缓存 | `@capacitor/filesystem` |
 | 10 | 应用内更新检测 | `@capawesome/capacitor-app-update` |
-| 11 | APK 打包 + 签名 | `apps/hplayer_android/android/` Gradle 工程 |
+| 11 | release 签名配置模板（本地执行） | `apps/hplayer_android/android/` Gradle 工程 |
 | 12 | V2 构建脚本 | 根 `package.json`：`build:android`、`sync:android`、`open:android` |
 
 ### 2.2 不包含（V2.0 不做）
@@ -83,30 +83,23 @@
 | --- | --- | --- |
 | Node.js | v24.15.0 | ✅ 可用（偏新，但 Capacitor 8 已支持 Node 20+） |
 | pnpm | 9.0.0 | ✅ 可用 |
-| Java | OpenJDK 25.0.2 | ⚠️ **过新**，Android Gradle Plugin 8.x 官方最高支持 Java 21；需验证或降级到 JDK 21 |
+| Java | OpenJDK 25.0.2 | ⚠️ **过新**，Android Gradle Plugin 8.x 官方最高支持 Java 21；沙箱执行 `cap sync` 时可能需降级到 JDK 21，或本地执行 Gradle sync |
 | Android SDK | 未安装（`ANDROID_HOME` 为空） | ❌ **缺失**，无法编译/打包 APK |
 | `adb` / `sdkmanager` | 不存在 | ❌ **缺失** |
 | Capacitor CLI | 未安装 | ❌ 需安装 |
-| 磁盘空间 | `/workspace` 剩余约 5G | ⚠️ **紧张**，完整 Android SDK + 模拟器需 10G+；建议只装 command-line tools + platform-tools + 单个 platform |
+| 磁盘空间 | `/workspace` 剩余约 5G | ⚠️ **紧张**，按方案 A 沙箱不安装完整 Android SDK，只存放 Capacitor 工程与 Web 产物；本地环境负责 SDK 与模拟器 |
 | 网络代理 | `http_proxy=http://127.0.0.1:18080` | ✅ 可访问 npm；Gradle/Maven 需同样走代理 |
 | 操作系统 | Ubuntu 24.04 x86_64 | ✅ 支持 Android SDK linux64 |
 
-### 3.3 环境准备建议
+### 3.3 环境准备方案
 
-**方案 A（推荐）：本地 Android Studio 开发 + 沙箱只出包**
+**采用方案 A：本地 Android Studio 开发 + 沙箱只出包**
 
-- 沙箱完成 Capacitor 初始化、Web 构建、代码迁移。
+- 沙箱完成 Capacitor 工程初始化、Web 构建、代码迁移、`pnpm cap sync android` 验证。
 - APK 最终签名与真机调试在本地 Android Studio（Windows/macOS/Linux）完成。
-- 避免在沙箱安装完整 Android SDK，节省磁盘。
+- 沙箱不安装完整 Android SDK，节省磁盘；本地环境负责 JDK 21 + Android SDK + 模拟器/真机。
 
-**方案 B（沙箱全量环境）**
-
-- 安装 Android SDK Command Line Tools + platform-tools + `platforms;android-34` + `build-tools;34.0.0`。
-- 降级/安装 JDK 21。
-- 配置 `ANDROID_HOME`、Gradle proxy。
-- 风险：磁盘可能不足，且模拟器在容器内通常无法运行。
-
-> **决策建议**：采用方案 A。沙箱负责「可构建的 Capacitor 工程 + 迁移逻辑 + CI 脚本」，本地/CI 负责最终 APK 打包与签名。若用户坚持在沙箱出包，则必须先扩展磁盘并安装 JDK 21 + Android SDK。
+> 本设计文档及配套开发计划均基于方案 A 编写。
 
 ---
 
@@ -325,7 +318,7 @@ Android WebView 同样受 CORS 限制，且无法像浏览器扩展那样绕过�
 
 ## 10. 构建与打包
 
-### 10.1 构建流程
+### 10.1 沙箱侧构建流程
 
 ```bash
 # 1. 构建 Web 产物
@@ -333,18 +326,26 @@ pnpm build
 
 # 2. 同步到 Capacitor Android 工程
 pnpm cap sync android
+```
 
-# 3. 构建 APK（debug）
-cd apps/hplayer_android/android && ./gradlew assembleDebug
+> 按方案 A，沙箱侧只负责产出可同步的 Capacitor Android 工程；APK 构建与签名在本地 Android Studio 完成。
 
-# 4. 构建 APK（release）
+### 10.2 本地侧构建与签名
+
+本地 Android Studio 环境：
+
+```bash
+cd apps/hplayer_android/android
+
+# debug APK
+./gradlew assembleDebug
+
+# release APK
 ./gradlew assembleRelease
 ```
 
-### 10.2 签名
-
 - release APK 必须使用 keystore 签名。
-- keystore 不提交到仓库，通过环境变量或本地 `local.properties` 指定路径/密码。
+- keystore 与 `local.properties` 不提交到仓库，通过本地环境变量或 `local.properties` 指定路径/密码。
 
 ### 10.3 根 package.json 脚本
 
@@ -358,6 +359,8 @@ cd apps/hplayer_android/android && ./gradlew assembleDebug
   }
 }
 ```
+
+> `open:android` 与 `run:android` 依赖本地 Android Studio / 连接设备，沙箱侧不使用。
 
 ---
 
@@ -416,14 +419,14 @@ hplayer/
 
 ## 13. 里程碑
 
-### Phase 8.1：环境准备与 Capacitor 初始化
+### Phase 8.1：Capacitor 工程初始化（沙箱侧）
 
-- [ ] 确认/安装 JDK 21、Android SDK
 - [ ] 安装 Capacitor CLI 与 `@capacitor/android`
 - [ ] 创建 `apps/hplayer_android`
 - [ ] 配置 `capacitor.config.ts`（appId、appName、webDir）
 - [ ] `pnpm cap add android` 成功
 - [ ] `pnpm build && pnpm cap sync android` 成功
+- [ ] 本地 Android Studio 环境准备说明：需 JDK 21 + Android SDK + 模拟器或真机
 
 ### Phase 8.2：路由与构建适配
 
@@ -469,19 +472,18 @@ hplayer/
 
 | 风险 | 对冲 |
 | --- | --- |
-| Android SDK 未安装 / 磁盘不足 | 方案 A：沙箱只做工程初始化，本地 Android Studio 打包；方案 B：扩展磁盘并安装最小 SDK |
-| Java 25 与 Android Gradle Plugin 不兼容 | 安装/切换到 JDK 21；或在 `gradle.properties` 中声明兼容版本 |
+| 沙箱无 Android SDK，无法直接出 APK | 采用方案 A：沙箱完成工程初始化与 `cap sync`，APK 构建/签名/真机调试在本地 Android Studio 完成 |
+| 本地 Java 25 与 Android Gradle Plugin 不兼容 | 本地安装 JDK 21；沙箱侧不处理 APK 构建 |
 | WebView HLS 播放失败 | 先验证 WebView 能力，再决定是否引入 ExoPlayer 原生桥接 |
 | 第三方源 CORS 在 WebView 仍失败 | 集成 Capacitor HTTP plugin 或提示用户源站不支持 |
 | SQLite 迁移失败导致数据丢失 | 迁移前备份 localStorage；幂等设计；失败保留原数据 |
 | 后台播放被系统杀 | 使用 foreground service + MediaSession；必要时引导用户关闭电池优化 |
-| APK 签名配置泄露 | keystore 不提交仓库，通过环境变量注入 |
+| APK 签名配置泄露 | keystore 不提交仓库，通过本地环境变量或 `local.properties` 注入 |
 
 ---
 
 ## 15. 下一步
 
-1. 用户确认 V2 设计方向与范围。
-2. 用户确认环境方案：**A（沙箱初始化 + 本地打包）** 或 **B（沙箱全量环境）**。
-3. 若选方案 A，可直接进入 Phase 8.1 Task 1–6，在沙箱完成 Capacitor 工程初始化与同步验证。
-4. 若选方案 B，需先安装 JDK 21 + Android SDK，耗时较长，建议单独作为一个准备 task。
+1. 用户确认 V2 设计方向与范围（已确认采用方案 A）。
+2. 在沙箱执行 Phase 8.1 Task 1–6：Capacitor CLI 安装、`apps/hplayer_android` 创建、`cap add android`、`pnpm build && pnpm cap sync android` 验证。
+3. 沙箱验证 `cap sync` 成功后，将工程代码 push 到仓库，用户在本地 Android Studio 完成 JDK 21 + Android SDK 环境配置、真机调试与 release 签名出包。

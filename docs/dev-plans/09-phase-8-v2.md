@@ -14,7 +14,7 @@
 
 - V1.1 增强全部完成（P7）。
 - 设计文档 [HPlayer-v2.md](../design/HPlayer-v2.md) 已确认。
-- 用户已确认环境方案：**A（沙箱初始化 + 本地打包）** 或 **B（沙箱全量环境）**。
+- 环境方案已确认：**A（沙箱初始化 + 本地 Android Studio 打包）**。
 
 ## 阶段目标
 
@@ -23,12 +23,12 @@
 3. **Agent P8-3**：抽象 storage 接口、SQLite 实现、V1 → V2 迁移。
 4. **Agent P8-4**：状态栏、启动屏、返回键、横屏、后台播放 + MediaSession。
 5. **Agent P8-5**：Capacitor HTTP plugin 评估与集成，处理 WebView CORS。
-6. **Agent P8-6**：debug/release APK 构建、签名、应用内更新检测。
+6. **Agent P8-6**：release 签名配置模板（本地执行）、应用内更新检测。
 7. **Agent P8-7**：回归测试、文档更新、STATE.md 归档。
 
 ## 范围确认
 
-**包含**：Capacitor Android 壳、history 路由、SQLite 持久化、storage 抽象、状态栏/启动屏/返回键、横屏、后台播放、MediaSession、CORS 处理、APK 打包签名、应用内更新。
+**包含**：Capacitor Android 壳、history 路由、SQLite 持久化、storage 抽象、状态栏/启动屏/返回键、横屏、后台播放、MediaSession、CORS 处理、release 签名配置模板（本地执行）、应用内更新。
 
 **不包含**：iOS、TV、直播、云同步、登录、原生 ExoPlayer（可选后续增强）。
 
@@ -40,20 +40,17 @@
 
 ---
 
-## 前置决策（必须在 P8-1 之前确认）
+## 前置说明
 
 > 当前沙箱环境：`Node v24.15.0`、`pnpm 9.0.0`、`OpenJDK 25.0.2`、`ANDROID_HOME` 未设置、磁盘剩余约 5G。
 >
-> 请用户选择：
+> `cap sync` 可能触发 Gradle sync，OpenJDK 25 有失败风险；届时沙箱可降级到 JDK 21，或将 Gradle sync 步骤也放到本地执行。
 >
-> **A. 沙箱初始化 + 本地 Android Studio 打包（推荐）**
-> - 沙箱完成 Capacitor 工程初始化、`cap sync`、Web 代码迁移。
-> - 最终 APK 签名/真机调试在本地 Android Studio 完成。
-> - 不需要在沙箱安装完整 Android SDK，节省磁盘。
+> **已确认采用方案 A：沙箱初始化 + 本地 Android Studio 打包。**
 >
-> **B. 沙箱全量环境**
-> - 在沙箱安装 JDK 21 + Android SDK Command Line Tools + platform-tools + `platforms;android-34` + `build-tools;34.0.0`。
-> - 风险：磁盘可能不足；模拟器无法运行；Java 25 可能需要降级。
+> - 沙箱完成 Capacitor 工程初始化、`cap add android`、`pnpm cap sync android`、Web 代码迁移验证。
+> - 最终 APK 签名、真机调试、release 出包在本地 Android Studio 完成。
+> - 沙箱不安装完整 Android SDK，不处理 Gradle/APK 构建。
 
 ---
 
@@ -223,9 +220,7 @@ pnpm sync:android
 - `apps/hplayer_android/android/app/src/main/assets/public/` 下出现 Web 构建产物。
 - 无 Gradle 同步错误。
 
-> 若沙箱未安装 Android SDK，`cap sync` 会报错。此时：
-> - 方案 A：记录错误，P8-1 视为「工程初始化完成」，后续 APK 构建移到本地 Android Studio。
-> - 方案 B：安装 Android SDK 后重试。
+> 沙箱未安装 Android SDK。`cap sync` 只要能将 Web 产物复制到 `android/app/src/main/assets/public/` 并完成配置同步即可视为成功；APK 构建与真机调试在本地 Android Studio 完成。
 
 ---
 
@@ -669,30 +664,19 @@ git commit -m "feat(P8-5): Capacitor native HTTP bridge to bypass WebView CORS"
 
 ---
 
-## Agent P8-6: 打包与签名
+## Agent P8-6: 打包签名配置（本地执行）与更新检测
+
+> 本 Agent 的 APK 构建与签名任务在**本地 Android Studio** 执行；沙箱侧仅提供 Gradle 配置模板与 `.gitignore` 规则，不生成 release APK。
 
 **Own Files:**
 - Modify: `apps/hplayer_android/android/app/build.gradle`
 - Modify: `apps/hplayer_android/android/gradle.properties`
-- Create: `.gitignore` 规则（不提交 keystore）
-- Create/Modify: 签名脚本（可选）
+- Create: `.gitignore` 规则（不提交 keystore / `local.properties`）
+- Modify: `packages/views/src/settings/index.vue`（检查更新按钮）
 
 ---
 
-- [ ] **Task 6.1: 配置 debug APK 构建**
-
-执行：
-
-```bash
-cd apps/hplayer_android/android
-./gradlew assembleDebug
-```
-
-验证 `app-debug.apk` 生成在 `app/build/outputs/apk/debug/`。
-
----
-
-- [ ] **Task 6.2: 配置 release 签名**
+- [ ] **Task 6.1: 配置 release 签名模板**
 
 在 `apps/hplayer_android/android/app/build.gradle` 中配置 signingConfigs：
 
@@ -715,21 +699,13 @@ android {
 }
 ```
 
-在 `local.properties`（不提交）或环境变量中提供 keystore 路径与密码。
+在 `local.properties`（不提交）或本地环境变量中提供 keystore 路径与密码。
+
+> 沙箱侧不执行 Gradle 构建，仅确保配置文件语法正确；`./gradlew assembleDebug / assembleRelease` 在本地 Android Studio 完成。
 
 ---
 
-- [ ] **Task 6.3: 构建 release APK**
-
-```bash
-./gradlew assembleRelease
-```
-
-验证 `app-release.apk` 生成并正确签名。
-
----
-
-- [ ] **Task 6.4: 应用内更新检测**
+- [ ] **Task 6.2: 应用内更新检测**
 
 集成 `@capawesome/capacitor-app-update`：
 
@@ -744,15 +720,15 @@ async function checkUpdate() {
 }
 ```
 
-在 `settings/index.vue`「关于」区域新增「检查更新」按钮。
+> 在 `settings/index.vue`「关于」区域新增「检查更新」按钮。
 
 ---
 
-- [ ] **Task 6.5: commit P8-6**
+- [ ] **Task 6.3: commit P8-6**
 
 ```bash
 git add .
-git commit -m "feat(P8-6): APK debug/release build, signing config, and in-app update"
+git commit -m "feat(P8-6): release signing config template and in-app update"
 ```
 
 ---
@@ -783,15 +759,17 @@ pnpm sync:android
 
 ---
 
-- [ ] **Task 7.2: 真机/模拟器回归（环境允许时）**
+- [ ] **Task 7.2: 本地真机/模拟器回归（本地 Android Studio 环境）**
 
-验证：
+沙箱侧完成代码与配置后，在本地 Android Studio 连接真机或模拟器验证：
 
 - 首次启动：Splash → 迁移 → 首页
 - 添加源 → 分类/列表加载
 - 详情 → 播放 → 横屏 → 锁屏控制
 - 收藏/历史 → 杀进程 → 重启 → 数据保留
 - 主题切换 → 状态栏同步
+
+沙箱侧若无法连接真机，此 task 记录为「本地待验证」，不影响阶段提交。
 
 ---
 
@@ -819,8 +797,9 @@ git commit -m "docs(P8-7): finalize V2.0 Capacitor Android docs and state"
 | `pnpm test` | 135+ 测试通过 |
 | `pnpm build` | Web 产物构建成功 |
 | `pnpm sync:android` | Capacitor sync 成功 |
-| debug APK | `assembleDebug` 成功 |
-| release APK | `assembleRelease` 成功且已签名 |
+| release 签名配置 | `build.gradle` signingConfigs 模板正确，不提交 keystore |
+| 本地 debug APK | 可选：在本地 Android Studio 执行 `./gradlew assembleDebug` |
+| 本地 release APK | 可选：在本地 Android Studio 执行 `./gradlew assembleRelease` 并签名 |
 
 ---
 
@@ -828,8 +807,8 @@ git commit -m "docs(P8-7): finalize V2.0 Capacitor Android docs and state"
 
 | 风险 | 对冲 |
 | --- | --- |
-| Android SDK 缺失/磁盘不足 | 方案 A：沙箱初始化，本地打包；方案 B：扩展磁盘安装 SDK |
-| Java 25 与 AGP 不兼容 | 降级到 JDK 21 |
+| 沙箱无 Android SDK，无法直接出 APK | 方案 A：沙箱完成工程初始化与 `cap sync`，APK 构建/签名/真机调试在本地 Android Studio 完成 |
+| 本地 Java 25 与 AGP 不兼容 | 本地安装 JDK 21；沙箱侧不处理 APK 构建 |
 | WebView HLS 播放异常 | 先验证，再引入 ExoPlayer 原生桥接 |
 | CORS 在 WebView 仍失败 | 使用 Capacitor HTTP plugin |
 | SQLite 迁移数据丢失 | 迁移前备份、幂等、失败保留原数据 |
