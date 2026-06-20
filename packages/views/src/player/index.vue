@@ -2,6 +2,7 @@
 import type { Plugin } from '@capacitor/core'
 import { Capacitor } from '@capacitor/core'
 import { ScreenOrientation } from '@capacitor/screen-orientation'
+import { KeepAwake } from '@capacitor-community/keep-awake'
 import type { capExitListener, capVideoPlayerOptions } from '@capgo/capacitor-video-player'
 import { VideoPlayer } from '@capgo/capacitor-video-player'
 import {
@@ -37,6 +38,13 @@ const NATIVE_PLAYER_ID = 'native-player-host'
 const isAndroidNative = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android'
 // @capgo/capacitor-video-player 类型定义未暴露 addListener/removeAllListeners，按 Capacitor Plugin 断言
 const nativeVideoPlayer = VideoPlayer as unknown as Plugin & typeof VideoPlayer
+
+// 原生播放器方向与画面比例状态
+type Orientation = 'landscape' | 'portrait'
+type ResizeMode = 'fit' | 'fill'
+const orientation = ref<Orientation>('landscape')
+const resizeMode = ref<ResizeMode>('fit')
+const detectingOrientation = ref(false)
 
 // 播放器可用倍速档位（与 ArtPlayer settings 菜单同步）
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3] as const
@@ -165,6 +173,52 @@ function setRate(r: Rate) {
   }
 }
 
+// 根据视频宽高判断方向（height > width 视为竖屏）
+function resolveOrientation(width: number, height: number): Orientation {
+  return height > width ? 'portrait' : 'landscape'
+}
+
+// 通过临时 <video> 预加载元数据获取视频实际宽高
+function detectVideoOrientation(url: string): Promise<Orientation> {
+  return new Promise((resolve) => {
+    if (!url) {
+      resolve('landscape')
+      return
+    }
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.crossOrigin = 'anonymous'
+    video.muted = true
+    video.playsInline = true
+    video.style.display = 'none'
+    document.body.appendChild(video)
+
+    const cleanup = () => {
+      video.removeAttribute('src')
+      video.load()
+      video.remove()
+    }
+
+    const timer = setTimeout(() => {
+      cleanup()
+      resolve('landscape')
+    }, 3000)
+
+    video.addEventListener('loadedmetadata', () => {
+      clearTimeout(timer)
+      const o = resolveOrientation(video.videoWidth, video.videoHeight)
+      cleanup()
+      resolve(o)
+    })
+    video.addEventListener('error', () => {
+      clearTimeout(timer)
+      cleanup()
+      resolve('landscape')
+    })
+    video.src = url
+  })
+}
+
 // Android 原生播放器 POC
 async function initNativePlayer(url: string, startAt?: number) {
   if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
@@ -181,34 +235,42 @@ async function initNativePlayer(url: string, startAt?: number) {
   nativeError.value = null
   lastProgress.value = 0
 
-  cleanupNativePlayer()
+  await cleanupNativePlayer()
 
-  await nativeVideoPlayer.addListener('jeepCapVideoPlayerReady', () => {
-    nativeStatus.value = '原生播放器已就绪'
-  })
-  await nativeVideoPlayer.addListener('jeepCapVideoPlayerPlay', () => {
-    nativeStatus.value = '播放中'
-  })
-  await nativeVideoPlayer.addListener('jeepCapVideoPlayerPause', () => {
-    nativeStatus.value = '已暂停'
-  })
-  await nativeVideoPlayer.addListener('jeepCapVideoPlayerEnded', () => {
-    nativeStatus.value = '播放结束'
-    void persistNativeProgress()
-  })
-  await nativeVideoPlayer.addListener('jeepCapVideoPlayerExit', async (evt: capExitListener) => {
-    nativeStatus.value = `已退出（退出时间: ${evt.currentTime ?? 0} 秒）`
-    lastProgress.value = evt.currentTime ?? 0
-    await persistNativeProgress(evt.currentTime)
+  try {
+    await nativeVideoPlayer.addListener('jeepCapVideoPlayerReady', () => {
+      nativeStatus.value = '原生播放器已就绪'
+    })
+    await nativeVideoPlayer.addListener('jeepCapVideoPlayerPlay', () => {
+      nativeStatus.value = '播放中'
+    })
+    await nativeVideoPlayer.addListener('jeepCapVideoPlayerPause', () => {
+      nativeStatus.value = '已暂停'
+    })
+    await nativeVideoPlayer.addListener('jeepCapVideoPlayerEnded', () => {
+      nativeStatus.value = '播放结束'
+      void persistNativeProgress()
+    })
+    await nativeVideoPlayer.addListener('jeepCapVideoPlayerExit', async (evt: capExitListener) => {
+      nativeStatus.value = `已退出（退出时间: ${evt.currentTime ?? 0} 秒）`
+      lastProgress.value = evt.currentTime ?? 0
+      await persistNativeProgress(evt.currentTime)
+      isNative.value = false
+      await restorePortraitAndGoBack()
+    })
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : '原生播放器事件监听失败'
+    console.error('[initNativePlayer] addListener error:', e)
+    nativeError.value = msg
     isNative.value = false
-    await restorePortraitAndGoBack()
-  })
+    return
+  }
 
   const options: capVideoPlayerOptions = {
     mode: 'fullscreen',
     url,
     playerId: NATIVE_PLAYER_ID,
-    displayMode: 'landscape',
+    displayMode: orientation.value,
     showControls: true,
     pipEnabled: false,
     bkmodeEnabled: false,
@@ -230,6 +292,7 @@ async function initNativePlayer(url: string, startAt?: number) {
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : '原生播放器初始化异常'
+    console.error('[initNativePlayer] initPlayer error:', e)
     error.value = msg
     nativeError.value = msg
     isNative.value = false
@@ -256,14 +319,27 @@ async function persistNativeProgress(progress?: number) {
   })
 }
 
-function cleanupNativePlayer() {
-  void nativeVideoPlayer.stopAllPlayers()
-  void nativeVideoPlayer.removeAllListeners()
+async function cleanupNativePlayer() {
+  try {
+    await nativeVideoPlayer.stopAllPlayers()
+  } catch (e) {
+    console.warn('[cleanupNativePlayer] stopAllPlayers error:', e)
+  }
+  try {
+    await nativeVideoPlayer.removeAllListeners()
+  } catch (e) {
+    console.warn('[cleanupNativePlayer] removeAllListeners error:', e)
+  }
 }
 
-async function lockLandscape() {
+async function lockOrientation(o: Orientation) {
   if (!Capacitor.isNativePlatform()) return
-  await ScreenOrientation.lock({ orientation: 'landscape' })
+  try {
+    await ScreenOrientation.lock({ orientation: o })
+  } catch (e) {
+    console.warn('[lockOrientation] failed:', e)
+    await ScreenOrientation.unlock()
+  }
 }
 
 async function unlockOrientation() {
@@ -274,12 +350,36 @@ async function unlockOrientation() {
 async function restorePortraitAndGoBack() {
   if (!Capacitor.isNativePlatform()) return
   try {
+    await KeepAwake.allowSleep()
+  } catch (e) {
+    console.warn('[restorePortraitAndGoBack] allowSleep error:', e)
+  }
+  try {
     await ScreenOrientation.lock({ orientation: 'portrait' })
   } catch {
     await unlockOrientation()
   }
   if (window.history.length > 1) router.back()
   else router.replace('/home')
+}
+
+// 切换横竖屏：停止当前原生播放器，重新初始化
+async function switchNativeOrientation(next: Orientation) {
+  if (orientation.value === next) return
+  orientation.value = next
+  await lockOrientation(next)
+  const cur = playerStore.current
+  if (!cur?.episode) return
+  // 保留当前进度，重新初始化播放器
+  const startAt = lastProgress.value || cur.startAt
+  await initNativePlayer(cur.episode.url, startAt)
+}
+
+// 切换画面比例。注意：@capgo 插件未暴露 resizeMode/aspectRatio API，
+// 当前版本仅记录状态；实际缩放由 ExoPlayer 默认行为决定。
+async function switchResizeMode(next: ResizeMode) {
+  resizeMode.value = next
+  console.warn(`[switchResizeMode] 已切换为 ${next}，但 @capgo 插件不支持原生画面比例控制`)
 }
 
 onMounted(async () => {
@@ -290,18 +390,52 @@ onMounted(async () => {
     return
   }
   playingTitle.value = `${cur.vod.name} - ${ep.name}`
+  // 播放时保持屏幕常亮
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await KeepAwake.keepAwake()
+    } catch (e) {
+      console.warn('[onMounted] keepAwake error:', e)
+    }
+  }
+
   if (isAndroidNative) {
     teardown()
-    await lockLandscape()
+    // 自动检测视频方向：竖屏短视频切换到 portrait，默认 landscape
+    detectingOrientation.value = true
+    try {
+      orientation.value = await detectVideoOrientation(ep.url)
+    } catch (e) {
+      console.warn('[onMounted] detectVideoOrientation error:', e)
+      orientation.value = 'landscape'
+    } finally {
+      detectingOrientation.value = false
+    }
+    await lockOrientation(orientation.value)
     await initNativePlayer(ep.url, cur.startAt)
   } else {
     buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
   }
 })
 
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
   teardown()
-  cleanupNativePlayer()
+  await cleanupNativePlayer()
+  if (Capacitor.isNativePlatform()) {
+    // 退出播放页时恢复系统默认息屏行为
+    try {
+      await KeepAwake.allowSleep()
+    } catch (e) {
+      console.warn('[onBeforeUnmount] allowSleep error:', e)
+    }
+    // 退出播放页时恢复竖屏
+    try {
+      await ScreenOrientation.lock({ orientation: 'portrait' })
+    } catch (e) {
+      console.warn('[onBeforeUnmount] restore portrait error:', e)
+      await unlockOrientation()
+    }
+  }
 })
 
 watch(
@@ -331,11 +465,28 @@ async function onBack() {
 
     <NavBar v-if="!isAndroidNative" :title="playingTitle || '播放'" @click-left="onBack" />
 
-    <!-- Android 原生环境：自动启动原生播放器，此处仅显示启动状态/错误 -->
+    <!-- Android 原生环境：自动启动原生播放器，此处显示状态与手动控制 -->
     <div v-if="isAndroidNative" class="native-debug">
       <p class="native-tag">正在启动原生播放器</p>
       <p class="status">{{ nativeStatus }}</p>
+      <p v-if="detectingOrientation" class="native-hint">正在检测视频方向...</p>
       <p v-if="nativeError" class="native-error">错误：{{ nativeError }}</p>
+      <div class="native-controls">
+        <button
+          type="button"
+          class="native-btn"
+          @click="switchNativeOrientation(orientation === 'landscape' ? 'portrait' : 'landscape')"
+        >
+          {{ orientation === 'landscape' ? '切换竖屏' : '切换横屏' }}
+        </button>
+        <button
+          type="button"
+          class="native-btn"
+          @click="switchResizeMode(resizeMode === 'fit' ? 'fill' : 'fit')"
+        >
+          比例：{{ resizeMode === 'fit' ? '适应' : '填充' }}
+        </button>
+      </div>
     </div>
 
     <div v-if="!isAndroidNative" class="art-wrap" ref="containerRef"></div>
@@ -404,8 +555,19 @@ async function onBack() {
   color: #ff4d4f;
   margin-top: 12px;
 }
-.native-btn {
+.native-debug .native-hint {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  margin-top: 8px;
+}
+.native-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
   margin-top: 16px;
+}
+.native-btn {
   padding: 10px 20px;
   background: var(--van-primary-color);
   color: #fff;

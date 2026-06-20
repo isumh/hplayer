@@ -2,6 +2,7 @@
 import {
   adapterProxy,
   type Episode,
+  normalizeImageUrl,
   stripHtml,
   useFavoriteStore,
   useHistoryStore,
@@ -29,6 +30,17 @@ const error = ref<string | null>(null)
 
 const id = route.params.id as string
 const sourceId = (route.query.sourceId as string) || sourceStore.activeSourceId || ''
+
+const source = computed(() => sourceStore.list.find((s) => s.id === sourceId))
+const posterUrl = computed(() =>
+  detail.value ? normalizeImageUrl(detail.value.pic, source.value?.forceHttpsImage ?? false) : '',
+)
+
+function onPosterError(e: Event) {
+  const img = e.target as HTMLImageElement
+  console.warn('[detail] 海报加载失败:', detail.value?.pic)
+  img.style.opacity = '0'
+}
 
 async function load() {
   const source = sourceStore.list.find((s) => s.id === sourceId)
@@ -61,8 +73,8 @@ function toggleFav() {
 }
 
 function previewPoster() {
-  if (!detail.value?.pic) return
-  previewStore.open([detail.value.pic], 0)
+  if (!posterUrl.value) return
+  previewStore.open([posterUrl.value], 0)
 }
 
 const isFav = computed(() =>
@@ -87,7 +99,7 @@ onMounted(load)
     <EmptyState v-else-if="error" :text="error" />
     <template v-else-if="detail">
       <div class="header">
-        <img class="poster" :src="detail.pic" :alt="detail.name" @click="previewPoster" />
+        <img class="poster" :src="posterUrl" :alt="detail.name" @click="previewPoster" @error="onPosterError" />
         <div class="meta">
           <h1 class="title">{{ detail.name }}</h1>
           <div class="row" v-if="detail.year">

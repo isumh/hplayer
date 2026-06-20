@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { VodItem } from '@hplayer/core'
-import { usePreviewStore } from '@hplayer/core'
+import { normalizeImageUrl, usePreviewStore, useSourceStore } from '@hplayer/core'
 import { computed } from 'vue'
 
 const props = defineProps<{ item: VodItem }>()
+const sourceStore = useSourceStore()
 // ⓘ 图标 → 跳详情页；▶ 按钮 → 直接播放；cover 区域 → 弹图片预览
 const emit = defineEmits<{
   (e: 'select', it: VodItem): void
@@ -15,6 +16,12 @@ const previewStore = usePreviewStore()
 
 // 完整名称（用于原生 title tooltip）
 const fullName = computed(() => props.item.name)
+
+// 根据视频源配置决定是否强制将图片 http 替换为 https
+const source = computed(() => sourceStore.list.find((s) => s.id === props.item.sourceId))
+const coverUrl = computed(() =>
+  normalizeImageUrl(props.item.pic, source.value?.forceHttpsImage ?? false),
+)
 
 function stop(e: MouseEvent) {
   // 防止 ⓘ/▶ 按钮的 click 冒泡触发 cover 的图片预览
@@ -29,9 +36,15 @@ function onPlay(e: MouseEvent) {
   emit('play', props.item)
 }
 function onPreview() {
-  if (!props.item.pic) return
+  if (!coverUrl.value) return
   // 触发全局单例 ImagePreview
-  previewStore.open([props.item.pic], 0)
+  previewStore.open([coverUrl.value], 0)
+}
+
+function onImageError(e: Event) {
+  const img = e.target as HTMLImageElement
+  console.warn('[VodCard] 图片加载失败:', props.item.pic)
+  img.style.opacity = '0'
 }
 </script>
 
@@ -40,10 +53,11 @@ function onPreview() {
     <div class="cover-wrap" @click="onPreview">
       <img
         class="cover"
-        :src="item.pic"
+        :src="coverUrl"
         :alt="item.name"
         loading="lazy"
         referrerpolicy="no-referrer"
+        @error="onImageError"
       />
       <!-- 左上：详情链接图标 -->
       <button

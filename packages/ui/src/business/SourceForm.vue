@@ -28,6 +28,7 @@ const form = ref<Omit<VideoSource, 'id' | 'createdAt' | 'order'>>({
   pageSize: 20,
   enabled: true,
   remark: '',
+  forceHttpsImage: false,
 })
 
 watch(
@@ -42,6 +43,7 @@ watch(
           baseUrl: s.baseUrl,
           pageSize: s.pageSize ?? 20,
           enabled: s.enabled,
+          forceHttpsImage: s.forceHttpsImage ?? false,
         }
         form.value = next
       }
@@ -134,6 +136,11 @@ async function remove() {
       <Field name="enabled" label="启用">
         <template #input>
           <Switch v-model="form.enabled" />
+        </template>
+      </Field>
+      <Field name="forceHttpsImage" label="图片强制 HTTPS">
+        <template #input>
+          <Switch v-model="form.forceHttpsImage" />
         </template>
       </Field>
       <Field v-model="form.remark as string" label="备注" type="textarea" placeholder="选填" :maxlength="200" rows="2" autosize />

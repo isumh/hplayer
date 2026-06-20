@@ -289,6 +289,13 @@ hplayer/
 
 ## 5. 任务拆分
 
+### Phase 9.5：无分类视频源兼容
+
+- [ ] **Task 5.1**：确认 `T1JsonAdapter` / `T0XmlAdapter` 在缺 `class` 时均返回空数组（当前行为已符合）。
+- [ ] **Task 5.2**：修改 `home/index.vue`：`categories` 为空时设置默认 `{ id: 0, name: '全部' }` 并调用 `loadList(true)`。
+- [ ] **Task 5.3**：验证有分类源和无分类源的首页行为。
+- [ ] **Task 5.4**：commit。
+
 ### Phase 9.1：图片 URL 规范化与按源配置
 
 - [ ] **Task 1.1**：`VideoSource` 类型新增 `forceHttpsImage?: boolean`。
@@ -296,13 +303,6 @@ hplayer/
 - [ ] **Task 1.3**：`SourceForm.vue` 新增「图片强制 HTTPS」开关。
 - [ ] **Task 1.4**：`VodCard.vue`、`detail/index.vue` 等应用 `normalizeImageUrl` 并加错误占位。
 - [ ] **Task 1.5**：commit。
-
-### Phase 9.2：图片列表虚拟滚动
-
-- [ ] **Task 2.1**：自研基于 `IntersectionObserver` 的虚拟滚动容器组件。
-- [ ] **Task 2.2**：`VodList.vue` 接入虚拟滚动，保持 `VodCard` 复用。
-- [ ] **Task 2.3**：首页/搜索/收藏/历史页面验证虚拟滚动效果。
-- [ ] **Task 2.4**：commit。
 
 ### Phase 9.3：原生播放器横竖屏与比例
 
@@ -319,12 +319,12 @@ hplayer/
 - [ ] **Task 4.3**：真机验证稳定性、比例、息屏。
 - [ ] **Task 4.4**：commit。
 
-### Phase 9.5：无分类视频源兼容
+### Phase 9.2：图片列表虚拟滚动
 
-- [ ] **Task 5.1**：确认 `T1JsonAdapter` / `T0XmlAdapter` 在缺 `class` 时均返回空数组（当前行为已符合）。
-- [ ] **Task 5.2**：修改 `home/index.vue`：`categories` 为空时设置默认 `{ id: 0, name: '全部' }` 并调用 `loadList(true)`。
-- [ ] **Task 5.3**：验证有分类源和无分类源的首页行为。
-- [ ] **Task 5.4**：commit。
+- [ ] **Task 2.1**：自研基于 `IntersectionObserver` 的虚拟滚动容器组件。
+- [ ] **Task 2.2**：`VodList.vue` 接入虚拟滚动，保持 `VodCard` 复用。
+- [ ] **Task 2.3**：首页/搜索/收藏/历史页面验证虚拟滚动效果。
+- [ ] **Task 2.4**：commit。
 
 ### Phase 9.6：文档与回归
 

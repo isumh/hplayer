@@ -51,6 +51,9 @@ importers:
 
   apps/hplayer_android:
     dependencies:
+      '@capacitor-community/keep-awake':
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor-community/sqlite':
         specifier: ^8.0.0
         version: 8.1.0(@capacitor/core@8.4.1)
@@ -407,6 +410,11 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
+
+  '@capacitor-community/keep-awake@8.0.1':
+    resolution: {integrity: sha512-wTI5A6FWl5gWoMduzJ5euuJ1P73SO+rea0jV6vNdmz5TLbwIDhufelFe/GowNvU9gog6kDYbFhJ2pOp9ua1f3w==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
 
   '@capacitor-community/sqlite@8.1.0':
     resolution: {integrity: sha512-yhKZDAVPDPcM3QE6UGB3LXyV25a6Rve1SjZ1aUpTE0E2isnYTVM0PG9+JOI241f+NdsHzPTE7ESJiYSqKsKnuA==}
@@ -2500,6 +2508,10 @@ snapshots:
 
   '@biomejs/cli-win32-x64@2.4.5':
     optional: true
+
+  '@capacitor-community/keep-awake@8.0.1(@capacitor/core@8.4.1)':
+    dependencies:
+      '@capacitor/core': 8.4.1
 
   '@capacitor-community/sqlite@8.1.0(@capacitor/core@8.4.1)':
     dependencies:

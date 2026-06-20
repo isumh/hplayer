@@ -27,6 +27,9 @@ const categories = ref<Category[]>([])
 // 选中的分类 ID（用于 v-model 绑定到 CategoryBar）
 const activeCategoryId = ref<string | number | null>(null)
 const activeCategory = ref<Category | null>(null)
+
+// 无分类视频源时的默认分类，固定使用 categoryId = '0' 加载全部视频
+const DEFAULT_CATEGORY = (sourceId: string): Category => ({ id: '0', name: '全部', sourceId })
 const items = ref<VodItem[]>([])
 const page = ref(1)
 const loading = ref(false)
@@ -44,18 +47,24 @@ async function loadCategories() {
   try {
     const list = await adapterProxy.getCategories(sourceStore.activeSource)
     categories.value = list
-    // 默认选中第一个分类（如已选过，保持现状）
-    if (list.length && activeCategoryId.value == null) {
-      const first = list[0]
-      if (first) {
-        activeCategoryId.value = first.id
-        activeCategory.value = first
-        await loadList(true)
+    if (list.length) {
+      // 有分类：默认选中第一个（如已选过，保持现状并同步对象）
+      if (activeCategoryId.value == null) {
+        const first = list[0]
+        if (first) {
+          activeCategoryId.value = first.id
+          activeCategory.value = first
+          await loadList(true)
+        }
+      } else {
+        const found = list.find((c) => c.id === activeCategoryId.value)
+        if (found) activeCategory.value = found
       }
-    } else if (activeCategoryId.value != null) {
-      // 已选过 → 同步 activeCategory（防止外部修改 categories 后丢失）
-      const found = list.find((c) => c.id === activeCategoryId.value)
-      if (found) activeCategory.value = found
+    } else {
+      // 无分类：使用默认 categoryId = '0' 加载全部视频
+      activeCategory.value = DEFAULT_CATEGORY(sourceStore.activeSource.id)
+      activeCategoryId.value = '0'
+      await loadList(true)
     }
   } catch (err) {
     console.error(err)
