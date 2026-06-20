@@ -108,30 +108,50 @@ pnpm sync:android
 
 ---
 
-## 7. 测试结果（待填写）
-
-| 编号 | 结果 | 备注 |
-|---|---|---|
-| V1 |  |  |
-| V2 |  |  |
-| V3 |  |  |
-| V4 |  |  |
-| V5 |  |  |
-| V6 |  |  |
-| V7 |  |  |
+## 7. 测试结果
 
 ### 第一轮 POC 结论（Capacitor 7）
 
 **POC 失败。** `@capgo/capacitor-video-player@7.0.0` 在 Capacitor 7.x + 测试真机环境下，调用 `initPlayer` 即触发原生层崩溃，无法完成基础播放验证。
 
-### 第二轮 POC 状态（Capacitor 8）
+### 第二轮 POC 结论（Capacitor 8）
 
-**已升级到 Capacitor 8 + `@capgo/capacitor-video-player@8.1.20`，构建、同步、质量门禁均通过，待真机验证 `initPlayer` 是否仍崩溃。**
+**POC 失败。** 升级到 Capacitor 8 + `@capgo/capacitor-video-player@8.1.20` 后，GitHub Actions 构建、同步、质量门禁均通过；但真机安装 APK 后，进入播放页点击「测试原生播放器」按钮，`initPlayer` 仍触发应用闪退，与 v7 现象一致。
+
+| 编号 | 结果 | 备注 |
+|---|---|---|
+| V1 | ❌ 失败 | 未进入原生全屏，调用 `initPlayer` 即崩溃 |
+| V2 | — | 未验证 |
+| V3 | — | 未验证 |
+| V4 | — | 未验证 |
+| V5 | — | 未验证 |
+| V6 | — | 未验证 |
+| V7 | ❌ 失败 | 必现崩溃，稳定性不满足 |
 
 ---
 
-## 8. 后续建议
+## 8. 最终结论与决策
 
-1. **本轮验证**：推送 GitHub Actions 打包 APK，在真机上点击播放页「测试原生播放器」按钮，确认是否仍闪退。
-2. **若 v8 仍失败**：回滚到 Capacitor 7（或保持 Capacitor 8 但移除原生播放器入口），继续以 `Artplayer + hls.js` 作为 Android 播放方案。
-3. **若 v8 成功**：进一步验证 V1–V7 验证点，并处理标题栏隐藏、倍速同步、进度续播等体验细节。
+**放弃 `@capgo/capacitor-video-player` 原生播放器方案，Android 端继续使用 WebView 内 `Artplayer + hls.js` 播放。**
+
+原因：
+
+1. **同一插件在 v7、v8 均触发原生崩溃**，问题出在插件原生层（ExoPlayer/Activity 初始化），非参数或工程配置可修复。
+2. **当前环境无法便捷调试**：沙箱无 `adb`，GitHub Actions 打包后需手动安装测试，崩溃栈难以获取；接入 Sentry/Firebase Crashlytics 会显著增加工程复杂度。
+3. **Web 播放器已满足核心需求**：m3u8/mp4、暂停、拖动、倍速均已在真机验证通过。
+4. **参考项目 zyfun 同样以 Web 播放器为主**：zyfun 是 Electron 桌面应用，内核使用 `artplayer` / `xgplayer`；其 `@zy/vlc` 原生包明确为 `libVLC native addon for Electron`，不适用于 Android。
+
+已执行回退动作：
+
+- 移除 `packages/views/src/player/index.vue` 中原生播放器调试面板、「测试原生播放器」按钮、所有监听器与初始化逻辑。
+- 从 `packages/views`、`apps/hplayer_web`、`apps/hplayer_android` 的 `package.json` 移除 `@capgo/capacitor-video-player` 依赖。
+- 从 `capacitor.build.gradle` 与 `capacitor.settings.gradle` 移除 `capgo-capacitor-video-player` 原生模块。
+- 运行 `pnpm install` / `pnpm sync:android` 清理残留。
+
+---
+
+## 9. 后续建议
+
+1. **保持当前方案**：Android 端统一使用 Web 播放器（Artplayer + hls.js），后续优化方向集中在全屏体验、倍速UI、进度续播。
+2. **如需原生播放器**：可调研替代插件（如 `@capacitor-community/video-player`）或自行封装 ExoPlayer Activity，但都需要重新 POC，且当前环境调试成本高。
+3. **标题栏与全屏**：播放页进入全屏时由 Artplayer 自身处理；如需进入页面即全屏，可在 `onMounted` 中调用 Artplayer 的全屏 API。

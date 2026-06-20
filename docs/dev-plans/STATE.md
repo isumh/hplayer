@@ -160,11 +160,12 @@
   2. **视频源选择弹出框贴顶/被状态栏遮挡**：`SourcePicker` 的 `Popup position="top"` 在 Android WebView 中 fixed 定位可能紧贴状态栏。修复：改为 `position="center"` 居中弹窗，并设置 `width: 80vw; max-width: 400px` 增加列表宽度。
   3. **播放页点击「测试原生播放器」闪退**：`@capgo/capacitor-video-player@7.0.0` 在 Capacitor 7.x 下调用 `initPlayer` 触发原生崩溃（POC 已失败）。临时修复：移除播放页原生播放器调试入口、监听器与初始化逻辑；从 `packages/views`、`apps/hplayer_web`、`apps/hplayer_android` 的 `package.json` 移除该依赖；执行 `cap sync android` 清理原生插件。Android 端统一使用 Web 播放器（Artplayer + hls.js）。
 - **2026-06-20 / P8 / Capacitor 8 升级与原生播放器第二轮 POC**：
-  1. **升级 Capacitor 7 → 8**：所有 `@capacitor/*` 核心包与官方插件升级到 `^8.0.0`；`@capacitor-community/sqlite` 升级到 `^8.0.0`；`@capawesome/*` 插件升级到 `^8.0.0`；`@capgo/capacitor-video-player` 升级到 `^8.0.0`（实际安装 `8.1.20`）。
+  1. **升级 Capacitor 7 → 8**：所有 `@capacitor/*` 核心包与官方插件升级到 `^8.0.0`；`@capacitor-community/sqlite` 升级到 `^8.0.0`；`@capawesome/*` 插件升级到 `^8.0.0`；临时引入 `@capgo/capacitor-video-player@8.1.20` 进行第二轮 POC。
   2. **升级 Android 原生工具链**：`variables.gradle` 更新 `compileSdk/targetSdk = 36`、`minSdk = 24`、AndroidX 依赖版本；`build.gradle` 更新 AGP 到 `8.13.0`；`gradle-wrapper.properties` 更新 Gradle 到 `8.14.3`。
   3. **更新 CI 环境**：`.github/workflows/build-apk.yml` 中 Node 从 `20` 升级到 `22`，Android SDK 从 `android-35/build-tools;35.0.0` 升级到 `android-36/build-tools;36.0.0`。
-  4. **重新集成原生播放器入口**：在 `packages/views/src/player/index.vue` 恢复 v7 POC 时的调试面板与「测试原生播放器」按钮，默认仍使用 Web 播放器，手动触发原生播放测试。
-  5. **状态**：`pnpm type-check` / `pnpm lint` / `pnpm test`（141 测试） / `pnpm build` / `pnpm sync:android` 全部通过；待推送 GitHub Actions 打包后在真机验证 `initPlayer` 是否仍崩溃。
+  4. **原生播放器 POC 失败**：真机安装 Capacitor 8 构建的 APK 后，点击播放页「测试原生播放器」按钮，`@capgo/capacitor-video-player` 调用 `initPlayer` 仍触发应用闪退，与 v7 现象一致。
+  5. **回退到 Web 播放器**：移除 `packages/views/src/player/index.vue` 中原生播放器调试面板、按钮、监听器与初始化逻辑；从 `packages/views`、`apps/hplayer_web`、`apps/hplayer_android` 移除 `@capgo/capacitor-video-player` 依赖；从 `capacitor.build.gradle` 与 `capacitor.settings.gradle` 移除原生模块；Android 端统一使用 `Artplayer + hls.js` Web 播放器。
+  6. **状态**：回退后 `pnpm type-check` / `pnpm lint` / `pnpm test` / `pnpm build` / `pnpm sync:android` 全部通过。
 
 ---
 

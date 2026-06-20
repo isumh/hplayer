@@ -24,17 +24,18 @@ const playerStore = usePlayerStore()
 const historyStore = useHistoryStore()
 
 const containerRef = ref<HTMLDivElement | null>(null)
+const nativeHostRef = ref<HTMLDivElement | null>(null)
 const error = ref<string | null>(null)
 const playingTitle = ref('')
 
-// POC: Android 原生播放器调试状态
+// Android 原生播放器 POC 状态
 const isNative = ref(false)
 const nativeStatus = ref('未启动')
-const lastProgress = ref(0)
 const nativeError = ref<string | null>(null)
-const NATIVE_PLAYER_ID = 'hplayerPocNative'
+const lastProgress = ref(0)
+const NATIVE_PLAYER_ID = 'native-player-host'
 const isAndroidNative = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android'
-// 插件类型定义未暴露监听器方法，通过 Capacitor Plugin 类型断言
+// @capgo/capacitor-video-player 类型定义未暴露 addListener/removeAllListeners，按 Capacitor Plugin 断言
 const nativeVideoPlayer = VideoPlayer as unknown as Plugin & typeof VideoPlayer
 
 // 播放器可用倍速档位（与 ArtPlayer settings 菜单同步）
@@ -164,7 +165,7 @@ function setRate(r: Rate) {
   }
 }
 
-// POC: Android 原生播放器入口
+// Android 原生播放器 POC
 async function initNativePlayer(url: string, startAt?: number) {
   if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
     nativeError.value = `非 Android 原生环境：isNative=${Capacitor.isNativePlatform()} platform=${Capacitor.getPlatform()}`
@@ -174,28 +175,28 @@ async function initNativePlayer(url: string, startAt?: number) {
     error.value = '不安全的播放地址'
     return
   }
+
   isNative.value = true
   nativeStatus.value = '正在启动原生播放器...'
   nativeError.value = null
   lastProgress.value = 0
 
-  // 清理旧监听，避免重复
   cleanupNativePlayer()
 
-  nativeVideoPlayer.addListener('jeepCapVideoPlayerReady', () => {
+  await nativeVideoPlayer.addListener('jeepCapVideoPlayerReady', () => {
     nativeStatus.value = '原生播放器已就绪'
   })
-  nativeVideoPlayer.addListener('jeepCapVideoPlayerPlay', () => {
+  await nativeVideoPlayer.addListener('jeepCapVideoPlayerPlay', () => {
     nativeStatus.value = '播放中'
   })
-  nativeVideoPlayer.addListener('jeepCapVideoPlayerPause', () => {
+  await nativeVideoPlayer.addListener('jeepCapVideoPlayerPause', () => {
     nativeStatus.value = '已暂停'
   })
-  nativeVideoPlayer.addListener('jeepCapVideoPlayerEnded', () => {
+  await nativeVideoPlayer.addListener('jeepCapVideoPlayerEnded', () => {
     nativeStatus.value = '播放结束'
     void persistNativeProgress()
   })
-  nativeVideoPlayer.addListener('jeepCapVideoPlayerExit', (evt: capExitListener) => {
+  await nativeVideoPlayer.addListener('jeepCapVideoPlayerExit', (evt: capExitListener) => {
     nativeStatus.value = `已退出（退出时间: ${evt.currentTime ?? 0} 秒）`
     lastProgress.value = evt.currentTime ?? 0
     void persistNativeProgress(evt.currentTime)
@@ -210,22 +211,20 @@ async function initNativePlayer(url: string, startAt?: number) {
     pipEnabled: false,
     bkmodeEnabled: false,
     exitOnEnd: true,
+    chromecast: false,
   }
 
   try {
     const res = await nativeVideoPlayer.initPlayer(options)
     if (!res.result) {
-      error.value = res.message ?? '原生播放器启动失败'
-      nativeError.value = res.message ?? '原生播放器启动失败'
+      const msg = res.message ?? '原生播放器启动失败'
+      error.value = msg
+      nativeError.value = msg
       isNative.value = false
       return
     }
-    // 若需要续播，等待就绪后 seek
     if (typeof startAt === 'number' && startAt > 0) {
-      const unready = await nativeVideoPlayer.addListener('jeepCapVideoPlayerReady', () => {
-        void nativeVideoPlayer.setCurrentTime({ playerId: NATIVE_PLAYER_ID, seektime: startAt })
-        unready.remove()
-      })
+      void nativeVideoPlayer.setCurrentTime({ playerId: NATIVE_PLAYER_ID, seektime: startAt })
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : '原生播放器初始化异常'
@@ -257,16 +256,7 @@ async function persistNativeProgress(progress?: number) {
 
 function cleanupNativePlayer() {
   void nativeVideoPlayer.stopAllPlayers()
-  nativeVideoPlayer.removeAllListeners()
-}
-
-function reopenNative() {
-  const cur = playerStore.current
-  if (!cur?.episode) {
-    error.value = '无效播放会话'
-    return
-  }
-  void initNativePlayer(cur.episode.url, cur.startAt)
+  void nativeVideoPlayer.removeAllListeners()
 }
 
 async function startNativeTest() {
@@ -276,7 +266,18 @@ async function startNativeTest() {
     return
   }
   teardown()
+  await lockLandscape()
   await initNativePlayer(cur.episode.url, cur.startAt)
+}
+
+async function lockLandscape() {
+  if (!Capacitor.isNativePlatform()) return
+  await ScreenOrientation.lock({ orientation: 'landscape' })
+}
+
+async function unlockOrientation() {
+  if (!Capacitor.isNativePlatform()) return
+  await ScreenOrientation.unlock()
 }
 
 onMounted(async () => {
@@ -287,8 +288,7 @@ onMounted(async () => {
     return
   }
   playingTitle.value = `${cur.vod.name} - ${ep.name}`
-  await lockLandscape()
-  // POC：Android 端默认仍用 Web 播放器，手动触发原生播放器测试，避免自动初始化闪退影响正常播放
+  // Android 原生环境默认仍用 Web 播放器，避免自动初始化闪退影响正常播放
   buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
 })
 
@@ -307,16 +307,6 @@ watch(
   },
 )
 
-async function lockLandscape() {
-  if (!Capacitor.isNativePlatform()) return
-  await ScreenOrientation.lock({ orientation: 'landscape' })
-}
-
-async function unlockOrientation() {
-  if (!Capacitor.isNativePlatform()) return
-  await ScreenOrientation.unlock()
-}
-
 function onBack() {
   persistProgress()
   if (window.history.length > 1) router.back()
@@ -325,24 +315,28 @@ function onBack() {
 </script>
 
 <template>
-  <div class="player-page" :class="{ 'player-page--native': isAndroidNative }">
-    <NavBar v-if="!isAndroidNative" :title="playingTitle || '播放'" @click-left="onBack" />
-    <!-- Android POC：调试面板与原生播放器测试入口 -->
+  <div class="player-page" :class="{ 'player-page--native': isNative }">
+    <!-- 原生播放器宿主 DOM，满足 playerId 必须对应真实 DOM 的要求 -->
+    <div v-if="isAndroidNative" id="native-player-host" ref="nativeHostRef" class="native-host"></div>
+
+    <NavBar v-if="!isNative" :title="playingTitle || '播放'" @click-left="onBack" />
+
+    <!-- Android 原生播放器调试入口 -->
     <div v-if="isAndroidNative" class="native-debug">
       <p class="native-tag">Android 原生播放器（POC）</p>
       <p>平台：isNative={{ Capacitor.isNativePlatform() }} | platform={{ Capacitor.getPlatform() }}</p>
       <p class="status">状态：{{ nativeStatus }}</p>
       <p v-if="lastProgress > 0">已保存进度：{{ lastProgress.toFixed(1) }} 秒</p>
       <p v-if="nativeError" class="native-error">错误：{{ nativeError }}</p>
-      <button v-if="!isNative" class="native-btn" @click="startNativeTest">测试原生播放器</button>
-      <button v-else class="native-btn" @click="reopenNative">重新打开原生播放器</button>
+      <button class="native-btn" @click="startNativeTest">测试原生播放器</button>
     </div>
+
     <div v-if="!isNative" class="art-wrap" ref="containerRef"></div>
 
     <!-- 错误展示 -->
     <div v-if="error" class="error">{{ error }}</div>
 
-    <!-- 播放控制：倍速按钮条（Web 端保留，原生播放器测试时使用自带倍速菜单） -->
+    <!-- 播放控制：倍速按钮条 -->
     <div v-if="!isNative" class="rate-bar" role="group" aria-label="倍速">
       <button
         v-for="r in RATES"
@@ -366,14 +360,21 @@ function onBack() {
   min-height: 100vh;
   background: black;
 }
-.player-page--native {
-  padding-top: 0;
-  min-height: 100vh;
-}
 .art-wrap {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: black;
+}
+.player-page--native {
+  padding-top: 0;
+  min-height: 100vh;
+}
+.native-host {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
 }
 .native-debug {
   color: white;
@@ -381,6 +382,11 @@ function onBack() {
   text-align: center;
   background: #111;
   min-height: 200px;
+}
+.native-debug .native-tag {
+  color: var(--van-primary-color);
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 .native-debug .status {
   color: var(--van-primary-color);
