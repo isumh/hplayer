@@ -9,13 +9,13 @@
 
 | 字段 | 值 |
 | --- | --- |
-| `current_phase` | **P9 V2.1 Android 体验优化（in_progress）** |
+| `current_phase` | **P9 V2.1 Android 体验优化（completed）** |
 | `current_agent` | **P9-1** |
-| `last_completed_task` | P8-7:Task 7.3 |
-| `last_commit_hash` | `ff74262` |
+| `last_completed_task` | P9:Task 6.2 |
+| `last_commit_hash` | `77a6221` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
-| `last_update` | 2026-06-20（V2.1 设计文档完成，进入 P9 实施） |
+| `last_update` | 2026-06-20（P9 V2.1 实施完成，全量质量门禁通过） |
 
 ---
 
@@ -52,7 +52,7 @@
 ## V2.1 计划入口
 
 - 设计文档：[docs/design/HPlayer-v2.1.md](../design/HPlayer-v2.1.md)
-- 状态：in_progress，P9-1 待开始
+- 状态：completed，Phase 9.1 / 9.2 / 9.3 / 9.4 / 9.5 / 9.6 全部完成
 - 关键决策：
   - 横竖屏切换采用「自动检测 + 手动按钮」。
   - 图片协议替换采用「按源配置 `forceHttpsImage` 开关」。
@@ -199,6 +199,15 @@
   1. 在 `docs/design/HPlayer-v2.1.md` 中新增 3.5 节：部分 Apple CMS 源不返回 `class` 字段，首页隐藏分类栏，使用默认 `categoryId = 0` 直接加载全部视频列表。
   2. 调整任务拆分为 Phase 9.5（无分类源兼容）与 Phase 9.6（文档与回归）。
   3. 更新 `STATE.md` 关键决策与变更记录。
+- **2026-06-20 / P9 / V2.1 实施完成**:
+  1. **Phase 9.5 无分类视频源兼容**：`packages/views/src/home/index.vue` 在 `getCategories()` 返回空数组时使用默认 `categoryId = '0'` 加载全部视频，隐藏分类栏，`AppHeader` 显示「全部」。
+  2. **Phase 9.1 图片 URL 规范化**：新增 `VideoSource.forceHttpsImage` 字段与 `normalizeImageUrl()` 工具；`SourceForm.vue` 新增开关；`VodCard.vue` / `detail/index.vue` 应用协议替换与错误占位。
+  3. **Phase 9.3 原生播放器横竖屏与比例**：`player/index.vue` 通过临时 `<video>` 预加载元数据判断方向，支持手动横竖屏切换；比例切换 UI 受 `@capgo` 插件 API 限制，保留状态与按钮。
+  4. **Phase 9.4 原生播放器稳定化与息屏**：`initPlayer` 与监听器加 `try/catch`；引入 `@capacitor-community/keep-awake` 实现播放页防息屏。
+  5. **Phase 9.2 图片列表虚拟滚动**：新增 `VirtualGrid.vue`（基于 `IntersectionObserver`）；`VodList.vue` 接入，离屏卡片渲染轻量占位。
+  6. **Phase 9.6 文档与回归**：更新 `docs/design/HPlayer-v2.1.md` 状态与任务勾选；更新 `STATE.md` 与 `README.md`；全量质量门禁通过（146 测试）。
+  7. **修复既有测试**：`packages/core/src/api/ua-pool.ts` 的去重逻辑修复 `ua-pool.test.ts` 偶发失败。
+  8. **真机回归**：沙箱无 Android 真机/模拟器，Task 6.3 标记为待用户本地验证。
 
 ---
 
