@@ -2,8 +2,9 @@
 
 > 文档版本：v2.0-design
 > 编写日期：2026-06-19
+> 更新日期：2026-06-20
 > 前置参考：[HPlayer-v1.1.md](./HPlayer-v1.1.md)、[HPlayer-v1.md](./HPlayer-v1.md)
-> 状态：design_ready
+> 状态：completed
 
 ---
 
@@ -76,17 +77,17 @@
 | Gradle | 由 AGP 自动拉取 | 构建 Android 工程 |
 | Capacitor CLI | 7.x / 8.x | 初始化与同步 |
 
-### 3.2 当前沙箱环境评估（2026-06-19）
+### 3.2 当前沙箱环境评估（2026-06-20）
 
 | 检查项 | 当前状态 | 结论 |
 | --- | --- | --- |
-| Node.js | v24.15.0 | ✅ 可用（偏新，但 Capacitor 8 已支持 Node 20+） |
+| Node.js | v24.15.0 | ✅ 可用 |
 | pnpm | 9.0.0 | ✅ 可用 |
-| Java | OpenJDK 25.0.2 | ⚠️ **过新**，Android Gradle Plugin 8.x 官方最高支持 Java 21；沙箱执行 `cap sync` 时可能需降级到 JDK 21，或本地执行 Gradle sync |
-| Android SDK | 未安装（`ANDROID_HOME` 为空） | ❌ **缺失**，无法编译/打包 APK |
-| `adb` / `sdkmanager` | 不存在 | ❌ **缺失** |
-| Capacitor CLI | 未安装 | ❌ 需安装 |
-| 磁盘空间 | `/workspace` 剩余约 5G | ⚠️ **紧张**，按方案 A 沙箱不安装完整 Android SDK，只存放 Capacitor 工程与 Web 产物；本地环境负责 SDK 与模拟器 |
+| Java | OpenJDK 25.0.2 | ✅ CI 已使用，兼容 Gradle 8.14.3 |
+| Android SDK | 未安装（`ANDROID_HOME` 为空） | ⚠️ 沙箱不打包 APK，CI 已配置 SDK 36 |
+| `adb` / `sdkmanager` | 不存在 | ⚠️ 本地真机调试需自备 |
+| Capacitor CLI | ^8.0.0 | ✅ 已安装 |
+| 磁盘空间 | `/workspace` 剩余约 5G | ⚠️ 按方案 A，沙箱不安装完整 Android SDK |
 | 网络代理 | `http_proxy=http://127.0.0.1:18080` | ✅ 可访问 npm；Gradle/Maven 需同样走代理 |
 | 操作系统 | Ubuntu 24.04 x86_64 | ✅ 支持 Android SDK linux64 |
 
@@ -106,26 +107,27 @@
 
 ### 4.1 Capacitor 版本
 
-- **Capacitor CLI**：`^7.0.0`（当前稳定版，支持 Node 20+、Android SDK 34+）
-- **@capacitor/android**：`^7.0.0`
-- **@capacitor/core**：`^7.0.0`
+- **Capacitor CLI**：`^8.0.0`
+- **@capacitor/android**：`^8.0.0`
+- **@capacitor/core**：`^8.0.0`
 
-> 若 Capacitor 8 已正式发布且兼容 Node 24 / AGP 8.x，可在 P8 环境准备阶段评估升级；设计以 7.x 为基线，迁移到 8.x 通常为 minor 调整。
+> 实际实施中从 Capacitor 7 升级到 8，以兼容最新 Android SDK 36 与 Gradle 8.14。迁移改动主要为 `variables.gradle` 与 `build.gradle` 版本号升级。
 
 ### 4.2 插件清单
 
 | 能力 | 包名 | 版本 | 说明 |
 | --- | --- | --- | --- |
-| 状态栏 | `@capacitor/status-bar` | ^7.0.0 | 沉浸式、深色/浅色图标 |
-| 启动屏 | `@capacitor/splash-screen` | ^7.0.0 | 启动图 + 淡出 |
-| KV 存储 | `@capacitor/preferences` | ^7.0.0 | 主题、版本号等轻量配置 |
-| SQLite | `@capacitor-community/sqlite` | ^7.0.0 | 业务数据迁移后主存储 |
-| 文件系统 | `@capacitor/filesystem` | ^7.0.0 | 缓存、导出备份 |
-| 屏幕方向 | `@capacitor/screen-orientation` | ^7.0.0 | 播放页强制横屏 |
-| 应用更新 | `@capawesome/capacitor-app-update` | ^7.0.0 | 检测 APK 更新 |
-| 后台任务 | `@capawesome/capacitor-background-task` | ^7.0.0 | 切后台保活播放（辅助，V2.0 不保证效果） |
-| 震动 | `@capacitor/haptics` | ^7.0.0 | 关键操作反馈 |
-| 分享 | `@capacitor/share` | ^7.0.0 | 分享应用/备份文件 |
+| 状态栏 | `@capacitor/status-bar` | ^8.0.0 | 沉浸式、深色/浅色图标 |
+| 启动屏 | `@capacitor/splash-screen` | ^8.0.0 | 启动图 + 淡出 |
+| KV 存储 | `@capacitor/preferences` | ^8.0.0 | 主题、版本号等轻量配置 |
+| SQLite | `@capacitor-community/sqlite` | ^8.0.0 | 业务数据迁移后主存储 |
+| 文件系统 | `@capacitor/filesystem` | ^8.0.0 | 缓存、导出备份 |
+| 屏幕方向 | `@capacitor/screen-orientation` | ^8.0.0 | 播放页强制横屏 |
+| 应用更新 | `@capawesome/capacitor-app-update` | ^8.0.0 | 检测 APK 更新 |
+| 后台任务 | `@capawesome/capacitor-background-task` | ^8.0.0 | 切后台保活播放（辅助，V2.0 不保证效果） |
+| 震动 | `@capacitor/haptics` | ^8.0.0 | 关键操作反馈 |
+| 分享 | `@capacitor/share` | ^8.0.0 | 分享应用/备份文件 |
+| 原生视频播放 | `@capgo/capacitor-video-player` | ^8.0.0 | 已评估，真机闪退，V2.0 回退到 Web 播放器 |
 
 ### 4.3 播放方案
 
@@ -169,26 +171,25 @@ hplayer/
 
 ---
 
-## 6. 路由迁移：hash → history
+## 6. 路由模式：hash 模式
 
-Capacitor 官方推荐在 WebView 内使用 **history 模式**，由 Android `assetlinks`/ WebView 自动 fallback 到 `index.html`。
+V2.0 最初计划采用 **history 模式**，但在真机测试中发现：Capacitor Android WebView 的 `canGoBack()` 依赖实际 URL 变化，而 `file://` 协议下 `history.pushState` 不会改变地址栏 URL，导致物理返回键/手势直接退出应用。因此最终回退到 **hash 模式**。
 
 ### 6.1 变更点
 
 - `packages/router/src/index.ts`：
   ```ts
   const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
+    history: createWebHashHistory(import.meta.env.BASE_URL),
     routes,
   })
   ```
-- Vite 配置：生产构建无需额外 `historyApiFallback`（Capacitor WebView 已处理）。
-- 开发环境：保留 hash 模式可选，避免 `file://` 协议下 history 模式异常；通过 `import.meta.env.VITE_CAPACITOR` 区分。
+- Vite 配置：`base: './'`，确保 Capacitor `file://android_asset/` 协议下资源路径正确。
 
 ### 6.2 兼容性
 
 - 所有页面路径不变：`/home`、`/search`、`/settings`、`/detail/:id`、`/player/:id`、`/favorite`、`/history`。
-- 路由守卫逻辑不变，仅路由模式切换。
+- 路由守卫逻辑不变，仅路由模式切换为 hash，以适配 Android 返回栈。
 
 ---
 
@@ -417,50 +418,51 @@ hplayer/
 
 ### Phase 8.1：Capacitor 工程初始化（沙箱侧）
 
-- [ ] 安装 Capacitor CLI 与 `@capacitor/android`
-- [ ] 创建 `apps/hplayer_android`
-- [ ] 配置 `capacitor.config.ts`（appId、appName、webDir）
-- [ ] `pnpm cap add android` 成功
-- [ ] `pnpm build && pnpm cap sync android` 成功
-- [ ] 本地 Android Studio 环境准备说明：需 JDK 21 + Android SDK + 模拟器或真机
+- [x] 安装 Capacitor CLI 与 `@capacitor/android`
+- [x] 创建 `apps/hplayer_android`
+- [x] 配置 `capacitor.config.ts`（appId、appName、webDir）
+- [x] `pnpm cap add android` 成功
+- [x] `pnpm build && pnpm cap sync android` 成功
+- [x] CI 配置 Android SDK 36 自动打包
 
 ### Phase 8.2：路由与构建适配
 
-- [ ] 路由切换为 history 模式
-- [ ] Vite 配置适配 Capacitor 生产构建
-- [ ] Android WebView 可正常加载首页
-- [ ] 返回键行为符合预期
+- [x] 路由切换为 hash 模式（history 模式真机返回键异常后回退）
+- [x] Vite 配置 `base: './'` 适配 Capacitor 生产构建
+- [x] Android WebView 可正常加载首页
+- [x] 返回键行为符合预期
 
 ### Phase 8.3：持久化迁移
 
-- [ ] 抽象 storage 接口
-- [ ] 实现 `storage-capacitor.ts`
-- [ ] 启用 `migrateV1ToV2()`
-- [ ] 测试：添加源 → 杀掉 App → 重启 → 源仍在
+- [x] 抽象 storage 接口
+- [x] 实现 `storage-capacitor.ts`
+- [x] 启用 `migrateV1ToV2()`
+- [x] 测试：添加源 → 杀掉 App → 重启 → 源仍在
 
 ### Phase 8.4：原生体验
 
-- [ ] 状态栏/启动屏/导航栏
-- [ ] 播放页横屏
-- [ ] 返回键适配
-- [ ] 文件系统缓存（可选）
+- [x] 状态栏/启动屏/导航栏
+- [x] 播放页横屏
+- [x] 返回键适配
+- [x] 文件系统缓存（可选）
 
 ### Phase 8.5：网络与 CORS
 
-- [ ] 评估/集成 Capacitor HTTP plugin
-- [ ] 真机测试 XML/JSON 源请求
+- [x] 评估 Capacitor HTTP plugin
+- [x] 真机测试 XML/JSON 源请求
+- [x] 配置 `cleartext` 与 `usesCleartextTraffic` 兼容 http 源
 
 ### Phase 8.6：打包与签名
 
-- [ ] debug APK 构建
-- [ ] release APK 签名
-- [ ] 应用内更新检测
+- [x] debug/release APK 构建（CI 自动完成）
+- [x] release APK 签名（CI 通过 Secrets 注入 keystore）
+- [x] 应用内更新检测
 
 ### Phase 8.7：回归与文档
 
-- [ ] 135 个单元测试全部通过
-- [ ] 真机核心链路回归
-- [ ] 更新 STATE.md 与开发计划状态
+- [x] 141 个单元测试全部通过
+- [x] 真机核心链路回归（用户验证通过）
+- [x] 更新 STATE.md、README.md 与开发计划状态
 
 ---
 
@@ -478,8 +480,16 @@ hplayer/
 
 ---
 
-## 15. 下一步
+## 15. V2.0 完成总结
 
-1. 用户确认 V2 设计方向与范围（已确认采用方案 A）。
-2. 在沙箱执行 Phase 8.1 Task 1–6：Capacitor CLI 安装、`apps/hplayer_android` 创建、`cap add android`、`pnpm build && pnpm cap sync android` 验证。
-3. 沙箱验证 `cap sync` 成功后，将工程代码 push 到仓库，用户在本地 Android Studio 完成 JDK 21 + Android SDK 环境配置、真机调试与 release 签名出包。
+V2.0 已全部完成并通过真机验证：
+
+- Capacitor 8 + Android SDK 36 工程可正常构建 release APK（GitHub Actions 自动签名）。
+- Web 播放器（Artplayer + hls.js）在 Android WebView 下可正常播放 HLS/MP4。
+- 原生播放器插件 `@capgo/capacitor-video-player` 两轮 POC 均真机闪退，V2.0 最终回退到 Web 播放器；原生播放体验优化作为 V2.x 后续方向。
+- 返回键/手势、状态栏、启动屏、横屏、SQLite 持久化、数据导入导出、应用内更新等能力均已实现。
+
+## 16. 下一步
+
+1. 用户下载 GitHub Actions 产出的 `app-release.apk` 进行最终验收。
+2. 根据验收反馈决定是否进入 V2.1（原生播放器稳定化、播放器画面比例控制、后台播放增强等）。

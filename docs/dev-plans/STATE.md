@@ -12,10 +12,10 @@
 | `current_phase` | **P8 V2.0 Capacitor Android（completed）** |
 | `current_agent` | **P8-7** |
 | `last_completed_task` | P8-7:Task 7.3 |
-| `last_commit_hash` | `e3f0081` |
+| `last_commit_hash` | `45a0f7c` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
-| `last_update` | 2026-06-19（P8-7 质量门禁与文档归档完成） |
+| `last_update` | 2026-06-20（V2.0 真机修复完成，文档归档更新） |
 
 ---
 
@@ -166,6 +166,18 @@
   4. **原生播放器 POC 失败**：真机安装 Capacitor 8 构建的 APK 后，点击播放页「测试原生播放器」按钮，`@capgo/capacitor-video-player` 调用 `initPlayer` 仍触发应用闪退，与 v7 现象一致。
   5. **回退到 Web 播放器**：移除 `packages/views/src/player/index.vue` 中原生播放器调试面板、按钮、监听器与初始化逻辑；从 `packages/views`、`apps/hplayer_web`、`apps/hplayer_android` 移除 `@capgo/capacitor-video-player` 依赖；从 `capacitor.build.gradle` 与 `capacitor.settings.gradle` 移除原生模块；Android 端统一使用 `Artplayer + hls.js` Web 播放器。
   6. **状态**：回退后 `pnpm type-check` / `pnpm lint` / `pnpm test` / `pnpm build` / `pnpm sync:android` 全部通过。
+- **2026-06-20 / P8 / 真机测试修复与配置优化**:
+  1. **Android 返回键/手势直接退出应用**：`packages/router/src/index.ts` 从 `createWebHistory()` 切换为 `createWebHashHistory()`；`apps/hplayer_web/src/App.vue` 优化 `@capacitor/app` backButton 监听，优先 `router.back()`，无法回退时返回首页。
+  2. **搜索页播放按钮无响应**：`packages/views/src/search/index.vue` 监听 `@play` 事件，实现 `onPlay` 获取首集并跳转播放页。
+  3. **设置页无法滚动**：`.settings` 添加 `height: 100dvh; overflow-y: auto;`。
+  4. **详情页海报预览**：点击海报打开全局 `ImagePreview`，支持关闭与双指缩放。
+  5. **Capacitor 配置优化**：`capacitor.config.ts` 加 `server.cleartext: true`；`AndroidManifest.xml` 加 `android:usesCleartextTraffic="true"` 与 `ACCESS_NETWORK_STATE`；加 `android.adjustMarginsForEdgeToEdge` 与 `backgroundColor`。
+  6. **Vite 与构建优化**：`apps/hplayer_web/vite.config.ts` 加 `base: './'`；启用 Release R8 压缩并补充 OkHttp ProGuard `-dontwarn` 规则。
+  7. **UI 细节优化**：`index.html` viewport 加 `maximum-scale=1.0`；关键 Popup 加 `lock-scroll`。
+- **2026-06-20 / P8 / 文档归档**:
+  1. 更新 `docs/design/HPlayer-v2.md`：状态改为 completed，Capacitor 版本改为 8.x，路由模式改为 hash，里程碑全部勾选，增加 V2.0 完成总结。
+  2. 更新 `docs/dev-plans/09-phase-8-v2.md` 变更记录。
+  3. 更新 `README.md`：修正技术栈版本、新增 V2.0 真机修复说明与构建注意事项。
 
 ---
 

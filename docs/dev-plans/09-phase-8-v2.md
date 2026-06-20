@@ -804,3 +804,4 @@ git commit -m "docs(P8-7): finalize V2.0 Capacitor Android docs and state"
 | 版本 | 日期 | 变更 |
 | --- | --- | --- |
 | v1.0 | 2026-06-19 | 初始 V2.0 Capacitor Android 开发计划 |
+| v1.1 | 2026-06-20 | 阶段完成；真机测试后回退路由到 hash 模式、修复返回键/原生播放器/搜索播放/设置滚动等问题；升级 Capacitor 7 → 8；更新里程碑为全部完成 |

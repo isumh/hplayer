@@ -12,12 +12,21 @@
 - **本地收藏与历史**：收藏影片、播放历史自动记录，历史条目支持续播（回退 10 秒）。
 - **数据管理**：设置页支持数据导出/导入 JSON，便于备份与迁移。
 - **V2.0 Android 原生能力**：
-  - Capacitor 封装为 Android APK；
+  - Capacitor 8 封装为 Android APK，targetSdk/compileSdk 36；
   - localStorage 迁移至 Capacitor SQLite，解决容量与可靠性问题；
   - 沉浸式状态栏、启动屏、返回键/手势适配；
   - 播放页自动横屏，退出后恢复竖屏；
   - 原生 HTTP 请求绕过 WebView CORS 限制；
-  - 应用内版本更新检测。
+  - 应用内版本更新检测；
+  - GitHub Actions 自动构建并签名 release APK。
+
+### V2.0 真机测试修复要点
+
+- **路由**：最终采用 `createWebHashHistory()`，解决 Android 物理返回键/手势直接退出应用的问题。
+- **构建**：Vite `base: './'`，避免 Capacitor `file://` 协议下静态资源 404。
+- **网络**：`capacitor.config.ts` 与 `AndroidManifest.xml` 开启 cleartext，兼容 http 视频源。
+- **播放器**：两次评估 `@capgo/capacitor-video-player`（v7/v8）均真机闪退，V2.0 回退并统一使用 Web 播放器（Artplayer + hls.js）。
+- **UI**：设置页可滚动、搜索页播放按钮响应、详情页海报预览、Popup 锁定滚动、viewport 禁用缩放。
 - **隐私优先**：无登录、无统计、无追踪，所有配置与数据保存在本地。
 
 ---
@@ -30,7 +39,7 @@
 | 构建 | Vite | ^7.0 |
 | 类型 | TypeScript（`exactOptionalPropertyTypes` 严格模式） | ^5.6 |
 | 状态 | Pinia | ^2.2 |
-| 路由 | vue-router（history 模式） | ^4.4 |
+| 路由 | vue-router（hash 模式，适配 Capacitor） | ^4.4 |
 | UI 组件 | Vant | ^4.9 |
 | 样式 | Tailwind CSS | ^4.0 |
 | 视频 | Artplayer + hls.js | ^5.1 / ^1.5 |
@@ -38,7 +47,7 @@
 | 代码质量 | Biome | 2.4.5 |
 | 测试 | Vitest | ^2.1 |
 | 包管理 | pnpm workspace | 9.0.0 |
-| 移动端壳 | Capacitor | ^7.0 |
+| 移动端壳 | Capacitor | ^8.0 |
 
 ---
 
@@ -103,6 +112,20 @@ pnpm sync:android
 ```
 
 该命令会先确保 `apps/hplayer_web/dist/` 已构建，并将产物复制到 `apps/hplayer_android/android/app/src/main/assets/public/`。
+
+### Android 构建关键配置
+
+V2.0 在 `apps/hplayer_android/` 下已预置以下适配，通常无需手动修改：
+
+| 配置项 | 文件 | 说明 |
+| --- | --- | --- |
+| Vite 相对路径 | `apps/hplayer_web/vite.config.ts` | `base: './'`，避免 `file://` 资源 404 |
+| Hash 路由 | `packages/router/src/index.ts` | `createWebHashHistory()`，适配 Android 返回栈 |
+| Cleartext | `capacitor.config.ts` + `AndroidManifest.xml` | 允许 http 源请求 |
+| Edge-to-edge | `capacitor.config.ts` | `adjustMarginsForEdgeToEdge: true` |
+| Release 混淆 | `android/app/build.gradle` + `proguard-rules.pro` | R8 开启，已补充 OkHttp `-dontwarn` 规则 |
+
+> 本地打包前请确保 JDK 17/21 与 Android SDK（API 36）已正确配置。
 
 ### 本地 Android Studio 打包
 
