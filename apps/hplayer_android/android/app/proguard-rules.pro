@@ -26,3 +26,8 @@
 -keep public class io.liteglue.** { *; }
 -keep public class com.getcapacitor.community.** { *; }
 -keep public class com.capawesome.** { *; }
+
+# OkHttp 可选 TLS 后端，R8 无需警告缺失
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
