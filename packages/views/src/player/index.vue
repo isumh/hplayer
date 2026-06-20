@@ -165,7 +165,7 @@ function setRate(r: Rate) {
 }
 
 // POC: Android 原生播放器入口
-async function initNativePlayer(url: string, title: string, poster: string, startAt?: number) {
+async function initNativePlayer(url: string, startAt?: number) {
   if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
     nativeError.value = `非 Android 原生环境：isNative=${Capacitor.isNativePlatform()} platform=${Capacitor.getPlatform()}`
     return
@@ -205,9 +205,6 @@ async function initNativePlayer(url: string, title: string, poster: string, star
     mode: 'fullscreen',
     url,
     playerId: NATIVE_PLAYER_ID,
-    title,
-    artwork: poster,
-    rate: currentRate.value,
     displayMode: 'landscape',
     showControls: true,
     pipEnabled: false,
@@ -268,7 +265,17 @@ function reopenNative() {
     error.value = '无效播放会话'
     return
   }
-  void initNativePlayer(cur.episode.url, cur.vod.name, cur.vod.pic, cur.startAt)
+  void initNativePlayer(cur.episode.url, cur.startAt)
+}
+
+async function startNativeTest() {
+  const cur = playerStore.current
+  if (!cur?.episode) {
+    error.value = '无效播放会话'
+    return
+  }
+  teardown()
+  await initNativePlayer(cur.episode.url, cur.startAt)
 }
 
 onMounted(async () => {
@@ -280,11 +287,8 @@ onMounted(async () => {
   }
   playingTitle.value = `${cur.vod.name} - ${ep.name}`
   await lockLandscape()
-  if (isAndroidNative) {
-    await initNativePlayer(ep.url, cur.vod.name, cur.vod.pic, cur.startAt)
-  } else {
-    buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
-  }
+  // POC：Android 端默认仍用 Web 播放器，手动触发原生播放器测试，避免自动初始化闪退影响正常播放
+  buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
 })
 
 onBeforeUnmount(() => {
@@ -298,11 +302,7 @@ watch(
   (ep) => {
     const cur = playerStore.current
     if (!ep || !cur?.episode) return
-    if (isAndroidNative) {
-      void initNativePlayer(cur.episode.url, cur.vod.name, cur.vod.pic, cur.startAt)
-    } else {
-      buildPlayer(cur.episode.url, cur.vod.name, cur.vod.pic)
-    }
+    buildPlayer(cur.episode.url, cur.vod.name, cur.vod.pic)
   },
 )
 
@@ -326,22 +326,23 @@ function onBack() {
 <template>
   <div class="player-page" :class="{ 'player-page--native': isAndroidNative }">
     <NavBar v-if="!isAndroidNative" :title="playingTitle || '播放'" @click-left="onBack" />
-    <!-- Android POC：原生播放器已接管，WebView 中只显示调试信息 -->
+    <!-- Android POC：调试面板与原生播放器测试入口 -->
     <div v-if="isAndroidNative" class="native-debug">
       <p class="native-tag">Android 原生播放器（POC）</p>
       <p>平台：isNative={{ Capacitor.isNativePlatform() }} | platform={{ Capacitor.getPlatform() }}</p>
       <p class="status">状态：{{ nativeStatus }}</p>
       <p v-if="lastProgress > 0">已保存进度：{{ lastProgress.toFixed(1) }} 秒</p>
       <p v-if="nativeError" class="native-error">错误：{{ nativeError }}</p>
-      <button class="native-btn" @click="reopenNative">重新打开原生播放器</button>
+      <button v-if="!isNative" class="native-btn" @click="startNativeTest">测试原生播放器</button>
+      <button v-else class="native-btn" @click="reopenNative">重新打开原生播放器</button>
     </div>
-    <div v-else class="art-wrap" ref="containerRef"></div>
+    <div v-if="!isNative" class="art-wrap" ref="containerRef"></div>
 
     <!-- 错误展示 -->
     <div v-if="error" class="error">{{ error }}</div>
 
-    <!-- 播放控制：倍速按钮条（Web 端保留，Android 原生播放器使用自带倍速菜单） -->
-    <div v-if="!isAndroidNative" class="rate-bar" role="group" aria-label="倍速">
+    <!-- 播放控制：倍速按钮条（Web 端保留，原生播放器测试时使用自带倍速菜单） -->
+    <div v-if="!isNative" class="rate-bar" role="group" aria-label="倍速">
       <button
         v-for="r in RATES"
         :key="r"

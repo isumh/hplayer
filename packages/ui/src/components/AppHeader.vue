@@ -40,6 +40,9 @@ function openHistory() {
   padding-top: env(safe-area-inset-top);
   background: var(--van-nav-bar-background);
   border-bottom: 1px solid var(--van-border-color);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  z-index: 10;
 }
 .left { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
 .logo { color: var(--van-primary-color); font-size: 20px; }
