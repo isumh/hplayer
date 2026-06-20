@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@capacitor/core": "^8.0.0",
+    "@capacitor/filesystem": "^8.0.0",
     "@capacitor/screen-orientation": "^8.0.0",
     "@capawesome/capacitor-app-update": "^8.0.0",
     "@capgo/capacitor-video-player": "^8.0.0",

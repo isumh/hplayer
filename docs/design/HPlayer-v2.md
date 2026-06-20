@@ -27,7 +27,7 @@
 
 1. **原生 Android 形态**：将现有 Web 应用封装为 Android APK，保持现有页面结构、交互流程、数据模型不变。
 2. **本地持久化升级**：将 `localStorage` 迁移到 Capacitor SQLite，解决容量限制与数据可靠性问题。
-3. **原生播放体验**：全屏横屏切换；后台音频播放保持与浏览器一致（V2.0 不实现锁屏/通知栏媒体控制）。
+3. **原生播放体验**：Android 端使用 `@capgo/capacitor-video-player` 全屏横屏播放，退出后恢复竖屏（V2.0 不实现锁屏/通知栏媒体控制）。
 4. **原生壳体验**：沉浸式状态栏、启动屏、返回键/手势适配、版本更新检测。
 5. **保持可维护**：Web 代码继续作为单一来源，Android 工程只作为「壳」存在，业务逻辑尽量留在 Web 层。
 
@@ -127,18 +127,18 @@
 | 后台任务 | `@capawesome/capacitor-background-task` | ^8.0.0 | 切后台保活播放（辅助，V2.0 不保证效果） |
 | 震动 | `@capacitor/haptics` | ^8.0.0 | 关键操作反馈 |
 | 分享 | `@capacitor/share` | ^8.0.0 | 分享应用/备份文件 |
-| 原生视频播放 | `@capgo/capacitor-video-player` | ^8.0.0 | 已评估，真机闪退，V2.0 回退到 Web 播放器 |
+| 原生视频播放 | `@capgo/capacitor-video-player` | ^8.0.0 | Android 端实际使用的全屏原生播放器 |
 
 ### 4.3 播放方案
 
-V2.0 分两个阶段：
+V2.0 实际落地方案：
 
-| 阶段 | 方案 | 说明 |
+| 端 | 方案 | 说明 |
 | --- | --- | --- |
-| Phase 8.1 | WebView 内 artplayer + hls.js | 复用 V1.1 全部播放代码，先验证 Android WebView 播放能力 |
-| Phase 8.3+（可选） | 原生 ExoPlayer Bridge | 若 WebView HLS 兼容性不足，再引入原生播放器；设计预留接口 |
+| Web / 桌面浏览器 | WebView 内 Artplayer + hls.js | 复用 V1.1 全部播放代码 |
+| Android | `@capgo/capacitor-video-player` 原生播放器 | 进入播放页强制横屏全屏，退出恢复竖屏；Capacitor 7 → 8 升级后真机播放稳定 |
 
-> V2.0 核心目标是把 Web 应用「装进 Android」，不强制要求第一阶段就替换播放器。原生播放器作为后续增强。
+> 注：早期 POC 中 `@capgo/capacitor-video-player` 在 Capacitor 7 下曾闪退，升级到 Capacitor 8 + Android SDK 36 后问题消失，V2.0 最终采用该原生方案。
 
 ---
 
@@ -303,7 +303,7 @@ Android WebView 同样受 CORS 限制，且无法像浏览器扩展那样绕过�
 ### 9.4 屏幕方向
 
 - 普通页面：跟随系统（竖屏）。
-- 播放页：进入时强制横屏，退出时恢复竖屏。
+- 播放页：进入时锁定横屏并启动 `@capgo/capacitor-video-player` 全屏播放，退出时恢复竖屏。
 
 ### 9.5 后台播放（V2.0 不实现系统控制）
 
@@ -376,7 +376,7 @@ cd apps/hplayer_android/android
 | 首次启动 | Splash 显示 → 迁移 → 首页 |
 | 视频源添加 | 表单提交 → 持久化到 SQLite → 重启后仍在 |
 | 首页浏览 | 分类加载、列表分页、下拉刷新 |
-| 播放 | HLS/MP4 播放、横屏、后台音频（无锁屏控制） |
+| 播放 | HLS/MP4 原生播放器播放、横屏、退出恢复竖屏 |
 | 历史/收藏 | 添加、删除、重启后保留 |
 | 主题切换 | 状态栏图标颜色同步 |
 | 返回键 | 播放页先退出全屏，首页提示退出 |
@@ -472,7 +472,7 @@ hplayer/
 | --- | --- |
 | 沙箱无 Android SDK，无法直接出 APK | 采用方案 A：沙箱完成工程初始化与 `cap sync`，APK 构建/签名/真机调试在本地 Android Studio 完成 |
 | 本地 Java 25 与 Android Gradle Plugin 不兼容 | 本地安装 JDK 21；沙箱侧不处理 APK 构建 |
-| WebView HLS 播放失败 | 先验证 WebView 能力，再决定是否引入 ExoPlayer 原生桥接 |
+| 原生播放器兼容性 | 已采用 `@capgo/capacitor-video-player`，V2.1 继续评估横竖屏、比例、后台播放等增强 |
 | 第三方源 CORS 在 WebView 仍失败 | 集成 Capacitor HTTP plugin 或提示用户源站不支持 |
 | SQLite 迁移失败导致数据丢失 | 迁移前备份 localStorage；幂等设计；失败保留原数据 |
 | 后台播放被系统杀 | V2.0 不保证；作为 V2.x 增强项实现 |
@@ -485,11 +485,11 @@ hplayer/
 V2.0 已全部完成并通过真机验证：
 
 - Capacitor 8 + Android SDK 36 工程可正常构建 release APK（GitHub Actions 自动签名）。
-- Web 播放器（Artplayer + hls.js）在 Android WebView 下可正常播放 HLS/MP4。
-- 原生播放器插件 `@capgo/capacitor-video-player` 两轮 POC 均真机闪退，V2.0 最终回退到 Web 播放器；原生播放体验优化作为 V2.x 后续方向。
-- 返回键/手势、状态栏、启动屏、横屏、SQLite 持久化、数据导入导出、应用内更新等能力均已实现。
+- Android 端采用 `@capgo/capacitor-video-player` 原生播放器，进入播放页强制横屏全屏，退出恢复竖屏，HLS/MP4 播放稳定。
+- Web / 桌面浏览器端继续沿用 Artplayer + hls.js Web 播放器。
+- 返回键/手势、状态栏、启动屏、横屏、SQLite 持久化、应用内更新等能力均已实现。
 
 ## 16. 下一步
 
-1. 用户下载 GitHub Actions 产出的 `app-release.apk` 进行最终验收。
-2. 根据验收反馈决定是否进入 V2.1（原生播放器稳定化、播放器画面比例控制、后台播放增强等）。
+1. V2.0 已通过用户验收，进入 V2.1 优化阶段。
+2. V2.1 重点方向：原生播放器横竖屏自动切换、画面比例控制、后台播放、锁屏与防息屏、图片加载与性能优化、数据导出导入可用性提升。

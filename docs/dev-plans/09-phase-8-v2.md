@@ -805,3 +805,4 @@ git commit -m "docs(P8-7): finalize V2.0 Capacitor Android docs and state"
 | --- | --- | --- |
 | v1.0 | 2026-06-19 | 初始 V2.0 Capacitor Android 开发计划 |
 | v1.1 | 2026-06-20 | 阶段完成；真机测试后回退路由到 hash 模式、修复返回键/原生播放器/搜索播放/设置滚动等问题；升级 Capacitor 7 → 8；更新里程碑为全部完成 |
+| v1.2 | 2026-06-20 | V2.1 启动；勘误：实际 Android 播放方案为 `@capgo/capacitor-video-player` 原生播放器，修正文档中「回退到 Web 播放器」的不一致描述 |

@@ -15,7 +15,7 @@
   - Capacitor 8 封装为 Android APK，targetSdk/compileSdk 36；
   - localStorage 迁移至 Capacitor SQLite，解决容量与可靠性问题；
   - 沉浸式状态栏、启动屏、返回键/手势适配；
-  - 播放页自动横屏，退出后恢复竖屏；
+  - Android 端使用 `@capgo/capacitor-video-player` 原生播放器，进入播放页自动横屏全屏，退出后恢复竖屏；
   - 原生 HTTP 请求绕过 WebView CORS 限制；
   - 应用内版本更新检测；
   - GitHub Actions 自动构建并签名 release APK。
@@ -25,7 +25,7 @@
 - **路由**：最终采用 `createWebHashHistory()`，解决 Android 物理返回键/手势直接退出应用的问题。
 - **构建**：Vite `base: './'`，避免 Capacitor `file://` 协议下静态资源 404。
 - **网络**：`capacitor.config.ts` 与 `AndroidManifest.xml` 开启 cleartext，兼容 http 视频源。
-- **播放器**：两次评估 `@capgo/capacitor-video-player`（v7/v8）均真机闪退，V2.0 回退并统一使用 Web 播放器（Artplayer + hls.js）。
+- **播放器**：Android 端使用 `@capgo/capacitor-video-player` 原生全屏播放器；Capacitor 7 升级至 8 后播放稳定，HLS/MP4 真机验证通过。
 - **UI**：设置页可滚动、搜索页播放按钮响应、详情页海报预览、Popup 锁定滚动、viewport 禁用缩放。
 - **隐私优先**：无登录、无统计、无追踪，所有配置与数据保存在本地。
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Capacitor } from '@capacitor/core'
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem'
 import { AppUpdate, AppUpdateAvailability } from '@capawesome/capacitor-app-update'
 import { exportBackup, importBackup, useSettingsStore, useSourceStore } from '@hplayer/core'
 import {
@@ -119,16 +120,85 @@ function onDeviceConfirm({ selectedValues }: { selectedValues: (string | number)
   showDevicePicker.value = false
 }
 
-function exportData() {
+const BACKUP_DIR = 'hplayer'
+const BACKUP_FILE_PREFIX = 'hplayer-backup'
+
+function backupFileName(): string {
+  return `${BACKUP_FILE_PREFIX}-${new Date().toISOString().slice(0, 10)}.json`
+}
+
+async function ensureBackupDir(dir: Directory, path: string): Promise<void> {
+  try {
+    await Filesystem.readdir({ directory: dir, path })
+  } catch {
+    await Filesystem.mkdir({ directory: dir, path, recursive: true })
+  }
+}
+
+async function exportDataNative() {
+  const raw = exportBackup()
+  const fileName = backupFileName()
+
+  // 请求公共存储读写权限（Android 6+ 需要运行时授权）
+  try {
+    const perm = await Filesystem.requestPermissions()
+    if (perm.publicStorage !== 'granted') {
+      showToast('需要存储权限才能导出备份')
+      return
+    }
+  } catch (err) {
+    console.warn('[exportDataNative] requestPermissions failed:', err)
+  }
+
+  // 优先尝试保存到 Downloads/hplayer/，失败则回退到 Documents/hplayer/
+  const strategies: { dir: Directory; path: string; label: string }[] = [
+    {
+      dir: Directory.ExternalStorage,
+      path: `Download/${BACKUP_DIR}/${fileName}`,
+      label: 'Download/hplayer',
+    },
+    { dir: Directory.Documents, path: `${BACKUP_DIR}/${fileName}`, label: 'Documents/hplayer' },
+  ]
+
+  for (const { dir, path, label } of strategies) {
+    try {
+      const dirPath = path.slice(0, path.lastIndexOf('/'))
+      await ensureBackupDir(dir, dirPath)
+      const result = await Filesystem.writeFile({
+        directory: dir,
+        path,
+        data: raw,
+        encoding: Encoding.UTF8,
+      })
+      showToast(`已导出到 ${label}/${fileName}`)
+      console.log('[exportDataNative] uri:', result.uri)
+      return
+    } catch (err) {
+      console.warn(`[exportDataNative] failed to write to ${label}:`, err)
+    }
+  }
+
+  showToast('导出失败，请检查存储权限')
+}
+
+function exportDataWeb() {
   const raw = exportBackup()
   const blob = new Blob([raw], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `hplayer-backup-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = backupFileName()
   a.click()
   URL.revokeObjectURL(url)
   showToast('导出成功')
+}
+
+async function exportData() {
+  if (Capacitor.isNativePlatform()) {
+    await exportDataNative()
+  } else {
+    exportDataWeb()
+  }
 }
 
 function triggerImport() {
@@ -138,7 +208,15 @@ function triggerImport() {
 function handleImport(e: Event) {
   const target = e.target as HTMLInputElement
   const file = target.files?.[0]
-  if (!file) return
+  if (!file) {
+    showToast('未选择文件')
+    return
+  }
+  if (!file.name.endsWith('.json')) {
+    showToast('请选择 .json 备份文件')
+    target.value = ''
+    return
+  }
   const reader = new FileReader()
   reader.onload = (ev) => {
     const raw = ev.target?.result as string | undefined

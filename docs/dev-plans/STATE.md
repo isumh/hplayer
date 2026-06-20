@@ -178,6 +178,9 @@
   1. 更新 `docs/design/HPlayer-v2.md`：状态改为 completed，Capacitor 版本改为 8.x，路由模式改为 hash，里程碑全部勾选，增加 V2.0 完成总结。
   2. 更新 `docs/dev-plans/09-phase-8-v2.md` 变更记录。
   3. 更新 `README.md`：修正技术栈版本、新增 V2.0 真机修复说明与构建注意事项。
+- **2026-06-20 / P8 / V2.1 启动与文档勘误**:
+  1. 经代码确认，`packages/views/src/player/index.vue` 在 Android 原生环境下实际调用 `@capgo/capacitor-video-player` 原生播放器，而非 Web 播放器。此前 V2.0 文档中「回退到 Web 播放器」的描述与代码不一致，已修正 `docs/design/HPlayer-v2.md`、`docs/dev-plans/STATE.md`、`README.md` 中相关表述。
+  2. 明确 V2.1 优先任务：设置页数据导出导入可用性修复。
 
 ---
 
