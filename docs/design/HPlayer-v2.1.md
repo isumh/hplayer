@@ -26,6 +26,7 @@
 2. **修复海报图片不显示**：针对部分源返回 `http://` 图片但实际需要 `https://` 的问题，提供按源配置的协议强制替换能力。
 3. **图片列表性能优化**：长列表页面引入虚拟滚动，降低大量图片 DOM 的渲染压力；统一图片错误降级占位。
 4. **原生播放器增强**：提升稳定性、支持画面比例（填充/适应）切换、播放时防止屏幕自动熄灭。
+5. **兼容无分类视频源**：部分 Apple CMS 源不返回 `class` 分类字段，首页应隐藏分类栏，使用默认 `categoryId = 0` 直接加载全部视频列表并支持滚动分页。
 
 ---
 
@@ -43,6 +44,7 @@
 | 6 | 原生播放器稳定化 | `packages/views/src/player/index.vue` |
 | 7 | 原生播放器画面比例切换 | `packages/views/src/player/index.vue` |
 | 8 | 播放时防止息屏 | `packages/views/src/player/index.vue`、`@capacitor-community/keep-awake` |
+| 9 | 无分类视频源兼容 | `packages/views/src/home/index.vue` |
 
 ### 2.2 不包含
 
@@ -191,6 +193,69 @@ async function switchNativePlayerOrientation(next: 'landscape' | 'portrait') {
 
 ---
 
+### 3.5 兼容无分类视频源
+
+#### 背景
+
+部分 Apple CMS 视频源（尤其是较老的 XML/JSON 源）不返回 `class` 分类字段，导致 `getCategories()` 返回空数组。当前首页逻辑要求必须先选中分类才能加载视频列表，因此这类源会一直显示骨架屏，无法展示任何内容。
+
+#### 方案
+
+1. **适配器行为不变**：`T1JsonAdapter.getCategories()` / `T0XmlAdapter.getCategories()` 继续按现有逻辑解析 `class` 字段，缺省时返回空数组。
+2. **首页逻辑调整**：
+   - `home/index.vue` 的 `loadCategories()` 在获取到空数组时，不再报错，而是进入「无分类模式」。
+   - 设置一个默认分类对象：
+     ```ts
+     const DEFAULT_CATEGORY: Category = { id: 0, name: '全部', sourceId: '' }
+     ```
+   - 将 `activeCategory` 设为默认分类，并立即调用 `loadList(true)` 加载全部视频。
+3. **UI 表现**：
+   - 分类栏不渲染（`categories.length === 0`）。
+   - `AppHeader` 的 `category-name` 显示为「全部」。
+   - 视频列表区域正常显示并支持滚动分页。
+4. **分页与刷新**：无分类模式下的分页逻辑与有分类模式完全一致，仅 `categoryId` 固定为 `0`。
+
+#### 关键代码结构
+
+```ts
+async function loadCategories() {
+  if (!sourceStore.activeSource) {
+    error.value = null
+    return
+  }
+  error.value = null
+  try {
+    const list = await adapterProxy.getCategories(sourceStore.activeSource)
+    categories.value = list
+    if (list.length) {
+      // 有分类：按原逻辑处理
+      if (activeCategoryId.value == null) {
+        const first = list[0]
+        if (first) {
+          activeCategoryId.value = first.id
+          activeCategory.value = first
+          await loadList(true)
+        }
+      } else {
+        const found = list.find((c) => c.id === activeCategoryId.value)
+        if (found) activeCategory.value = found
+      }
+    } else {
+      // 无分类：使用默认 categoryId = 0 加载全部
+      activeCategory.value = { id: 0, name: '全部', sourceId: sourceStore.activeSource.id }
+      activeCategoryId.value = 0
+      await loadList(true)
+    }
+  } catch (err) {
+    console.error(err)
+    error.value = '加载分类失败'
+    showToast('加载失败，请检查网络或视频源')
+  }
+}
+```
+
+---
+
 ## 4. 工程结构变化
 
 ```text
@@ -211,7 +276,7 @@ hplayer/
 │       └── src/
 │           ├── player/index.vue       # 修改：横竖屏、比例、息屏
 │           ├── detail/index.vue       # 修改：海报 normalize + 错误占位
-│           ├── home/index.vue         # 修改：接入虚拟滚动 VodList
+│           ├── home/index.vue         # 修改：接入虚拟滚动 VodList、无分类源兼容
 │           ├── search/index.vue       # 修改：接入虚拟滚动 VodList
 │           ├── favorite/index.vue     # 修改：接入虚拟滚动 VodList
 │           └── history/index.vue      # 修改：接入虚拟滚动 VodList
@@ -254,12 +319,19 @@ hplayer/
 - [ ] **Task 4.3**：真机验证稳定性、比例、息屏。
 - [ ] **Task 4.4**：commit。
 
-### Phase 9.5：文档与回归
+### Phase 9.5：无分类视频源兼容
 
-- [ ] **Task 5.1**：更新 `STATE.md` 与 `README.md`。
-- [ ] **Task 5.2**：全量质量门禁。
-- [ ] **Task 5.3**：本地真机回归。
+- [ ] **Task 5.1**：确认 `T1JsonAdapter` / `T0XmlAdapter` 在缺 `class` 时均返回空数组（当前行为已符合）。
+- [ ] **Task 5.2**：修改 `home/index.vue`：`categories` 为空时设置默认 `{ id: 0, name: '全部' }` 并调用 `loadList(true)`。
+- [ ] **Task 5.3**：验证有分类源和无分类源的首页行为。
 - [ ] **Task 5.4**：commit。
+
+### Phase 9.6：文档与回归
+
+- [ ] **Task 6.1**：更新 `STATE.md` 与 `README.md`。
+- [ ] **Task 6.2**：全量质量门禁。
+- [ ] **Task 6.3**：本地真机回归。
+- [ ] **Task 6.4**：commit。
 
 ---
 
@@ -280,6 +352,8 @@ hplayer/
 | 长列表滚动 | 首页/搜索大量条目滚动流畅，无卡顿 |
 | 播放不息屏 | 播放页超过系统息屏时间仍保持亮屏 |
 | 退出播放页 | 恢复竖屏、恢复系统默认息屏行为 |
+| 无分类源首页 | 不显示分类栏，直接加载全部视频列表并支持滚动分页 |
+| 有分类源首页 | 分类栏正常显示，切换分类加载对应列表 |
 
 ---
 
@@ -292,6 +366,7 @@ hplayer/
 | 虚拟滚动导致列表项高度不一致 | 强制 `VodCard` 封面使用固定宽高比，列表项高度可预估 |
 | 图片 https 替换后仍失败 | 增加错误占位图，并在日志中记录原始 URL 便于后续分析 |
 | keep-awake 插件与某些 ROM 不兼容 | 播放页退出时务必调用 `allowSleep()`，避免全局影响 |
+| 无分类源 `categoryId = 0` 不被源站识别 | 若某源站 `t=0` 返回空，可后续增加「默认分类 ID」按源配置项作为 fallback |
 
 ---
 
@@ -300,3 +375,4 @@ hplayer/
 | 版本 | 日期 | 变更 |
 | --- | --- | --- |
 | v1.0 | 2026-06-20 | 初始 V2.1 Android 体验优化设计文档 |
+| v1.1 | 2026-06-20 | 新增「兼容无分类视频源」需求：首页无分类时隐藏分类栏，使用 categoryId = 0 直接加载全部视频列表 |
