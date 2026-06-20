@@ -9,13 +9,13 @@
 
 | 字段 | 值 |
 | --- | --- |
-| `current_phase` | **P8 V2.0 Capacitor Android（completed）** |
-| `current_agent` | **P8-7** |
+| `current_phase` | **P9 V2.1 Android 体验优化（in_progress）** |
+| `current_agent` | **P9-1** |
 | `last_completed_task` | P8-7:Task 7.3 |
-| `last_commit_hash` | `45a0f7c` |
+| `last_commit_hash` | `ff74262` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
-| `last_update` | 2026-06-20（V2.0 真机修复完成，文档归档更新） |
+| `last_update` | 2026-06-20（V2.1 设计文档完成，进入 P9 实施） |
 
 ---
 
@@ -48,6 +48,16 @@
 - 设计文档：[docs/design/HPlayer-v2.md](../design/HPlayer-v2.md)
 - 开发计划：[docs/dev-plans/09-phase-8-v2.md](09-phase-8-v2.md)
 - 状态：completed，P8-1 / P8-2 / P8-3 / P8-4 / P8-5 / P8-6 / P8-7 全部完成
+
+## V2.1 计划入口
+
+- 设计文档：[docs/design/HPlayer-v2.1.md](../design/HPlayer-v2.1.md)
+- 状态：in_progress，P9-1 待开始
+- 关键决策：
+  - 横竖屏切换采用「自动检测 + 手动按钮」。
+  - 图片协议替换采用「按源配置 `forceHttpsImage` 开关」。
+  - 图片列表性能优化采用「自研虚拟滚动 + 图片错误降级」。
+  - 原生播放器增强仅做「稳定化、画面比例切换、防止息屏」，不做后台播放与锁屏控制。
 
 ---
 
@@ -181,6 +191,9 @@
 - **2026-06-20 / P8 / V2.1 启动与文档勘误**:
   1. 经代码确认，`packages/views/src/player/index.vue` 在 Android 原生环境下实际调用 `@capgo/capacitor-video-player` 原生播放器，而非 Web 播放器。此前 V2.0 文档中「回退到 Web 播放器」的描述与代码不一致，已修正 `docs/design/HPlayer-v2.md`、`docs/dev-plans/STATE.md`、`README.md` 中相关表述。
   2. 明确 V2.1 优先任务：设置页数据导出导入可用性修复。
+- **2026-06-20 / P9 / V2.1 设计定稿**:
+  1. 创建 `docs/design/HPlayer-v2.1.md`，明确四大优化方向：横竖屏自动切换、图片 http → https 按源配置、图片列表虚拟滚动、原生播放器稳定化/比例/息屏。
+  2. 更新 `STATE.md`：`current_phase` 切到 P9 V2.1，记录关键决策与计划入口。
 
 ---
 
