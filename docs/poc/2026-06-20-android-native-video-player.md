@@ -118,10 +118,12 @@ pnpm sync:android
 
 ### 总体结论
 
-（待测试完成后填写）
+**POC 失败。** `@capgo/capacitor-video-player@7.0.0` 在 Capacitor 7.x + 测试真机环境下，调用 `initPlayer` 即触发原生层崩溃，无法完成基础播放验证。
 
 ---
 
 ## 8. 后续建议
 
-（待测试完成后填写：是否正式接入、是否需要升级 Capacitor 8、是否需要保留 Web 端双方案等）
+1. **短期**：保持 Web 端 `Artplayer + hls.js` 播放方案，移除或隐藏 Android 原生播放器测试入口。
+2. **中期**：如仍希望使用原生播放，可尝试升级到 **Capacitor 8 + `@capgo/capacitor-video-player` v8.x**（v8 为 actively maintained）。
+3. **替代方案**：调研其他 Capacitor 视频播放插件，例如 `@parenta/capacitor-video-player`（声明支持 Capacitor 7）或基于 WebView 的自定义全屏播放器。
