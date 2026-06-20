@@ -27,7 +27,7 @@ function pick(id: string) {
     <span class="name">{{ displayText }}</span>
     <span class="arrow">▾</span>
   </div>
-  <Popup v-model:show="showPicker" position="top" round :style="{ background: 'var(--van-background)' }">
+  <Popup v-model:show="showPicker" class="source-popup" position="top" round :style="{ background: 'var(--van-background)' }">
     <CellGroup>
       <Cell
         v-for="s in sources"
@@ -53,4 +53,8 @@ function pick(id: string) {
 }
 .name { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .arrow { font-size: 12px; color: var(--van-text-color-2); }
+.source-popup {
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+}
 </style>

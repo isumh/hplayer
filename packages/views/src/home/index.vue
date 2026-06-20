@@ -212,12 +212,13 @@ watch(
 .home {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
   height: 100dvh;
   overflow: hidden;
 }
 .home-content {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
 }

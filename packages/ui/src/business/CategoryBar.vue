@@ -130,6 +130,7 @@ onBeforeUnmount(() => {
   touch-action: pan-x;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  flex-shrink: 0;
 }
 .cat-bar::-webkit-scrollbar { display: none; }
 

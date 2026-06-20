@@ -12,6 +12,6 @@ import { TabBar } from '@hplayer/ui'
 </template>
 
 <style scoped>
-.tab-layout { display: flex; flex-direction: column; height: 100%; height: 100dvh; }
-.content { flex: 1; overflow: hidden; position: relative; }
+.tab-layout { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+.content { flex: 1 1 auto; min-height: 0; overflow: hidden; position: relative; }
 </style>
