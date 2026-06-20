@@ -121,3 +121,14 @@ onBeforeUnmount(() => {
     @closed="resetWheelScale"
   />
 </template>
+
+<style>
+/* 确保原生与 Web 端路由页面都能基于视口高度使用 flex 布局 */
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+</style>

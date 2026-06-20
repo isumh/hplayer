@@ -31,7 +31,9 @@ const playingTitle = ref('')
 const isNative = ref(false)
 const nativeStatus = ref('未启动')
 const lastProgress = ref(0)
+const nativeError = ref<string | null>(null)
 const NATIVE_PLAYER_ID = 'hplayerPocNative'
+const isAndroidNative = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android'
 // 插件类型定义未暴露监听器方法，通过 Capacitor Plugin 类型断言
 const nativeVideoPlayer = VideoPlayer as unknown as Plugin & typeof VideoPlayer
 
@@ -164,13 +166,17 @@ function setRate(r: Rate) {
 
 // POC: Android 原生播放器入口
 async function initNativePlayer(url: string, title: string, poster: string, startAt?: number) {
-  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') return
+  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
+    nativeError.value = `非 Android 原生环境：isNative=${Capacitor.isNativePlatform()} platform=${Capacitor.getPlatform()}`
+    return
+  }
   if (!isValidVideoUrl(url)) {
     error.value = '不安全的播放地址'
     return
   }
   isNative.value = true
   nativeStatus.value = '正在启动原生播放器...'
+  nativeError.value = null
   lastProgress.value = 0
 
   // 清理旧监听，避免重复
@@ -224,7 +230,9 @@ async function initNativePlayer(url: string, title: string, poster: string, star
       })
     }
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '原生播放器初始化异常'
+    const msg = e instanceof Error ? e.message : '原生播放器初始化异常'
+    error.value = msg
+    nativeError.value = msg
     isNative.value = false
   }
 }
@@ -272,7 +280,7 @@ onMounted(async () => {
   }
   playingTitle.value = `${cur.vod.name} - ${ep.name}`
   await lockLandscape()
-  if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+  if (isAndroidNative) {
     await initNativePlayer(ep.url, cur.vod.name, cur.vod.pic, cur.startAt)
   } else {
     buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
@@ -290,7 +298,7 @@ watch(
   (ep) => {
     const cur = playerStore.current
     if (!ep || !cur?.episode) return
-    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+    if (isAndroidNative) {
       void initNativePlayer(cur.episode.url, cur.vod.name, cur.vod.pic, cur.startAt)
     } else {
       buildPlayer(cur.episode.url, cur.vod.name, cur.vod.pic)
@@ -316,13 +324,15 @@ function onBack() {
 </script>
 
 <template>
-  <div class="player-page">
-    <NavBar :title="playingTitle || '播放'" @click-left="onBack" />
+  <div class="player-page" :class="{ 'player-page--native': isAndroidNative }">
+    <NavBar v-if="!isAndroidNative" :title="playingTitle || '播放'" @click-left="onBack" />
     <!-- Android POC：原生播放器已接管，WebView 中只显示调试信息 -->
-    <div v-if="isNative" class="native-debug">
-      <p>当前使用 Android 原生播放器（POC）</p>
+    <div v-if="isAndroidNative" class="native-debug">
+      <p class="native-tag">Android 原生播放器（POC）</p>
+      <p>平台：isNative={{ Capacitor.isNativePlatform() }} | platform={{ Capacitor.getPlatform() }}</p>
       <p class="status">状态：{{ nativeStatus }}</p>
       <p v-if="lastProgress > 0">已保存进度：{{ lastProgress.toFixed(1) }} 秒</p>
+      <p v-if="nativeError" class="native-error">错误：{{ nativeError }}</p>
       <button class="native-btn" @click="reopenNative">重新打开原生播放器</button>
     </div>
     <div v-else class="art-wrap" ref="containerRef"></div>
@@ -330,8 +340,8 @@ function onBack() {
     <!-- 错误展示 -->
     <div v-if="error" class="error">{{ error }}</div>
 
-    <!-- 播放控制：倍速按钮条（位于播放器下方，黑色背景） -->
-    <div v-else class="rate-bar" role="group" aria-label="倍速">
+    <!-- 播放控制：倍速按钮条（Web 端保留，Android 原生播放器使用自带倍速菜单） -->
+    <div v-if="!isAndroidNative" class="rate-bar" role="group" aria-label="倍速">
       <button
         v-for="r in RATES"
         :key="r"
@@ -354,6 +364,10 @@ function onBack() {
   min-height: 100vh;
   background: black;
 }
+.player-page--native {
+  padding-top: 0;
+  min-height: 100vh;
+}
 .art-wrap {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -370,6 +384,10 @@ function onBack() {
   color: var(--van-primary-color);
   font-weight: 600;
   margin: 12px 0;
+}
+.native-debug .native-error {
+  color: #ff4d4f;
+  margin-top: 12px;
 }
 .native-btn {
   margin-top: 16px;
