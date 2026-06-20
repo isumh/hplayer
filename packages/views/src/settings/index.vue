@@ -211,7 +211,7 @@ function handleImport(e: Event) {
         placeholder="点击选择主题"
         @click="showThemePicker = true"
       />
-      <Popup v-model:show="showThemePicker" destroy-on-close position="bottom">
+      <Popup v-model:show="showThemePicker" destroy-on-close position="bottom" lock-scroll>
         <Picker
           :columns="themeColumns"
           :model-value="themePickerValue"
@@ -230,7 +230,7 @@ function handleImport(e: Event) {
         placeholder="点击选择设备类型"
         @click="showDevicePicker = true"
       />
-      <Popup v-model:show="showDevicePicker" destroy-on-close position="bottom">
+      <Popup v-model:show="showDevicePicker" destroy-on-close position="bottom" lock-scroll>
         <Picker
           :columns="deviceColumns"
           :model-value="devicePickerValue"
@@ -263,6 +263,10 @@ function handleImport(e: Event) {
   padding-top: 46px;
   padding-top: calc(46px + constant(safe-area-inset-top));
   padding-top: calc(46px + env(safe-area-inset-top));
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .section { margin-bottom: 16px; }
 .section-title { padding: 8px 16px; font-size: 12px; color: var(--van-text-color-2); }

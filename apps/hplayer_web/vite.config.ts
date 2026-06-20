@@ -8,6 +8,8 @@ const devProxy = process.env.http_proxy || process.env.HTTP_PROXY
 const proxyAgent = devProxy ? new HttpProxyAgent(devProxy) : undefined
 
 export default defineConfig({
+  // Capacitor Android 使用 file:// 协议加载静态资源，相对路径可避免 404 白屏
+  base: './',
   plugins: [vue()],
   resolve: {
     alias: {

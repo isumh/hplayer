@@ -201,7 +201,7 @@ async function initNativePlayer(url: string, startAt?: number) {
     lastProgress.value = evt.currentTime ?? 0
     await persistNativeProgress(evt.currentTime)
     isNative.value = false
-    await restorePortraitAndGoHome()
+    await restorePortraitAndGoBack()
   })
 
   const options: capVideoPlayerOptions = {
@@ -261,17 +261,6 @@ function cleanupNativePlayer() {
   void nativeVideoPlayer.removeAllListeners()
 }
 
-async function startNativeTest() {
-  const cur = playerStore.current
-  if (!cur?.episode) {
-    error.value = '无效播放会话'
-    return
-  }
-  teardown()
-  await lockLandscape()
-  await initNativePlayer(cur.episode.url, cur.startAt)
-}
-
 async function lockLandscape() {
   if (!Capacitor.isNativePlatform()) return
   await ScreenOrientation.lock({ orientation: 'landscape' })
@@ -282,14 +271,15 @@ async function unlockOrientation() {
   await ScreenOrientation.unlock()
 }
 
-async function restorePortraitAndGoHome() {
+async function restorePortraitAndGoBack() {
   if (!Capacitor.isNativePlatform()) return
   try {
     await ScreenOrientation.lock({ orientation: 'portrait' })
   } catch {
     await unlockOrientation()
   }
-  void router.replace('/home')
+  if (window.history.length > 1) router.back()
+  else router.replace('/home')
 }
 
 onMounted(async () => {
@@ -300,14 +290,18 @@ onMounted(async () => {
     return
   }
   playingTitle.value = `${cur.vod.name} - ${ep.name}`
-  // Android 原生环境默认仍用 Web 播放器，避免自动初始化闪退影响正常播放
-  buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
+  if (isAndroidNative) {
+    teardown()
+    await lockLandscape()
+    await initNativePlayer(ep.url, cur.startAt)
+  } else {
+    buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
+  }
 })
 
 onBeforeUnmount(() => {
   teardown()
   cleanupNativePlayer()
-  void restorePortraitAndGoHome()
 })
 
 watch(
@@ -322,7 +316,7 @@ watch(
 async function onBack() {
   persistProgress()
   if (isNative.value) {
-    await restorePortraitAndGoHome()
+    await restorePortraitAndGoBack()
     return
   }
   if (window.history.length > 1) router.back()
@@ -335,25 +329,22 @@ async function onBack() {
     <!-- 原生播放器宿主 DOM，满足 playerId 必须对应真实 DOM 的要求 -->
     <div v-if="isAndroidNative" id="native-player-host" ref="nativeHostRef" class="native-host"></div>
 
-    <NavBar v-if="!isNative" :title="playingTitle || '播放'" @click-left="onBack" />
+    <NavBar v-if="!isAndroidNative" :title="playingTitle || '播放'" @click-left="onBack" />
 
-    <!-- Android 原生播放器调试入口 -->
+    <!-- Android 原生环境：自动启动原生播放器，此处仅显示启动状态/错误 -->
     <div v-if="isAndroidNative" class="native-debug">
-      <p class="native-tag">Android 原生播放器（POC）</p>
-      <p>平台：isNative={{ Capacitor.isNativePlatform() }} | platform={{ Capacitor.getPlatform() }}</p>
-      <p class="status">状态：{{ nativeStatus }}</p>
-      <p v-if="lastProgress > 0">已保存进度：{{ lastProgress.toFixed(1) }} 秒</p>
+      <p class="native-tag">正在启动原生播放器</p>
+      <p class="status">{{ nativeStatus }}</p>
       <p v-if="nativeError" class="native-error">错误：{{ nativeError }}</p>
-      <button class="native-btn" @click="startNativeTest">测试原生播放器</button>
     </div>
 
-    <div v-if="!isNative" class="art-wrap" ref="containerRef"></div>
+    <div v-if="!isAndroidNative" class="art-wrap" ref="containerRef"></div>
 
     <!-- 错误展示 -->
     <div v-if="error" class="error">{{ error }}</div>
 
     <!-- 播放控制：倍速按钮条 -->
-    <div v-if="!isNative" class="rate-bar" role="group" aria-label="倍速">
+    <div v-if="!isAndroidNative" class="rate-bar" role="group" aria-label="倍速">
       <button
         v-for="r in RATES"
         :key="r"

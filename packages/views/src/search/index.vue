@@ -2,8 +2,10 @@
 import {
   adapterProxy,
   aggregateSearch,
+  usePlayerStore,
   useSearchHistoryStore,
   useSourceStore,
+  type VodDetail,
   type VodItem,
 } from '@hplayer/core'
 import { EmptyState, SearchBar, SearchHistory, SearchResultList } from '@hplayer/ui'
@@ -14,6 +16,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const sourceStore = useSourceStore()
 const searchHistoryStore = useSearchHistoryStore()
+const playerStore = usePlayerStore()
 
 const keyword = ref('')
 const mode = ref<'single' | 'aggregate'>('single')
@@ -85,6 +88,32 @@ function goDetail(it: VodItem) {
   router.push({ path: `/detail/${it.id}`, query: { sourceId: it.sourceId } })
 }
 
+// ▶ 直接播放：按 item.sourceId 找到对应视频源并取首集，支持单源/聚合搜索
+async function onPlay(it: VodItem) {
+  const source = sourceStore.list.find((s) => s.id === it.sourceId && s.enabled)
+  if (!source) {
+    showToast('未找到该视频对应的源')
+    return
+  }
+  showToast({ type: 'loading', message: '加载中...', duration: 0, forbidClick: true })
+  try {
+    const detail: VodDetail = await adapterProxy.getDetail(source, it.id)
+    const firstLine = detail.playFrom[0]
+    const firstEp = firstLine ? detail.playList[firstLine.name]?.[0] : undefined
+    if (!firstEp) {
+      showToast('没有可播放的剧集')
+      return
+    }
+    playerStore.setCurrent({ vod: detail, sourceId: source.id, episode: firstEp })
+    router.push(`/player/${it.id}`)
+  } catch (err) {
+    console.error(err)
+    showToast('加载失败，请重试')
+  } finally {
+    closeToast()
+  }
+}
+
 watch(mode, () => {
   if (keyword.value) doSearch(keyword.value)
 })
@@ -106,6 +135,7 @@ watch(mode, () => {
         @load="() => loadResults(keyword)"
         @refresh="() => loadResults(keyword, true)"
         @select="goDetail"
+        @play="onPlay"
       />
       <EmptyState v-else-if="searched" text="无搜索结果" />
     </div>

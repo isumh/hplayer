@@ -33,6 +33,7 @@ function pick(id: string) {
     class="source-popup"
     position="center"
     round
+    lock-scroll
     :style="{ background: 'var(--van-background)' }"
   >
     <CellGroup>

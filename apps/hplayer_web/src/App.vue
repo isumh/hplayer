@@ -69,18 +69,22 @@ async function setupBackButton() {
   if (!Capacitor.isNativePlatform()) return
   backButtonListener = await App.addListener('backButton', ({ canGoBack }) => {
     const currentPath = router.currentRoute.value.path
-    // 播放页优先退出播放
+    // 播放页优先触发路由返回（页面 unmount 时会清理原生播放器）
     if (currentPath.startsWith('/player')) {
       router.back()
       return
     }
-    // 非首页且存在可后退历史则返回上一页
-    if (currentPath !== '/home' && canGoBack) {
-      router.back()
+    // 首页按返回键退出应用
+    if (currentPath === '/home' || currentPath === '/') {
+      void App.exitApp()
       return
     }
-    // 首页按返回键退出应用
-    void App.exitApp()
+    // 其他页面：能后退则返回上一页，不能后退则回首页兜底，避免误退出应用
+    if (canGoBack) {
+      router.back()
+    } else {
+      router.replace('/home')
+    }
   })
 }
 

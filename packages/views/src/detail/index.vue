@@ -6,6 +6,7 @@ import {
   useFavoriteStore,
   useHistoryStore,
   usePlayerStore,
+  usePreviewStore,
   useSourceStore,
   type VodDetail,
 } from '@hplayer/core'
@@ -20,6 +21,7 @@ const sourceStore = useSourceStore()
 const favoriteStore = useFavoriteStore()
 const historyStore = useHistoryStore()
 const playerStore = usePlayerStore()
+const previewStore = usePreviewStore()
 
 const detail = ref<VodDetail | null>(null)
 const loading = ref(true)
@@ -58,6 +60,11 @@ function toggleFav() {
   favoriteStore.toggle({ vod: v, sourceId })
 }
 
+function previewPoster() {
+  if (!detail.value?.pic) return
+  previewStore.open([detail.value.pic], 0)
+}
+
 const isFav = computed(() =>
   detail.value ? favoriteStore.isFavorited(detail.value.id, sourceId) : false,
 )
@@ -80,7 +87,7 @@ onMounted(load)
     <EmptyState v-else-if="error" :text="error" />
     <template v-else-if="detail">
       <div class="header">
-        <img class="poster" :src="detail.pic" :alt="detail.name" />
+        <img class="poster" :src="detail.pic" :alt="detail.name" @click="previewPoster" />
         <div class="meta">
           <h1 class="title">{{ detail.name }}</h1>
           <div class="row" v-if="detail.year">

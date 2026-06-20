@@ -1,10 +1,12 @@
 import { useSourceStore } from '@hplayer/core'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const TabLayout = () => import('@hplayer/views/layouts/TabLayout.vue')
 
 export const router = createRouter({
-  history: createWebHistory(),
+  // Capacitor Android WebView 的 back/forward 列表依赖 URL 变化；hash 模式可确保
+  // 每次 router.push 都产生不同的 file://.../#/xxx URL，从而正确支持返回键。
+  history: createWebHashHistory(),
   routes: [
     { path: '/', redirect: '/home' },
     {

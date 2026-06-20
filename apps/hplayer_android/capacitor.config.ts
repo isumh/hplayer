@@ -6,6 +6,13 @@ const config: CapacitorConfig = {
   webDir: '../../apps/hplayer_web/dist',
   server: {
     androidScheme: 'https',
+    // 允许 http 源请求，部分视频源接口仍为明文
+    cleartext: true,
+  },
+  android: {
+    // 适配 Android 14/15  edge-to-edge，避免 Vant 顶部组件被状态栏遮挡
+    adjustMarginsForEdgeToEdge: true,
+    backgroundColor: '#ffffff',
   },
   plugins: {
     CapacitorHttp: {
