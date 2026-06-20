@@ -58,7 +58,20 @@ export class UAPool {
   }
 
   private regenerate(size: number, device: DeviceType): UserAgent[] {
-    return Array.from({ length: size }, () => new UserAgent({ deviceCategory: device }))
+    const set = new Set<string>()
+    const result: UserAgent[] = []
+    let attempts = 0
+    const maxAttempts = size * 10
+    while (result.length < size && attempts < maxAttempts) {
+      attempts++
+      const ua = new UserAgent({ deviceCategory: device })
+      const s = ua.toString()
+      if (!set.has(s)) {
+        set.add(s)
+        result.push(ua)
+      }
+    }
+    return result
   }
 }
 
