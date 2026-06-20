@@ -27,7 +27,14 @@ function pick(id: string) {
     <span class="name">{{ displayText }}</span>
     <span class="arrow">▾</span>
   </div>
-  <Popup v-model:show="showPicker" class="source-popup" position="top" round :style="{ background: 'var(--van-background)' }">
+  <!-- 居中弹出选择面板，避免与顶部状态栏/标题栏发生重叠 -->
+  <Popup
+    v-model:show="showPicker"
+    class="source-popup"
+    position="center"
+    round
+    :style="{ background: 'var(--van-background)' }"
+  >
     <CellGroup>
       <Cell
         v-for="s in sources"
@@ -54,7 +61,9 @@ function pick(id: string) {
 .name { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .arrow { font-size: 12px; color: var(--van-text-color-2); }
 .source-popup {
-  padding-top: constant(safe-area-inset-top);
-  padding-top: env(safe-area-inset-top);
+  /* 居中弹窗默认垂直水平居中，无需额外偏移 */
+  /* 增加弹窗宽度，避免源名较长时被截断 */
+  width: 80vw;
+  max-width: 400px;
 }
 </style>

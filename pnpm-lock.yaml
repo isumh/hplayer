@@ -9,15 +9,15 @@ importers:
   .:
     dependencies:
       '@capacitor/core':
-        specifier: ^7.0.0
-        version: 7.6.7
+        specifier: ^8.0.0
+        version: 8.4.1
     devDependencies:
       '@biomejs/biome':
         specifier: 2.4.5
         version: 2.4.5
       '@capacitor/cli':
-        specifier: ^7.0.0
-        version: 7.6.7
+        specifier: ^8.0.0
+        version: 8.4.1
       '@playwright/test':
         specifier: 1.57.0
         version: 1.57.0
@@ -52,86 +52,86 @@ importers:
   apps/hplayer_android:
     dependencies:
       '@capacitor-community/sqlite':
-        specifier: ^7.0.0
-        version: 7.0.3(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.1.0(@capacitor/core@8.4.1)
       '@capacitor/android':
-        specifier: ^7.0.0
-        version: 7.6.7(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.4.1(@capacitor/core@8.4.1)
       '@capacitor/core':
-        specifier: ^7.0.0
-        version: 7.6.7
+        specifier: ^8.0.0
+        version: 8.4.1
       '@capacitor/filesystem':
-        specifier: ^7.0.0
-        version: 7.1.8(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.1.2(@capacitor/core@8.4.1)
       '@capacitor/haptics':
-        specifier: ^7.0.0
-        version: 7.0.5(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.2(@capacitor/core@8.4.1)
       '@capacitor/preferences':
-        specifier: ^7.0.0
-        version: 7.0.4(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor/screen-orientation':
-        specifier: ^7.0.0
-        version: 7.0.4(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor/share':
-        specifier: ^7.0.0
-        version: 7.0.4(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor/splash-screen':
-        specifier: ^7.0.0
-        version: 7.0.5(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor/status-bar':
-        specifier: ^7.0.0
-        version: 7.0.6(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.2(@capacitor/core@8.4.1)
       '@capawesome/capacitor-app-update':
-        specifier: ^7.0.0
-        version: 7.2.0(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.3(@capacitor/core@8.4.1)
       '@capawesome/capacitor-background-task':
-        specifier: ^7.0.0
-        version: 7.0.1(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.2(@capacitor/core@8.4.1)
       '@capgo/capacitor-video-player':
-        specifier: 7.0.0
-        version: 7.0.0(@capacitor/core@7.6.7)(hls.js@1.6.16)
+        specifier: ^8.0.0
+        version: 8.1.20(@capacitor/core@8.4.1)(hls.js@1.6.16)
 
   apps/hplayer_web:
     dependencies:
       '@capacitor-community/sqlite':
-        specifier: ^7.0.0
-        version: 7.0.3(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.1.0(@capacitor/core@8.4.1)
       '@capacitor/app':
-        specifier: ^7.0.0
-        version: 7.1.2(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.1.0(@capacitor/core@8.4.1)
       '@capacitor/core':
-        specifier: ^7.0.0
-        version: 7.6.7
+        specifier: ^8.0.0
+        version: 8.4.1
       '@capacitor/filesystem':
-        specifier: ^7.0.0
-        version: 7.1.8(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.1.2(@capacitor/core@8.4.1)
       '@capacitor/haptics':
-        specifier: ^7.0.0
-        version: 7.0.5(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.2(@capacitor/core@8.4.1)
       '@capacitor/preferences':
-        specifier: ^7.0.0
-        version: 7.0.4(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor/screen-orientation':
-        specifier: ^7.0.0
-        version: 7.0.4(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor/share':
-        specifier: ^7.0.0
-        version: 7.0.4(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor/splash-screen':
-        specifier: ^7.0.0
-        version: 7.0.5(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor/status-bar':
-        specifier: ^7.0.0
-        version: 7.0.6(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.2(@capacitor/core@8.4.1)
       '@capawesome/capacitor-app-update':
-        specifier: ^7.0.0
-        version: 7.2.0(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.3(@capacitor/core@8.4.1)
       '@capawesome/capacitor-background-task':
-        specifier: ^7.0.0
-        version: 7.0.1(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.2(@capacitor/core@8.4.1)
       '@capgo/capacitor-video-player':
-        specifier: 7.0.0
-        version: 7.0.0(@capacitor/core@7.6.7)(hls.js@1.6.16)
+        specifier: ^8.0.0
+        version: 8.1.20(@capacitor/core@8.4.1)(hls.js@1.6.16)
       '@hplayer/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -215,14 +215,14 @@ importers:
   packages/core:
     dependencies:
       '@capacitor-community/sqlite':
-        specifier: ^7.0.0
-        version: 7.0.3(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.1.0(@capacitor/core@8.4.1)
       '@capacitor/core':
-        specifier: ^7.0.0
-        version: 7.6.7
+        specifier: ^8.0.0
+        version: 8.4.1
       '@capacitor/preferences':
-        specifier: ^7.0.0
-        version: 7.0.4(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       axios:
         specifier: ^1.7.0
         version: 1.18.0
@@ -257,8 +257,8 @@ importers:
   packages/ui:
     dependencies:
       '@capacitor/core':
-        specifier: ^7.0.0
-        version: 7.6.7
+        specifier: ^8.0.0
+        version: 8.4.1
       '@hplayer/core':
         specifier: workspace:*
         version: link:../core
@@ -282,17 +282,17 @@ importers:
   packages/views:
     dependencies:
       '@capacitor/core':
-        specifier: ^7.0.0
-        version: 7.6.7
+        specifier: ^8.0.0
+        version: 8.4.1
       '@capacitor/screen-orientation':
-        specifier: ^7.0.0
-        version: 7.0.4(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capawesome/capacitor-app-update':
-        specifier: ^7.0.0
-        version: 7.2.0(@capacitor/core@7.6.7)
+        specifier: ^8.0.0
+        version: 8.0.3(@capacitor/core@8.4.1)
       '@capgo/capacitor-video-player':
-        specifier: 7.0.0
-        version: 7.0.0(@capacitor/core@7.6.7)(hls.js@1.6.16)
+        specifier: ^8.0.0
+        version: 8.1.20(@capacitor/core@8.4.1)(hls.js@1.6.16)
       '@hplayer/core':
         specifier: workspace:*
         version: link:../core
@@ -405,82 +405,82 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@capacitor-community/sqlite@7.0.3':
-    resolution: {integrity: sha512-aKOCM3RglhF9Q2XA7NMyT923tc+dY9ANLzB+FgKy6Q6jxJIHuJ6YRZbFHJKicBjheCOP1k7HpPIdnZ05GpsGVg==}
+  '@capacitor-community/sqlite@8.1.0':
+    resolution: {integrity: sha512-yhKZDAVPDPcM3QE6UGB3LXyV25a6Rve1SjZ1aUpTE0E2isnYTVM0PG9+JOI241f+NdsHzPTE7ESJiYSqKsKnuA==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/android@7.6.7':
-    resolution: {integrity: sha512-YXJoXhjgVTczgwJrcm0b2ZTdAOYgY7UXRYgsOZtpA6CHJQFRcssEdXnzPkfaMYkK4AqfzrlDqDxe5UeZT7ZS4w==}
+  '@capacitor/android@8.4.1':
+    resolution: {integrity: sha512-igtDCJ7QQn0P2qHFD9p4KXaa6V1b2PRNt+MxjVwtjTm/BJvqmiazOJq6rPjwFSZnfHm6iFoZk8TfzHd44pyBGw==}
     peerDependencies:
-      '@capacitor/core': ^7.6.0
+      '@capacitor/core': ^8.4.0
 
-  '@capacitor/app@7.1.2':
-    resolution: {integrity: sha512-d4I/oF/PRu4megL7/IGKYfe5j7yzSON1FRFgq6kH+m5kH6g7V+wyjHRLauCzGNjdRx4S+nWOumINds0qcRBtKg==}
+  '@capacitor/app@8.1.0':
+    resolution: {integrity: sha512-MlmttTOWHDedr/G4SrhNRxsXMqY+R75S4MM4eIgzsgCzOYhb/MpCkA5Q3nuOCfL1oHm26xjUzqZ5aupbOwdfYg==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/cli@7.6.7':
-    resolution: {integrity: sha512-nV9j1+431/rsiabGs1UK0SbETrl2JfAf3SSlsM9RbMMjAL7WmruxnlJcbB9IXPoa6L99GljSO5q/9UCNvYz6Ag==}
-    engines: {node: '>=20.0.0'}
+  '@capacitor/cli@8.4.1':
+    resolution: {integrity: sha512-t7F2s7fFHCq113xgrggrmK6ctV0/8E5YfLNVLfPHp4GCTDO+tly9fZvWPf2/sOI8lMm18dLT43qbXLRTz/OZgw==}
+    engines: {node: '>=22.0.0'}
     hasBin: true
 
-  '@capacitor/core@7.6.7':
-    resolution: {integrity: sha512-DR0kqfcsDzWhvskz+sJWy41cdv+P1ITjmOYYG5WSV88EO6tx5Tf82M61vp4NjV7rfQDUAQjBAypgaTiB2/2oEg==}
+  '@capacitor/core@8.4.1':
+    resolution: {integrity: sha512-xqhOGLbTAYeOWK+IDUNSjQJAPapQjRHrIcgk9PYp52or9zFTaaMko31uNi16N6W+CRJ8VrRram6fOYILkBG2Hg==}
 
-  '@capacitor/filesystem@7.1.8':
-    resolution: {integrity: sha512-Qpw/2SE4/CzqAUvGgSM9hw/uXQ5qoOaF4wxbToXwpAaKPS+tzletS1h5ti3jjLmGcqizTs2sEXMtcsARW/Ceew==}
+  '@capacitor/filesystem@8.1.2':
+    resolution: {integrity: sha512-doaaMfGoFR2hWU6aV6u83I+5ZsGyJVq+Gz4r9lMpJzUKMm1eMu0hLnFdV1aXZlU9FlK/RndFrVD8oRZfNOqWgQ==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/haptics@7.0.5':
-    resolution: {integrity: sha512-ujXuUkL8UG1YLhuJo/q+jiHr0K5JmclGZHmV1RttmiUBRG1XpC4Fc4gXUJyEX+6IoyfwWhgtPvJFRUB31HYnRQ==}
+  '@capacitor/haptics@8.0.2':
+    resolution: {integrity: sha512-c2hZzRR5Fk1tbTvhG1jhh2XBAf3EhnIerMIb2sl7Mt41Gxx1fhBJFDa0/BI1IbY4loVepyyuqNC9820/GZuoWQ==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/preferences@7.0.4':
-    resolution: {integrity: sha512-TJhkwaI2RCs/iDC9PjNczZV4h6JM4gUtTuKMeFdy0OwGgFEHf4TrtW2mFMc1TnPDalYQ91p9NT+UKgiJs9/xtg==}
+  '@capacitor/preferences@8.0.1':
+    resolution: {integrity: sha512-T6no3ebi79XJCk91U3Jp/liJUwgBdvHR+s6vhvPkPxSuch7z3zx5Rv1bdWM6sWruNx+pViuEGqZvbfCdyBvcHQ==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/screen-orientation@7.0.4':
-    resolution: {integrity: sha512-xWeWnZsV6z1bXxlOnSi3ynrFMK/JICryAuLnIvGL069BHS05nvxwu15d0xMZiMZWkoucNEAN60vyIYGGqz5IWA==}
+  '@capacitor/screen-orientation@8.0.1':
+    resolution: {integrity: sha512-DPz/1YGmlAUDMg2ON+AGJp1eFn9IfVNP9VKI5zIU+jD5xAZ4JGxUDlY9MDCvEPQs7UCD53NduJpqvqhcnb32Kw==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/share@7.0.4':
-    resolution: {integrity: sha512-wNXxmXUcChrtbZ5jQv8scFIbIGKo3rk6B7qpWySxfUhYJP5NANgAqQ9Z69m0k/zYsucdh66SBU7XW1ykd9aUug==}
+  '@capacitor/share@8.0.1':
+    resolution: {integrity: sha512-3cSBKBCJVon54rKDROP2rqGyeGks4pBh9TbaEk9S375Kbek/ZHe72N50zIa0Vn9Eac/SuhwgehO/mmA4CsUOiw==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/splash-screen@7.0.5':
-    resolution: {integrity: sha512-bPG2SamFL7VT5I3XsgsGgJhkiyxq3OXCOVKEDupSieVdtEiG7j2vLbSD0xL+91zteF/qLuxsjbugGy5LD8mS2A==}
+  '@capacitor/splash-screen@8.0.1':
+    resolution: {integrity: sha512-c/ew/Z3eA7z8l06WoRAtzVF16VwYYrExmHmfGq1Cg675pVzaC/yuucB8/1xG1vhEfnW4fZ1KhSf/kzR1RiVYgg==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capacitor/status-bar@7.0.6':
-    resolution: {integrity: sha512-7AVqj46b26QikImQzWfsJmzG8NUJZBGkrVSuoeTo+SX/YH3hXH0MqwwFgMqMGHfa/BICDgSvTjM9miVFlq0+RQ==}
+  '@capacitor/status-bar@8.0.2':
+    resolution: {integrity: sha512-WXs8YB8B9eEaPZz+bcdY6t2nForF1FLoj/JU0Dl9RRgQnddnS98FEEyDooQhaY7wivr000j4+SC1FyeJkrFO7A==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
   '@capacitor/synapse@1.0.4':
     resolution: {integrity: sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==}
 
-  '@capawesome/capacitor-app-update@7.2.0':
-    resolution: {integrity: sha512-fwPxR9tV5qecn3FSgwS5wBwlHDV9JND5dnY1iqIYnqRG2s/Oq0h32u4hV6+/zpDARJFMZycb3pddEfwLwhglEg==}
+  '@capawesome/capacitor-app-update@8.0.3':
+    resolution: {integrity: sha512-5pS9I+i2TuUl8b6L3h2WsWF/PE68exzoc9CciXK/I2SdB2fIkdxObrYBeYS2Z09ndCGqJgx4iwZJmhXwVcMh4w==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capawesome/capacitor-background-task@7.0.1':
-    resolution: {integrity: sha512-ILkJ0bCOLperUc+fezzhpiH3Bfnr/318TI9XSrPU/vwvBXjMH7p7xYxKtjDA4VpJfbVh1cHmWLtRSWIk2wUglg==}
+  '@capawesome/capacitor-background-task@8.0.2':
+    resolution: {integrity: sha512-o16CYZVVKafGKQ3vlsuRUDiRk1+K+wJwx0QnLIkEuvaG6kK8AGa7z4euhQSzS6Etz58tRJq1sF/iGX4h3ihIsg==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
 
-  '@capgo/capacitor-video-player@7.0.0':
-    resolution: {integrity: sha512-Li5nng2Vq1poFZpHHiNYE6M0EZ3w+HG2+sb6xlRmxrL9N5ls8+xRTk9Jg7jjX0I4jaVDSQkfXD+N/PAc+eCDEA==}
+  '@capgo/capacitor-video-player@8.1.20':
+    resolution: {integrity: sha512-Qz4fgkskvIK6Uxzy9FZft8DzYtt0iPS17/XKPXia5KMQlNgAccspN4pYTYVe/5qExr8RnLJ5H8TqXwxtBkue8Q==}
     peerDependencies:
-      '@capacitor/core': '>=7.0.0'
+      '@capacitor/core': '>=8.0.0'
       hls.js: ^1.4.0
 
   '@csstools/color-helpers@5.1.0':
@@ -2498,20 +2498,20 @@ snapshots:
   '@biomejs/cli-win32-x64@2.4.5':
     optional: true
 
-  '@capacitor-community/sqlite@7.0.3(@capacitor/core@7.6.7)':
+  '@capacitor-community/sqlite@8.1.0(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
       jeep-sqlite: 2.8.0
 
-  '@capacitor/android@7.6.7(@capacitor/core@7.6.7)':
+  '@capacitor/android@8.4.1(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
-  '@capacitor/app@7.1.2(@capacitor/core@7.6.7)':
+  '@capacitor/app@8.1.0(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
-  '@capacitor/cli@7.6.7':
+  '@capacitor/cli@8.4.1':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8
       '@ionic/utils-subprocess': 3.0.1
@@ -2533,52 +2533,52 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@capacitor/core@7.6.7':
+  '@capacitor/core@8.4.1':
     dependencies:
       tslib: 2.8.1
 
-  '@capacitor/filesystem@7.1.8(@capacitor/core@7.6.7)':
+  '@capacitor/filesystem@8.1.2(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
       '@capacitor/synapse': 1.0.4
 
-  '@capacitor/haptics@7.0.5(@capacitor/core@7.6.7)':
+  '@capacitor/haptics@8.0.2(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
-  '@capacitor/preferences@7.0.4(@capacitor/core@7.6.7)':
+  '@capacitor/preferences@8.0.1(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
-  '@capacitor/screen-orientation@7.0.4(@capacitor/core@7.6.7)':
+  '@capacitor/screen-orientation@8.0.1(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
-  '@capacitor/share@7.0.4(@capacitor/core@7.6.7)':
+  '@capacitor/share@8.0.1(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
-  '@capacitor/splash-screen@7.0.5(@capacitor/core@7.6.7)':
+  '@capacitor/splash-screen@8.0.1(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
-  '@capacitor/status-bar@7.0.6(@capacitor/core@7.6.7)':
+  '@capacitor/status-bar@8.0.2(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
   '@capacitor/synapse@1.0.4': {}
 
-  '@capawesome/capacitor-app-update@7.2.0(@capacitor/core@7.6.7)':
+  '@capawesome/capacitor-app-update@8.0.3(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
-  '@capawesome/capacitor-background-task@7.0.1(@capacitor/core@7.6.7)':
+  '@capawesome/capacitor-background-task@8.0.2(@capacitor/core@8.4.1)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
 
-  '@capgo/capacitor-video-player@7.0.0(@capacitor/core@7.6.7)(hls.js@1.6.16)':
+  '@capgo/capacitor-video-player@8.1.20(@capacitor/core@8.4.1)(hls.js@1.6.16)':
     dependencies:
-      '@capacitor/core': 7.6.7
+      '@capacitor/core': 8.4.1
       hls.js: 1.6.16
 
   '@csstools/color-helpers@5.1.0': {}

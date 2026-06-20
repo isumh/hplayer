@@ -193,12 +193,12 @@ async function initNativePlayer(url: string, startAt?: number) {
   })
   nativeVideoPlayer.addListener('jeepCapVideoPlayerEnded', () => {
     nativeStatus.value = '播放结束'
-    persistNativeProgress()
+    void persistNativeProgress()
   })
   nativeVideoPlayer.addListener('jeepCapVideoPlayerExit', (evt: capExitListener) => {
     nativeStatus.value = `已退出（退出时间: ${evt.currentTime ?? 0} 秒）`
     lastProgress.value = evt.currentTime ?? 0
-    persistNativeProgress(evt.currentTime)
+    void persistNativeProgress(evt.currentTime)
   })
 
   const options: capVideoPlayerOptions = {
@@ -216,6 +216,7 @@ async function initNativePlayer(url: string, startAt?: number) {
     const res = await nativeVideoPlayer.initPlayer(options)
     if (!res.result) {
       error.value = res.message ?? '原生播放器启动失败'
+      nativeError.value = res.message ?? '原生播放器启动失败'
       isNative.value = false
       return
     }

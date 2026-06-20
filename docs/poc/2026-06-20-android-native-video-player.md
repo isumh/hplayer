@@ -1,8 +1,9 @@
 # Android 原生视频播放器 POC
 
 > 创建日期：2026-06-20  
-> 基线 Git Commit：`50ab4582ca866f02fa648780595387a3860ab6aa`  
-> 关联任务：评估在 Android 端使用 `@capgo/capacitor-video-player` 替代/增强 Web 播放器
+> 第二轮升级日期：2026-06-20  
+> 基线 Git Commit：`c85d78c08098a2b498da882c7cc8d61f25864049`  
+> 关联任务：升级到 Capacitor 8 后，重新评估在 Android 端使用 `@capgo/capacitor-video-player` 替代/增强 Web 播放器
 
 ---
 
@@ -19,17 +20,17 @@
 | 项目 | 值 |
 |---|---|
 | 基线分支 | 当前工作分支 |
-| 基线 Commit | `50ab4582ca866f02fa648780595387a3860ab6aa` |
-| Capacitor 版本 | 7.x |
-| 插件版本 | `@capgo/capacitor-video-player@7.0.0` |
+| 基线 Commit | `c85d78c08098a2b498da882c7cc8d61f25864049` |
+| Capacitor 版本 | 8.x |
+| 插件版本 | `@capgo/capacitor-video-player@8.1.20` |
 | 当前播放器 | `Artplayer + hls.js`（WebView 内播放） |
 
 ### 回滚方式
 
-若 POC 验证结果不理想或引发严重问题，执行：
+若 POC 验证结果不理想或引发严重问题，可回滚到本轮升级前（Capacitor 7 + 已移除原生播放器入口）：
 
 ```bash
-git reset --hard 50ab4582ca866f02fa648780595387a3860ab6aa
+git reset --hard c85d78c08098a2b498da882c7cc8d61f25864049~1
 ```
 
 > 注意：此命令会丢弃 POC 期间的所有代码变更。执行前请确认无需保留任何中间结果。
@@ -56,10 +57,13 @@ git reset --hard 50ab4582ca866f02fa648780595387a3860ab6aa
 
 ```bash
 # 原生平台依赖
-pnpm --filter hplayer_android add @capgo/capacitor-video-player@7.0.0
+pnpm --filter hplayer_android add @capgo/capacitor-video-player@^8.0.0
 
 # Web 平台依赖（仅用于 TypeScript 类型）
-pnpm --filter hplayer_web add @capgo/capacitor-video-player@7.0.0
+pnpm --filter hplayer_web add @capgo/capacitor-video-player@^8.0.0
+
+# views 包依赖（播放页集成）
+pnpm --filter @hplayer/views add @capgo/capacitor-video-player@^8.0.0
 ```
 
 ### 4.2 代码改造
@@ -97,7 +101,7 @@ pnpm sync:android
 ## 6. 风险与已知限制
 
 - 原生播放器会完全覆盖 WebView，播放页下方的倍速条、标题栏在播放期间不可见
-- `@capgo/capacitor-video-player@7.0.0` 对 Capacitor 7 的维护状态为 **On demand**，最新 v8 仅支持 Capacitor 8
+- 本轮升级到 Capacitor 8 以使用 `@capgo/capacitor-video-player` v8（actively maintained），涉及 Android SDK 36、Gradle 8.14.3、AGP 8.13.0 等原生工具链变更
 - 原生 ExoPlayer 默认控制器未必直接暴露倍速按钮，可能需要通过 API 或额外菜单调整
 - 切换剧集时原生播放器会关闭再重新打开，视觉上会有闪烁
 - 若当前视频源 URL 无法访问，需使用内置公开测试视频作为 fallback
@@ -116,14 +120,18 @@ pnpm sync:android
 | V6 |  |  |
 | V7 |  |  |
 
-### 总体结论
+### 第一轮 POC 结论（Capacitor 7）
 
 **POC 失败。** `@capgo/capacitor-video-player@7.0.0` 在 Capacitor 7.x + 测试真机环境下，调用 `initPlayer` 即触发原生层崩溃，无法完成基础播放验证。
+
+### 第二轮 POC 状态（Capacitor 8）
+
+**已升级到 Capacitor 8 + `@capgo/capacitor-video-player@8.1.20`，构建、同步、质量门禁均通过，待真机验证 `initPlayer` 是否仍崩溃。**
 
 ---
 
 ## 8. 后续建议
 
-1. **短期**：保持 Web 端 `Artplayer + hls.js` 播放方案，移除或隐藏 Android 原生播放器测试入口。
-2. **中期**：如仍希望使用原生播放，可尝试升级到 **Capacitor 8 + `@capgo/capacitor-video-player` v8.x**（v8 为 actively maintained）。
-3. **替代方案**：调研其他 Capacitor 视频播放插件，例如 `@parenta/capacitor-video-player`（声明支持 Capacitor 7）或基于 WebView 的自定义全屏播放器。
+1. **本轮验证**：推送 GitHub Actions 打包 APK，在真机上点击播放页「测试原生播放器」按钮，确认是否仍闪退。
+2. **若 v8 仍失败**：回滚到 Capacitor 7（或保持 Capacitor 8 但移除原生播放器入口），继续以 `Artplayer + hls.js` 作为 Android 播放方案。
+3. **若 v8 成功**：进一步验证 V1–V7 验证点，并处理标题栏隐藏、倍速同步、进度续播等体验细节。

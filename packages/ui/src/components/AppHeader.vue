@@ -31,10 +31,17 @@ function openHistory() {
 </template>
 
 <style scoped>
+/* 导出标题栏高度变量，供 SourcePicker 等 fixed 定位元素避让使用 */
+:root {
+  --app-header-height: calc(44px + constant(safe-area-inset-top));
+  --app-header-height: calc(44px + env(safe-area-inset-top));
+}
 .app-header {
   display: flex;
   align-items: center;
-  height: 44px;
+  /* 最小高度 = 内容区 44px + 顶部安全区域，确保状态栏较高时内容不会被压缩溢出 */
+  min-height: calc(44px + constant(safe-area-inset-top));
+  min-height: calc(44px + env(safe-area-inset-top));
   padding: 0 12px;
   padding-top: constant(safe-area-inset-top);
   padding-top: env(safe-area-inset-top);

@@ -8,10 +8,10 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@capacitor/core": "^7.0.0",
-    "@capacitor/screen-orientation": "^7.0.0",
-    "@capawesome/capacitor-app-update": "^7.0.0",
-    "@capgo/capacitor-video-player": "7.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/screen-orientation": "^8.0.0",
+    "@capawesome/capacitor-app-update": "^8.0.0",
+    "@capgo/capacitor-video-player": "^8.0.0",
     "@hplayer/core": "workspace:*",
     "@hplayer/ui": "workspace:*",
     "artplayer": "^5.1.0",

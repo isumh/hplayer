@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
-    "@capacitor/cli": "^7.0.0",
+    "@capacitor/cli": "^8.0.0",
     "@playwright/test": "1.57.0",
     "@types/node": "^20.0.0",
     "@vitejs/plugin-vue": "^6.0.0",
@@ -33,6 +33,6 @@
     "vue": "^3.5.0"
   },
   "dependencies": {
-    "@capacitor/core": "^7.0.0"
+    "@capacitor/core": "^8.0.0"
   }
 }
