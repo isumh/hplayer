@@ -284,6 +284,9 @@ importers:
 
   packages/views:
     dependencies:
+      '@capacitor-community/keep-awake':
+        specifier: ^8.0.0
+        version: 8.0.1(@capacitor/core@8.4.1)
       '@capacitor/core':
         specifier: ^8.0.0
         version: 8.4.1
