@@ -2,6 +2,7 @@
 import type { VodItem } from '@hplayer/core'
 import { List, PullRefresh } from 'vant'
 import { ref, watch } from 'vue'
+import VirtualGrid from './VirtualGrid.vue'
 import VodCard from './VodCard.vue'
 
 const props = defineProps<{
@@ -33,33 +34,27 @@ watch(
 <template>
   <PullRefresh v-model="refreshing" @refresh="$emit('refresh')">
     <List :loading="loading" :finished="finished" finished-text="没有更多了" @load="$emit('load')">
-      <div class="grid">
-        <VodCard
-          v-for="item in items"
-          :key="`${item.sourceId}-${item.id}`"
-          :item="item"
-          :source-name="sourceName ?? ''"
-          @select="(it: VodItem) => $emit('select', it)"
-          @play="(it: VodItem) => $emit('play', it)"
-        />
-      </div>
+      <VirtualGrid :items="items" :keyOf="(item: VodItem) => `${item.sourceId}-${item.id}`">
+        <template #default="{ item, visible }">
+          <VodCard
+            v-if="visible"
+            :item="item"
+            :source-name="sourceName ?? ''"
+            @select="(it: VodItem) => $emit('select', it)"
+            @play="(it: VodItem) => $emit('play', it)"
+          />
+          <div v-else class="vod-card-placeholder" />
+        </template>
+      </VirtualGrid>
     </List>
   </PullRefresh>
 </template>
 
 <style scoped>
-/* grid-auto-rows: 1fr：同列所有卡片同高 → 不会因标题/图片差异导致高度不齐 */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 1fr;
-  gap: 12px;
-  padding: 12px;
-}
-@media (min-width: 768px) {
-  .grid { grid-template-columns: repeat(5, 1fr); }
-}
-@media (min-width: 1024px) {
-  .grid { grid-template-columns: repeat(6, 1fr); max-width: 1200px; margin: 0 auto; }
+.vod-card-placeholder {
+  height: 100%;
+  min-height: 220px;
+  background: var(--van-background-2);
+  border-radius: 6px;
 }
 </style>
