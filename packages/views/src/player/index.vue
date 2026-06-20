@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import type { Plugin } from '@capacitor/core'
 import { Capacitor } from '@capacitor/core'
 import { ScreenOrientation } from '@capacitor/screen-orientation'
+import type { capExitListener, capVideoPlayerOptions } from '@capgo/capacitor-video-player'
+import { VideoPlayer } from '@capgo/capacitor-video-player'
 import {
   detectProtocol,
   isValidVideoUrl,
@@ -23,6 +26,14 @@ const historyStore = useHistoryStore()
 const containerRef = ref<HTMLDivElement | null>(null)
 const error = ref<string | null>(null)
 const playingTitle = ref('')
+
+// POC: Android 原生播放器调试状态
+const isNative = ref(false)
+const nativeStatus = ref('未启动')
+const lastProgress = ref(0)
+const NATIVE_PLAYER_ID = 'hplayerPocNative'
+// 插件类型定义未暴露监听器方法，通过 Capacitor Plugin 类型断言
+const nativeVideoPlayer = VideoPlayer as unknown as Plugin & typeof VideoPlayer
 
 // 播放器可用倍速档位（与 ArtPlayer settings 菜单同步）
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3] as const
@@ -146,6 +157,110 @@ function setRate(r: Rate) {
     art.playbackRate = r
     art.play() // 某些浏览器切倍速会暂停
   }
+  if (isNative.value) {
+    void nativeVideoPlayer.setRate({ playerId: NATIVE_PLAYER_ID, rate: r })
+  }
+}
+
+// POC: Android 原生播放器入口
+async function initNativePlayer(url: string, title: string, poster: string, startAt?: number) {
+  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') return
+  if (!isValidVideoUrl(url)) {
+    error.value = '不安全的播放地址'
+    return
+  }
+  isNative.value = true
+  nativeStatus.value = '正在启动原生播放器...'
+  lastProgress.value = 0
+
+  // 清理旧监听，避免重复
+  cleanupNativePlayer()
+
+  nativeVideoPlayer.addListener('jeepCapVideoPlayerReady', () => {
+    nativeStatus.value = '原生播放器已就绪'
+  })
+  nativeVideoPlayer.addListener('jeepCapVideoPlayerPlay', () => {
+    nativeStatus.value = '播放中'
+  })
+  nativeVideoPlayer.addListener('jeepCapVideoPlayerPause', () => {
+    nativeStatus.value = '已暂停'
+  })
+  nativeVideoPlayer.addListener('jeepCapVideoPlayerEnded', () => {
+    nativeStatus.value = '播放结束'
+    persistNativeProgress()
+  })
+  nativeVideoPlayer.addListener('jeepCapVideoPlayerExit', (evt: capExitListener) => {
+    nativeStatus.value = `已退出（退出时间: ${evt.currentTime ?? 0} 秒）`
+    lastProgress.value = evt.currentTime ?? 0
+    persistNativeProgress(evt.currentTime)
+  })
+
+  const options: capVideoPlayerOptions = {
+    mode: 'fullscreen',
+    url,
+    playerId: NATIVE_PLAYER_ID,
+    title,
+    artwork: poster,
+    rate: currentRate.value,
+    displayMode: 'landscape',
+    showControls: true,
+    pipEnabled: false,
+    bkmodeEnabled: false,
+    exitOnEnd: true,
+  }
+
+  try {
+    const res = await nativeVideoPlayer.initPlayer(options)
+    if (!res.result) {
+      error.value = res.message ?? '原生播放器启动失败'
+      isNative.value = false
+      return
+    }
+    // 若需要续播，等待就绪后 seek
+    if (typeof startAt === 'number' && startAt > 0) {
+      const unready = await nativeVideoPlayer.addListener('jeepCapVideoPlayerReady', () => {
+        void nativeVideoPlayer.setCurrentTime({ playerId: NATIVE_PLAYER_ID, seektime: startAt })
+        unready.remove()
+      })
+    }
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : '原生播放器初始化异常'
+    isNative.value = false
+  }
+}
+
+async function persistNativeProgress(progress?: number) {
+  const cur = playerStore.current
+  if (!cur?.episode) return
+  let p = progress
+  if (typeof p !== 'number') {
+    try {
+      const res = await nativeVideoPlayer.getCurrentTime({ playerId: NATIVE_PLAYER_ID })
+      p = typeof res.value === 'number' ? res.value : 0
+    } catch {
+      p = 0
+    }
+  }
+  historyStore.touch({
+    vod: cur.vod,
+    sourceId: cur.sourceId,
+    episode: cur.episode,
+    progress: p ?? 0,
+  })
+}
+
+function cleanupNativePlayer() {
+  void nativeVideoPlayer.stopAllPlayers()
+  nativeVideoPlayer.removeAllListeners()
+}
+
+function reopenNative() {
+  const cur = playerStore.current
+  if (!cur?.episode) {
+    error.value = '无效播放会话'
+    return
+  }
+  void initNativePlayer(cur.episode.url, cur.vod.name, cur.vod.pic, cur.startAt)
 }
 
 onMounted(async () => {
@@ -157,11 +272,16 @@ onMounted(async () => {
   }
   playingTitle.value = `${cur.vod.name} - ${ep.name}`
   await lockLandscape()
-  buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
+  if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+    await initNativePlayer(ep.url, cur.vod.name, cur.vod.pic, cur.startAt)
+  } else {
+    buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
+  }
 })
 
 onBeforeUnmount(() => {
   teardown()
+  cleanupNativePlayer()
   void unlockOrientation()
 })
 
@@ -169,7 +289,10 @@ watch(
   () => route.query.ep,
   (ep) => {
     const cur = playerStore.current
-    if (ep && cur?.episode) {
+    if (!ep || !cur?.episode) return
+    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+      void initNativePlayer(cur.episode.url, cur.vod.name, cur.vod.pic, cur.startAt)
+    } else {
       buildPlayer(cur.episode.url, cur.vod.name, cur.vod.pic)
     }
   },
@@ -195,7 +318,14 @@ function onBack() {
 <template>
   <div class="player-page">
     <NavBar :title="playingTitle || '播放'" @click-left="onBack" />
-    <div class="art-wrap" ref="containerRef"></div>
+    <!-- Android POC：原生播放器已接管，WebView 中只显示调试信息 -->
+    <div v-if="isNative" class="native-debug">
+      <p>当前使用 Android 原生播放器（POC）</p>
+      <p class="status">状态：{{ nativeStatus }}</p>
+      <p v-if="lastProgress > 0">已保存进度：{{ lastProgress.toFixed(1) }} 秒</p>
+      <button class="native-btn" @click="reopenNative">重新打开原生播放器</button>
+    </div>
+    <div v-else class="art-wrap" ref="containerRef"></div>
 
     <!-- 错误展示 -->
     <div v-if="error" class="error">{{ error }}</div>
@@ -229,6 +359,29 @@ function onBack() {
   aspect-ratio: 16 / 9;
   background: black;
 }
+.native-debug {
+  color: white;
+  padding: 24px 16px;
+  text-align: center;
+  background: #111;
+  min-height: 200px;
+}
+.native-debug .status {
+  color: var(--van-primary-color);
+  font-weight: 600;
+  margin: 12px 0;
+}
+.native-btn {
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: var(--van-primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.native-btn:active { opacity: 0.8; }
 .error {
   color: white;
   padding: 16px;

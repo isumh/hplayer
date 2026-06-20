@@ -27,7 +27,7 @@ function onLoad() {
 </script>
 
 <template>
-  <div class="search-result-list">
+  <div class="search-result-list" :class="{ 'is-virtual': enableVirtual }">
     <VodList
       v-if="!enableVirtual"
       :items="items"
@@ -45,7 +45,6 @@ function onLoad() {
         :items="items"
         :min-item-size="220"
         key-field="id"
-        page-mode
         @scroll-end="onLoad"
       >
         <template #default="{ item, index, active }">
@@ -69,6 +68,15 @@ function onLoad() {
 
 <style scoped>
 .search-result-list { min-height: 100%; }
+.search-result-list.is-virtual {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.virtual-scroller {
+  flex: 1;
+  min-height: 0;
+}
 .virtual-scroller :deep(.vue-recycle-scroller__item-view) {
   padding: 6px 12px;
 }

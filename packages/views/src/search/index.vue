@@ -93,22 +93,35 @@ watch(mode, () => {
 <template>
   <div class="search-page">
     <SearchBar v-model="keyword" v-model:mode="mode" :source-name="sourceName" @search="doSearch" />
-    <SearchHistory v-if="!searched" @select="onHistorySelect" />
-    <SearchResultList
-      v-else-if="items.length"
-      :items="items"
-      :source-name="sourceName"
-      :loading="loading"
-      :finished="finished"
-      :enable-virtual="enableVirtual"
-      @load="() => loadResults(keyword)"
-      @refresh="() => loadResults(keyword, true)"
-      @select="goDetail"
-    />
-    <EmptyState v-else-if="searched" text="无搜索结果" />
+    <!-- 搜索结果区域：仅此处可垂直滚动 -->
+    <div class="search-content">
+      <SearchHistory v-if="!searched" @select="onHistorySelect" />
+      <SearchResultList
+        v-else-if="items.length"
+        :items="items"
+        :source-name="sourceName"
+        :loading="loading"
+        :finished="finished"
+        :enable-virtual="enableVirtual"
+        @load="() => loadResults(keyword)"
+        @refresh="() => loadResults(keyword, true)"
+        @select="goDetail"
+      />
+      <EmptyState v-else-if="searched" text="无搜索结果" />
+    </div>
   </div>
 </template>
 
 <style scoped>
-.search-page { display: flex; flex-direction: column; min-height: 100%; }
+.search-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.search-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 </style>

@@ -182,31 +182,44 @@ watch(
     />
     <CategoryBarSkeleton v-else-if="showCatSkeleton" />
 
-    <!-- 视频列表骨架（首次/重置时占位，分页时由 Toast 提示） -->
-    <VodGridSkeleton v-if="showGridSkeleton" />
+    <!-- 视频列表区域：仅此处可垂直滚动 -->
+    <div class="home-content">
+      <!-- 视频列表骨架（首次/重置时占位，分页时由 Toast 提示） -->
+      <VodGridSkeleton v-if="showGridSkeleton" />
 
-    <VodList
-      v-else-if="items.length"
-      :items="items"
-      :loading="loading"
-      :finished="finished"
-      @load="() => loadList()"
-      @refresh="() => loadList(true)"
-      @select="goDetail"
-      @play="onPlay"
-    />
+      <VodList
+        v-else-if="items.length"
+        :items="items"
+        :loading="loading"
+        :finished="finished"
+        @load="() => loadList()"
+        @refresh="() => loadList(true)"
+        @select="goDetail"
+        @play="onPlay"
+      />
 
-    <EmptyState v-else :text="emptyText">
-      <button v-if="error" class="empty-btn" @click="retry">重试</button>
-      <button v-else-if="!sourceStore.activeSource" class="empty-btn" @click="goAddSource">
-        去添加
-      </button>
-    </EmptyState>
+      <EmptyState v-else :text="emptyText">
+        <button v-if="error" class="empty-btn" @click="retry">重试</button>
+        <button v-else-if="!sourceStore.activeSource" class="empty-btn" @click="goAddSource">
+          去添加
+        </button>
+      </EmptyState>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.home { display: flex; flex-direction: column; min-height: 100%; }
+.home {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.home-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 .empty-btn {
   padding: 8px 24px;
   background: var(--van-primary-color);

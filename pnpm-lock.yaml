@@ -87,6 +87,9 @@ importers:
       '@capawesome/capacitor-background-task':
         specifier: ^7.0.0
         version: 7.0.1(@capacitor/core@7.6.7)
+      '@capgo/capacitor-video-player':
+        specifier: 7.0.0
+        version: 7.0.0(@capacitor/core@7.6.7)(hls.js@1.6.16)
 
   apps/hplayer_web:
     dependencies:
@@ -126,6 +129,9 @@ importers:
       '@capawesome/capacitor-background-task':
         specifier: ^7.0.0
         version: 7.0.1(@capacitor/core@7.6.7)
+      '@capgo/capacitor-video-player':
+        specifier: 7.0.0
+        version: 7.0.0(@capacitor/core@7.6.7)(hls.js@1.6.16)
       '@hplayer/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -284,6 +290,9 @@ importers:
       '@capawesome/capacitor-app-update':
         specifier: ^7.0.0
         version: 7.2.0(@capacitor/core@7.6.7)
+      '@capgo/capacitor-video-player':
+        specifier: 7.0.0
+        version: 7.0.0(@capacitor/core@7.6.7)(hls.js@1.6.16)
       '@hplayer/core':
         specifier: workspace:*
         version: link:../core
@@ -467,6 +476,12 @@ packages:
     resolution: {integrity: sha512-ILkJ0bCOLperUc+fezzhpiH3Bfnr/318TI9XSrPU/vwvBXjMH7p7xYxKtjDA4VpJfbVh1cHmWLtRSWIk2wUglg==}
     peerDependencies:
       '@capacitor/core': '>=7.0.0'
+
+  '@capgo/capacitor-video-player@7.0.0':
+    resolution: {integrity: sha512-Li5nng2Vq1poFZpHHiNYE6M0EZ3w+HG2+sb6xlRmxrL9N5ls8+xRTk9Jg7jjX0I4jaVDSQkfXD+N/PAc+eCDEA==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+      hls.js: ^1.4.0
 
   '@csstools/color-helpers@5.1.0':
     resolution: {integrity: sha512-S11EXWJyy0Mz5SYvRmY8nJYTFFd1LCNV+7cXyAgQtOOuzb4EsgfqDufL+9esx72/eLhsRdGZwaldu/h+E4t4BA==}
@@ -2560,6 +2575,11 @@ snapshots:
   '@capawesome/capacitor-background-task@7.0.1(@capacitor/core@7.6.7)':
     dependencies:
       '@capacitor/core': 7.6.7
+
+  '@capgo/capacitor-video-player@7.0.0(@capacitor/core@7.6.7)(hls.js@1.6.16)':
+    dependencies:
+      '@capacitor/core': 7.6.7
+      hls.js: 1.6.16
 
   '@csstools/color-helpers@5.1.0': {}
 

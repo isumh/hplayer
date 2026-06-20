@@ -9,17 +9,18 @@
     "run": "cap run android"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^7.0.0",
     "@capacitor/android": "^7.0.0",
     "@capacitor/core": "^7.0.0",
-    "@capacitor/status-bar": "^7.0.0",
-    "@capacitor/splash-screen": "^7.0.0",
-    "@capacitor/preferences": "^7.0.0",
     "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/haptics": "^7.0.0",
+    "@capacitor/preferences": "^7.0.0",
     "@capacitor/screen-orientation": "^7.0.0",
     "@capacitor/share": "^7.0.0",
-    "@capacitor/haptics": "^7.0.0",
-    "@capacitor-community/sqlite": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0",
+    "@capawesome/capacitor-app-update": "^7.0.0",
     "@capawesome/capacitor-background-task": "^7.0.0",
-    "@capawesome/capacitor-app-update": "^7.0.0"
+    "@capgo/capacitor-video-player": "7.0.0"
   }
 }

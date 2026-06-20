@@ -166,3 +166,28 @@ http.interceptors.request.use((config) => {
 - `AxiosError: Network Error` + CORS 报错 → 请求未走 Vite 代理，检查 `import.meta.env.DEV` 是否生效、URL 是否被重写。
 - `AxiosError: timeout` + 控制台无代理响应日志 → Vite 代理可能直连目标失败，检查是否需要 `HttpProxyAgent`。
 - `Refused to set unsafe header "User-Agent"` → 浏览器安全限制，无法自定义 UA，不影响代理正确性。
+
+## 4. Git 远程推送规则
+
+**没有明确指令时，不要推送远程 GitHub。**
+
+只有在用户明确给出以下类型指令时，才能执行 `git` 远程推送到 GitHub：
+
+- 提交远程
+- 推送远程
+- 推送 GitHub / 推送 github
+- 其他语义等价的明确推送指令
+
+### 执行前确认
+
+即使收到明确推送指令，执行前也应检查：
+
+1. 当前是否有未提交的变更需要提交。
+2. 目标仓库与分支是否正确。
+3. 是否存在敏感文件（如 `.env`、密钥、签名文件）被意外纳入提交；如有，应提醒用户并跳过。
+
+### 禁止行为
+
+- 不要自动 `git push`。
+- 不要主动创建提交，除非用户明确要求提交。
+- 不要将签名文件、keystore、Token 等敏感信息推送到远程。
