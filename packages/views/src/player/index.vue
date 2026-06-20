@@ -196,10 +196,12 @@ async function initNativePlayer(url: string, startAt?: number) {
     nativeStatus.value = '播放结束'
     void persistNativeProgress()
   })
-  await nativeVideoPlayer.addListener('jeepCapVideoPlayerExit', (evt: capExitListener) => {
+  await nativeVideoPlayer.addListener('jeepCapVideoPlayerExit', async (evt: capExitListener) => {
     nativeStatus.value = `已退出（退出时间: ${evt.currentTime ?? 0} 秒）`
     lastProgress.value = evt.currentTime ?? 0
-    void persistNativeProgress(evt.currentTime)
+    await persistNativeProgress(evt.currentTime)
+    isNative.value = false
+    await restorePortraitAndGoHome()
   })
 
   const options: capVideoPlayerOptions = {
@@ -280,6 +282,16 @@ async function unlockOrientation() {
   await ScreenOrientation.unlock()
 }
 
+async function restorePortraitAndGoHome() {
+  if (!Capacitor.isNativePlatform()) return
+  try {
+    await ScreenOrientation.lock({ orientation: 'portrait' })
+  } catch {
+    await unlockOrientation()
+  }
+  void router.replace('/home')
+}
+
 onMounted(async () => {
   const cur = playerStore.current
   const ep = cur?.episode
@@ -295,7 +307,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   teardown()
   cleanupNativePlayer()
-  void unlockOrientation()
+  void restorePortraitAndGoHome()
 })
 
 watch(
@@ -307,8 +319,12 @@ watch(
   },
 )
 
-function onBack() {
+async function onBack() {
   persistProgress()
+  if (isNative.value) {
+    await restorePortraitAndGoHome()
+    return
+  }
   if (window.history.length > 1) router.back()
   else router.replace('/home')
 }
