@@ -12,7 +12,7 @@
 | `current_phase` | **P9 V2.1 Android 体验优化（completed）** |
 | `current_agent` | **P9-1** |
 | `last_completed_task` | P9:Task 6.2 |
-| `last_commit_hash` | `77a6221` |
+| `last_commit_hash` | `5a47bfc` |
 | `current_branch` | `feat/hplayer-v1.0-mvp` |
 | `start_time` | 2026-06-17 |
 | `last_update` | 2026-06-20（P9 V2.1 实施完成，全量质量门禁通过） |
