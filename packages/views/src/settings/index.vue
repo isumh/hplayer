@@ -2,7 +2,17 @@
 import { Capacitor } from '@capacitor/core'
 import { Directory, Encoding, Filesystem } from '@capacitor/filesystem'
 import { AppUpdate, AppUpdateAvailability } from '@capawesome/capacitor-app-update'
-import { exportBackup, importBackup, useSettingsStore, useSourceStore } from '@hplayer/core'
+import type { FavoriteItem, HistoryItem, Settings, VideoSource } from '@hplayer/core'
+import {
+  exportBackup,
+  importBackup,
+  STORAGE_KEYS,
+  storage,
+  useFavoriteStore,
+  useHistoryStore,
+  useSettingsStore,
+  useSourceStore,
+} from '@hplayer/core'
 import {
   Button,
   Cell,
@@ -21,8 +31,11 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const sourceStore = useSourceStore()
 const settingsStore = useSettingsStore()
+const favoriteStore = useFavoriteStore()
+const historyStore = useHistoryStore()
 
 const fileInput = ref<HTMLInputElement | null>(null)
+const defaultSettings: Settings = { theme: 'auto', deviceType: 'mobile' }
 
 const sources = computed(() => sourceStore.list.slice().sort((a, b) => a.order - b.order))
 
@@ -71,6 +84,18 @@ function deviceLabel(device: 'mobile' | 'desktop' | 'tablet'): string {
 function setDevice(device: 'mobile' | 'desktop' | 'tablet') {
   settingsStore.setDeviceType(device)
   showToast(`已切换至${deviceLabel(device)} UA`)
+}
+
+function applyImportedData() {
+  sourceStore.list = storage.get<VideoSource[]>(STORAGE_KEYS.sources, [])
+  sourceStore.activeSourceId = storage.get<string | null>(STORAGE_KEYS.activeSourceId, null)
+
+  const settings = storage.get<Settings>(STORAGE_KEYS.settings, defaultSettings)
+  settingsStore.setTheme(settings.theme)
+  settingsStore.setDeviceType(settings.deviceType)
+
+  favoriteStore.items = storage.get<FavoriteItem[]>(STORAGE_KEYS.favorites, [])
+  historyStore.items = storage.get<HistoryItem[]>(STORAGE_KEYS.history, [])
 }
 
 const showThemePicker = ref(false)
@@ -225,7 +250,8 @@ function handleImport(e: Event) {
       return
     }
     if (importBackup(raw)) {
-      showToast('导入成功，请刷新页面')
+      applyImportedData()
+      showToast('导入成功')
     } else {
       showToast('无效的备份文件')
     }
@@ -238,7 +264,7 @@ function handleImport(e: Event) {
 
 <template>
   <div class="settings">
-    <NavBar title="设置" />
+    <NavBar title="设置" fixed placeholder />
 
     <div class="section">
       <div class="section-title">视频源管理</div>
@@ -278,7 +304,7 @@ function handleImport(e: Event) {
       </CellGroup>
     </div>
 
-    <CellGroup inset>
+    <CellGroup inset title="其他" class="section">
       <Field
         :model-value="themeResult"
         is-link
@@ -316,15 +342,11 @@ function handleImport(e: Event) {
           @cancel="showDevicePicker = false"
         />
       </Popup>
-    </CellGroup>
 
-    <div class="section">
-      <CellGroup inset>
-        <Cell title="检查更新" clickable is-link @click="checkUpdate" />
-        <Cell title="关于 hplayer" value="v0.1.0" />
-        <Cell title="开源协议" value="MIT" />
-      </CellGroup>
-    </div>
+      <Cell title="检查更新" clickable is-link @click="checkUpdate" />
+      <Cell title="关于 hplayer" value="v0.1.0" />
+      <Cell title="开源协议" value="MIT" />
+    </CellGroup>
 
     <input
       ref="fileInput"
@@ -338,9 +360,6 @@ function handleImport(e: Event) {
 
 <style scoped>
 .settings {
-  padding-top: 46px;
-  padding-top: calc(46px + constant(safe-area-inset-top));
-  padding-top: calc(46px + env(safe-area-inset-top));
   height: 100vh;
   height: 100dvh;
   overflow-y: auto;

@@ -8,10 +8,12 @@ import { VideoPlayer } from '@capgo/capacitor-video-player'
 import {
   detectProtocol,
   isValidVideoUrl,
+  normalizeImageUrl,
   STORAGE_KEYS,
   storage,
   useHistoryStore,
   usePlayerStore,
+  useSourceStore,
 } from '@hplayer/core'
 import { NavBar } from '@hplayer/ui'
 import Artplayer from 'artplayer'
@@ -23,6 +25,7 @@ const route = useRoute()
 const router = useRouter()
 const playerStore = usePlayerStore()
 const historyStore = useHistoryStore()
+const sourceStore = useSourceStore()
 
 const containerRef = ref<HTMLDivElement | null>(null)
 const nativeHostRef = ref<HTMLDivElement | null>(null)
@@ -39,15 +42,11 @@ const isAndroidNative = Capacitor.isNativePlatform() && Capacitor.getPlatform() 
 // @capgo/capacitor-video-player 类型定义未暴露 addListener/removeAllListeners，按 Capacitor Plugin 断言
 const nativeVideoPlayer = VideoPlayer as unknown as Plugin & typeof VideoPlayer
 
-// 原生播放器方向与画面比例状态
-type Orientation = 'landscape' | 'portrait'
-type ResizeMode = 'fit' | 'fill'
-const orientation = ref<Orientation>('landscape')
-const resizeMode = ref<ResizeMode>('fit')
-const detectingOrientation = ref(false)
+// 原生播放器全屏时跟随设备方向，不再做 JS 层视频比例检测
+const nativeFullscreenHint = ref('全屏播放中，旋转手机可切换横竖屏')
 
-// 播放器可用倍速档位（与 ArtPlayer settings 菜单同步）
-const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2, 3] as const
+// 播放器可用倍速档位（与 @capgo 插件对齐：仅支持 0.25 / 0.5 / 0.75 / 1 / 2 / 4）
+const RATES = [0.25, 0.5, 0.75, 1, 2, 4] as const
 type Rate = (typeof RATES)[number]
 
 function isRate(value: number): value is Rate {
@@ -173,52 +172,6 @@ function setRate(r: Rate) {
   }
 }
 
-// 根据视频宽高判断方向（height > width 视为竖屏）
-function resolveOrientation(width: number, height: number): Orientation {
-  return height > width ? 'portrait' : 'landscape'
-}
-
-// 通过临时 <video> 预加载元数据获取视频实际宽高
-function detectVideoOrientation(url: string): Promise<Orientation> {
-  return new Promise((resolve) => {
-    if (!url) {
-      resolve('landscape')
-      return
-    }
-    const video = document.createElement('video')
-    video.preload = 'metadata'
-    video.crossOrigin = 'anonymous'
-    video.muted = true
-    video.playsInline = true
-    video.style.display = 'none'
-    document.body.appendChild(video)
-
-    const cleanup = () => {
-      video.removeAttribute('src')
-      video.load()
-      video.remove()
-    }
-
-    const timer = setTimeout(() => {
-      cleanup()
-      resolve('landscape')
-    }, 3000)
-
-    video.addEventListener('loadedmetadata', () => {
-      clearTimeout(timer)
-      const o = resolveOrientation(video.videoWidth, video.videoHeight)
-      cleanup()
-      resolve(o)
-    })
-    video.addEventListener('error', () => {
-      clearTimeout(timer)
-      cleanup()
-      resolve('landscape')
-    })
-    video.src = url
-  })
-}
-
 // Android 原生播放器 POC
 async function initNativePlayer(url: string, startAt?: number) {
   if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
@@ -227,6 +180,12 @@ async function initNativePlayer(url: string, startAt?: number) {
   }
   if (!isValidVideoUrl(url)) {
     error.value = '不安全的播放地址'
+    return
+  }
+
+  const cur = playerStore.current
+  if (!cur?.episode) {
+    error.value = '无效播放会话'
     return
   }
 
@@ -266,11 +225,18 @@ async function initNativePlayer(url: string, startAt?: number) {
     return
   }
 
+  const source = sourceStore.list.find((s) => s.id === cur.sourceId)
+  const artwork = normalizeImageUrl(cur.vod.pic, source?.forceHttpsImage ?? false)
+
   const options: capVideoPlayerOptions = {
     mode: 'fullscreen',
     url,
     playerId: NATIVE_PLAYER_ID,
-    displayMode: orientation.value,
+    displayMode: 'all',
+    title: cur.vod.name,
+    smallTitle: cur.episode.name,
+    artwork,
+    rate: currentRate.value,
     showControls: true,
     pipEnabled: false,
     bkmodeEnabled: false,
@@ -332,16 +298,6 @@ async function cleanupNativePlayer() {
   }
 }
 
-async function lockOrientation(o: Orientation) {
-  if (!Capacitor.isNativePlatform()) return
-  try {
-    await ScreenOrientation.lock({ orientation: o })
-  } catch (e) {
-    console.warn('[lockOrientation] failed:', e)
-    await ScreenOrientation.unlock()
-  }
-}
-
 async function unlockOrientation() {
   if (!Capacitor.isNativePlatform()) return
   await ScreenOrientation.unlock()
@@ -363,25 +319,6 @@ async function restorePortraitAndGoBack() {
   else router.replace('/home')
 }
 
-// 切换横竖屏：停止当前原生播放器，重新初始化
-async function switchNativeOrientation(next: Orientation) {
-  if (orientation.value === next) return
-  orientation.value = next
-  await lockOrientation(next)
-  const cur = playerStore.current
-  if (!cur?.episode) return
-  // 保留当前进度，重新初始化播放器
-  const startAt = lastProgress.value || cur.startAt
-  await initNativePlayer(cur.episode.url, startAt)
-}
-
-// 切换画面比例。注意：@capgo 插件未暴露 resizeMode/aspectRatio API，
-// 当前版本仅记录状态；实际缩放由 ExoPlayer 默认行为决定。
-async function switchResizeMode(next: ResizeMode) {
-  resizeMode.value = next
-  console.warn(`[switchResizeMode] 已切换为 ${next}，但 @capgo 插件不支持原生画面比例控制`)
-}
-
 onMounted(async () => {
   const cur = playerStore.current
   const ep = cur?.episode
@@ -401,17 +338,8 @@ onMounted(async () => {
 
   if (isAndroidNative) {
     teardown()
-    // 自动检测视频方向：竖屏短视频切换到 portrait，默认 landscape
-    detectingOrientation.value = true
-    try {
-      orientation.value = await detectVideoOrientation(ep.url)
-    } catch (e) {
-      console.warn('[onMounted] detectVideoOrientation error:', e)
-      orientation.value = 'landscape'
-    } finally {
-      detectingOrientation.value = false
-    }
-    await lockOrientation(orientation.value)
+    // 让传感器决定方向：不解锁则 Android 可能仍受之前 ScreenOrientation.lock 影响
+    await unlockOrientation()
     await initNativePlayer(ep.url, cur.startAt)
   } else {
     buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
@@ -465,28 +393,12 @@ async function onBack() {
 
     <NavBar v-if="!isAndroidNative" :title="playingTitle || '播放'" @click-left="onBack" />
 
-    <!-- Android 原生环境：自动启动原生播放器，此处显示状态与手动控制 -->
+    <!-- Android 原生环境：自动启动原生全屏播放器，方向交给设备传感器 -->
     <div v-if="isAndroidNative" class="native-debug">
       <p class="native-tag">正在启动原生播放器</p>
       <p class="status">{{ nativeStatus }}</p>
-      <p v-if="detectingOrientation" class="native-hint">正在检测视频方向...</p>
+      <p class="native-hint">{{ nativeFullscreenHint }}</p>
       <p v-if="nativeError" class="native-error">错误：{{ nativeError }}</p>
-      <div class="native-controls">
-        <button
-          type="button"
-          class="native-btn"
-          @click="switchNativeOrientation(orientation === 'landscape' ? 'portrait' : 'landscape')"
-        >
-          {{ orientation === 'landscape' ? '切换竖屏' : '切换横屏' }}
-        </button>
-        <button
-          type="button"
-          class="native-btn"
-          @click="switchResizeMode(resizeMode === 'fit' ? 'fill' : 'fit')"
-        >
-          比例：{{ resizeMode === 'fit' ? '适应' : '填充' }}
-        </button>
-      </div>
     </div>
 
     <div v-if="!isAndroidNative" class="art-wrap" ref="containerRef"></div>
@@ -560,23 +472,6 @@ async function onBack() {
   font-size: 12px;
   margin-top: 8px;
 }
-.native-controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 16px;
-}
-.native-btn {
-  padding: 10px 20px;
-  background: var(--van-primary-color);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
-}
-.native-btn:active { opacity: 0.8; }
 .error {
   color: white;
   padding: 16px;

@@ -306,10 +306,10 @@ hplayer/
 
 ### Phase 9.3：原生播放器横竖屏与比例
 
-- [x] **Task 3.1**：调研 `@capgo/capacitor-video-player` 是否暴露视频宽高/比例 API（结论：未暴露运行时比例/resizeMode API）。
-- [x] **Task 3.2**：实现视频比例自动检测与方向切换逻辑（通过临时 `<video>` 预加载元数据判断方向，重新初始化原生播放器）。
-- [x] **Task 3.3**：添加手动横竖屏切换按钮。
-- [x] **Task 3.4**：实现画面比例切换（适应 / 填充）UI 状态，实际比例受插件 API 限制，当前版本保留手动方向切换为主。
+- [x] **Task 3.1**：调研 `@capgo/capacitor-video-player` 是否暴露视频宽高/比例 API（结论：未暴露运行时比例/resizeMode API；`displayMode` 仅支持 `"all" / "portrait" / "landscape"`）。
+- [x] **Task 3.2**：移除不可靠的 JS 层视频比例检测（`<video>` 预加载常因 CORS / HLS / 混内容失败），改为 `displayMode: 'all'` 并解除 `ScreenOrientation` 锁定，让原生全屏播放器跟随手机物理方向自动旋转。
+- [x] **Task 3.3**：不再提供 Web 层手动横竖屏切换按钮（`mode: 'fullscreen'` 下 WebView 无法覆盖原生播放器控件）。
+- [x] **Task 3.4**：移除画面比例切换按钮；保留默认“适应”语义（`resizeMode = 'fit'`），实际缩放由 ExoPlayer 默认行为决定。
 - [x] **Task 3.5**：commit。
 
 ### Phase 9.4：原生播放器稳定化与息屏

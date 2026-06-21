@@ -1,11 +1,14 @@
 import type { FavoriteItem } from '../types/favorite'
 import type { HistoryItem } from '../types/history'
+import type { Settings } from '../types/settings'
 import type { VideoSource } from '../types/source'
 import { STORAGE_KEYS, storage } from './storage'
 
+const defaultSettings: Settings = { theme: 'auto', deviceType: 'mobile' }
+
 /**
  * 用户数据备份文件结构
- * 包含视频源、收藏、观看历史三类核心数据
+ * 包含视频源、收藏、观看历史、设置四类核心数据
  */
 export interface BackupFile {
   version: string
@@ -13,13 +16,14 @@ export interface BackupFile {
   sources: VideoSource[]
   favorites: FavoriteItem[]
   history: HistoryItem[]
+  settings: Settings
 }
 
 /**
  * 当前备份格式版本
  * 后续 schema 变更时同步递增
  */
-export const BACKUP_VERSION = 'v0.1.0'
+export const BACKUP_VERSION = 'v0.2.0'
 
 function isValidFavorite(item: unknown): item is FavoriteItem {
   const it = item as Partial<FavoriteItem> | undefined
@@ -37,6 +41,17 @@ function isValidHistory(item: unknown): item is HistoryItem {
   )
 }
 
+function isValidSettings(value: unknown): value is Settings {
+  const it = value as Partial<Settings> | undefined
+  if (!it) return false
+  const themes: Settings['theme'][] = ['light', 'dark', 'auto']
+  const devices: Settings['deviceType'][] = ['mobile', 'desktop', 'tablet']
+  return (
+    themes.includes(it.theme as Settings['theme']) &&
+    devices.includes(it.deviceType as Settings['deviceType'])
+  )
+}
+
 /**
  * 从 localStorage 读取所有用户数据并序列化为 JSON 字符串
  */
@@ -47,6 +62,7 @@ export function exportBackup(): string {
     sources: storage.get<VideoSource[]>(STORAGE_KEYS.sources, []),
     favorites: storage.get<FavoriteItem[]>(STORAGE_KEYS.favorites, []),
     history: storage.get<HistoryItem[]>(STORAGE_KEYS.history, []),
+    settings: storage.get<Settings>(STORAGE_KEYS.settings, defaultSettings),
   }
   return JSON.stringify(data, null, 2)
 }
@@ -66,6 +82,9 @@ export function importBackup(raw: string): boolean {
     const validHistory = Array.isArray(data.history) ? data.history.filter(isValidHistory) : []
     storage.set(STORAGE_KEYS.favorites, validFavorites)
     storage.set(STORAGE_KEYS.history, validHistory)
+    if (isValidSettings(data.settings)) {
+      storage.set(STORAGE_KEYS.settings, data.settings)
+    }
     return true
   } catch {
     return false

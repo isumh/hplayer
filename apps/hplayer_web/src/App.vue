@@ -9,8 +9,8 @@ import {
   useSearchHistoryStore,
   useSettingsStore,
 } from '@hplayer/core'
-import { ImagePreview } from 'vant'
-import { onBeforeUnmount, onMounted, watch } from 'vue'
+import { ConfigProvider, ImagePreview } from 'vant'
+import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const historyStore = useHistoryStore()
@@ -19,6 +19,12 @@ const searchHistoryStore = useSearchHistoryStore()
 const previewStore = usePreviewStore()
 const settingsStore = useSettingsStore()
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
+
+const vantTheme = computed(() => {
+  const theme = settingsStore.settings.theme
+  const isDark = theme === 'dark' || (theme === 'auto' && prefersDark.matches)
+  return isDark ? 'dark' : 'light'
+})
 
 // 滚轮缩放：Vant 4 ImagePreview 默认不支持 mouse wheel zoom，
 // 这里全局监听 wheel 事件 + 修改图片 transform 的 scale 部分（保留 translate 避免破坏双击/双指缩放的状态）
@@ -111,19 +117,21 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <router-view />
-  <!-- 全局单例图片预览：closeOnClickImage/closeOnClickOverlay 控制点击关闭；doubleScale 启用双击/双指缩放 -->
-  <ImagePreview
-    v-model:show="previewStore.show"
-    :images="previewStore.images"
-    :start-position="previewStore.startIndex"
-    closeable
-    close-on-click-image
-    close-on-click-overlay
-    double-scale
-    :max-zoom="3"
-    @closed="resetWheelScale"
-  />
+  <ConfigProvider :theme="vantTheme" class="h-full">
+    <router-view />
+    <!-- 全局单例图片预览：closeOnClickImage/closeOnClickOverlay 控制点击关闭；doubleScale 启用双击/双指缩放 -->
+    <ImagePreview
+      v-model:show="previewStore.show"
+      :images="previewStore.images"
+      :start-position="previewStore.startIndex"
+      closeable
+      close-on-click-image
+      close-on-click-overlay
+      double-scale
+      :max-zoom="3"
+      @closed="resetWheelScale"
+    />
+  </ConfigProvider>
 </template>
 
 <style>
