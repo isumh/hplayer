@@ -8,7 +8,7 @@ import {
   type VodDetail,
   type VodItem,
 } from '@hplayer/core'
-import { EmptyState, SearchBar, SearchHistory, SearchResultList } from '@hplayer/ui'
+import { EmptyState, NavBar, SearchBar, SearchHistory, SearchResultList } from '@hplayer/ui'
 import { closeToast, showToast } from 'vant'
 import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -121,6 +121,7 @@ watch(mode, () => {
 
 <template>
   <div class="search-page">
+    <NavBar title="搜索" fixed placeholder />
     <SearchBar v-model="keyword" v-model:mode="mode" :source-name="sourceName" @search="doSearch" />
     <!-- 搜索结果区域：仅此处可垂直滚动 -->
     <div class="search-content">

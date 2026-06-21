@@ -61,8 +61,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .search-bar {
   padding: 8px 12px;
-  padding-top: calc(8px + constant(safe-area-inset-top));
-  padding-top: calc(8px + env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
   gap: 8px;
