@@ -7,11 +7,13 @@ withDefaults(
     title?: string
     showBack?: boolean
     rightText?: string
+    placeholder?: boolean
   }>(),
   {
     title: '',
     showBack: true,
     rightText: '',
+    placeholder: false,
   },
 )
 
@@ -32,6 +34,7 @@ function back() {
     :title="title ?? ''"
     :left-arrow="showBack ?? true"
     :right-text="rightText ?? ''"
+    :placeholder="placeholder ?? false"
     @click-left="back"
     @click-right="emit('click-right')"
     fixed
