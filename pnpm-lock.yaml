@@ -296,6 +296,9 @@ importers:
       '@capacitor/screen-orientation':
         specifier: ^8.0.0
         version: 8.0.1(@capacitor/core@8.4.1)
+      '@capacitor/status-bar':
+        specifier: ^8.0.0
+        version: 8.0.2(@capacitor/core@8.4.1)
       '@capawesome/capacitor-app-update':
         specifier: ^8.0.0
         version: 8.0.3(@capacitor/core@8.4.1)

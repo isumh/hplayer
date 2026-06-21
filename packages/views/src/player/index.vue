@@ -2,6 +2,7 @@
 import type { Plugin } from '@capacitor/core'
 import { Capacitor } from '@capacitor/core'
 import { ScreenOrientation } from '@capacitor/screen-orientation'
+import { StatusBar, Style } from '@capacitor/status-bar'
 import { KeepAwake } from '@capacitor-community/keep-awake'
 import type { capExitListener, capVideoPlayerOptions } from '@capgo/capacitor-video-player'
 import { VideoPlayer } from '@capgo/capacitor-video-player'
@@ -303,6 +304,26 @@ async function unlockOrientation() {
   await ScreenOrientation.unlock()
 }
 
+async function hideStatusBar() {
+  if (!Capacitor.isNativePlatform()) return
+  try {
+    await StatusBar.setStyle({ style: Style.Dark })
+    await StatusBar.setBackgroundColor({ color: '#000000' })
+    await StatusBar.hide()
+  } catch (e) {
+    console.warn('[hideStatusBar] failed:', e)
+  }
+}
+
+async function showStatusBar() {
+  if (!Capacitor.isNativePlatform()) return
+  try {
+    await StatusBar.show()
+  } catch (e) {
+    console.warn('[showStatusBar] failed:', e)
+  }
+}
+
 async function restorePortraitAndGoBack() {
   if (!Capacitor.isNativePlatform()) return
   try {
@@ -315,6 +336,8 @@ async function restorePortraitAndGoBack() {
   } catch {
     await unlockOrientation()
   }
+  // 退出播放页后恢复状态栏显示
+  await showStatusBar()
   if (window.history.length > 1) router.back()
   else router.replace('/home')
 }
@@ -340,6 +363,8 @@ onMounted(async () => {
     teardown()
     // 让传感器决定方向：不解锁则 Android 可能仍受之前 ScreenOrientation.lock 影响
     await unlockOrientation()
+    // 播放页隐藏状态栏，避免原生全屏播放器顶部状态栏区域露白
+    await hideStatusBar()
     await initNativePlayer(ep.url, cur.startAt)
   } else {
     buildPlayer(ep.url, cur.vod.name, cur.vod.pic)
@@ -363,6 +388,8 @@ onBeforeUnmount(async () => {
       console.warn('[onBeforeUnmount] restore portrait error:', e)
       await unlockOrientation()
     }
+    // 退出播放页时恢复状态栏显示
+    await showStatusBar()
   }
 })
 

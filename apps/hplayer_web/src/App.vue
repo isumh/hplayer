@@ -59,14 +59,11 @@ function resetWheelScale() {
 
 async function syncStatusBar() {
   if (!Capacitor.isNativePlatform()) return
-  const isDark =
-    settingsStore.settings.theme === 'dark' ||
-    (settingsStore.settings.theme === 'auto' && prefersDark.matches)
-  // Android WebView 对 env(safe-area-inset-top) 支持不稳定，
-  // 关闭状态栏覆盖 WebView，使内容从状态栏下方开始渲染，避免顶部按钮被遮挡。
+  // 视频类应用保持状态栏区域为黑色底 + 白色图标，
+  // 避免原生全屏播放器退出/切换时顶部状态栏区域露白。
   await StatusBar.setOverlaysWebView({ overlay: false })
-  await StatusBar.setStyle({ style: isDark ? Style.Dark : Style.Light })
-  await StatusBar.setBackgroundColor({ color: isDark ? '#0a0a0a' : '#ffffff' })
+  await StatusBar.setStyle({ style: Style.Dark })
+  await StatusBar.setBackgroundColor({ color: '#000000' })
 }
 
 let backButtonListener: { remove: () => Promise<void> } | null = null
