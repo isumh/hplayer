@@ -151,8 +151,11 @@ watch(mode, () => {
   height: 100dvh;
   overflow: hidden;
 }
+.search-bar {
+  flex-shrink: 0;
+}
 .search-content {
-  flex: 1 1 auto;
+  flex: 1 1 0%;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
