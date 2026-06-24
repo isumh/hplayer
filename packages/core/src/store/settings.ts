@@ -4,10 +4,22 @@ import { setDeviceType } from '../api/ua-pool'
 import type { DeviceType, Settings, Theme } from '../types/settings'
 import { STORAGE_KEYS, storage } from '../utils/storage'
 
-const defaultSettings: Settings = { theme: 'auto', deviceType: 'mobile' }
+const defaultSettings: Settings = { theme: 'light', deviceType: 'mobile' }
+
+/**
+ * 规范化主题值：旧版本可能持久化了 'auto'（跟随系统），现在该选项已移除。
+ * 读时回退为 'light'，不主动迁移存储。
+ */
+function normalizeTheme(theme: unknown): Theme {
+  return theme === 'dark' ? 'dark' : 'light'
+}
 
 export const useSettingsStore = defineStore('settings', () => {
-  const settings = ref<Settings>(storage.get<Settings>(STORAGE_KEYS.settings, defaultSettings))
+  const stored = storage.get<Settings>(STORAGE_KEYS.settings, defaultSettings)
+  const settings = ref<Settings>({
+    ...stored,
+    theme: normalizeTheme(stored.theme),
+  })
 
   function persist(): void {
     storage.set(STORAGE_KEYS.settings, settings.value)
@@ -25,11 +37,8 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   function applyTheme(): void {
-    const theme = settings.value.theme
     const root = document.documentElement
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const isDark = theme === 'dark' || (theme === 'auto' && prefersDark)
-    root.classList.toggle('dark', isDark)
+    root.classList.toggle('dark', settings.value.theme === 'dark')
   }
 
   watch(() => settings.value.theme, applyTheme, { immediate: false })

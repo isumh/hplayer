@@ -18,13 +18,10 @@ const router = useRouter()
 const searchHistoryStore = useSearchHistoryStore()
 const previewStore = usePreviewStore()
 const settingsStore = useSettingsStore()
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
 
-const vantTheme = computed(() => {
-  const theme = settingsStore.settings.theme
-  const isDark = theme === 'dark' || (theme === 'auto' && prefersDark.matches)
-  return isDark ? 'dark' : 'light'
-})
+// 'auto' 已在 v0.2 中移除；旧存储值会经 settings store normalize 为 'light'，
+// 因此这里只判断 'dark' 即可。
+const vantTheme = computed(() => (settingsStore.settings.theme === 'dark' ? 'dark' : 'light'))
 
 // 滚轮缩放：Vant 4 ImagePreview 默认不支持 mouse wheel zoom，
 // 这里全局监听 wheel 事件 + 修改图片 transform 的 scale 部分（保留 translate 避免破坏双击/双指缩放的状态）
@@ -95,7 +92,6 @@ onMounted(() => {
   historyStore.cleanup()
   searchHistoryStore.cleanup()
   window.addEventListener('wheel', onWheel, { passive: false })
-  prefersDark.addEventListener('change', syncStatusBar)
 
   if (Capacitor.isNativePlatform()) {
     SplashScreen.hide()
@@ -108,7 +104,6 @@ watch(() => settingsStore.settings.theme, syncStatusBar)
 
 onBeforeUnmount(() => {
   window.removeEventListener('wheel', onWheel)
-  prefersDark.removeEventListener('change', syncStatusBar)
   void backButtonListener?.remove()
 })
 </script>

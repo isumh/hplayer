@@ -53,7 +53,7 @@ describe('migrateV1ToV2', () => {
     await migrateV1ToV2(adapter)
 
     expect(adapter.get(STORAGE_KEYS.sources, [])).toEqual([{ id: 's1' }])
-    expect(adapter.get(STORAGE_KEYS.settings, { theme: 'auto' })).toEqual({ theme: 'dark' })
+    expect(adapter.get(STORAGE_KEYS.settings, { theme: 'light' })).toEqual({ theme: 'dark' })
     expect(adapter.get(STORAGE_KEYS.favorites, [])).toEqual([{ id: 'f1' }])
     expect(Preferences.set).toHaveBeenCalledWith({ key: 'hplayer:migrationVersion', value: '2' })
   })

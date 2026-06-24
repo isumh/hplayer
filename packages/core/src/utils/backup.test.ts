@@ -61,7 +61,7 @@ describe('exportBackup', () => {
     expect(data.sources).toEqual([])
     expect(data.favorites).toEqual([])
     expect(data.history).toEqual([])
-    expect(data.settings).toEqual({ theme: 'auto', deviceType: 'mobile' })
+    expect(data.settings).toEqual({ theme: 'light', deviceType: 'mobile' })
   })
 })
 
@@ -138,7 +138,7 @@ describe('importBackup', () => {
     expect(storage.get<VideoSource[]>(STORAGE_KEYS.sources, [])).toEqual([sampleSource])
     expect(storage.get<FavoriteItem[]>(STORAGE_KEYS.favorites, [])).toEqual([sampleFav])
     expect(storage.get<HistoryItem[]>(STORAGE_KEYS.history, [])).toEqual([sampleHistory])
-    expect(storage.get<Settings>(STORAGE_KEYS.settings, { theme: 'auto', deviceType: 'mobile' })).toEqual(sampleSettings)
+    expect(storage.get<Settings>(STORAGE_KEYS.settings, { theme: 'light', deviceType: 'mobile' })).toEqual(sampleSettings)
   })
 
   it('恢复 settings', () => {
@@ -151,13 +151,20 @@ describe('importBackup', () => {
       settings: sampleSettings,
     }
     expect(importBackup(JSON.stringify(file))).toBe(true)
-    expect(storage.get<Settings>(STORAGE_KEYS.settings, { theme: 'auto', deviceType: 'mobile' })).toEqual(sampleSettings)
+    expect(storage.get<Settings>(STORAGE_KEYS.settings, { theme: 'light', deviceType: 'mobile' })).toEqual(sampleSettings)
   })
 
   it('settings 不合法时不覆盖当前设置', () => {
     storage.set(STORAGE_KEYS.settings, sampleSettings)
     const file = { version: 'v0.2.0', exportedAt: 0, sources: [sampleSource], settings: { theme: 'red', deviceType: 'tv' } }
     expect(importBackup(JSON.stringify(file))).toBe(true)
-    expect(storage.get<Settings>(STORAGE_KEYS.settings, { theme: 'auto', deviceType: 'mobile' })).toEqual(sampleSettings)
+    expect(storage.get<Settings>(STORAGE_KEYS.settings, { theme: 'light', deviceType: 'mobile' })).toEqual(sampleSettings)
+  })
+
+  it('settings.theme 为已废弃的 "auto" 时不覆盖当前设置', () => {
+    storage.set(STORAGE_KEYS.settings, sampleSettings)
+    const file = { version: 'v0.2.0', exportedAt: 0, sources: [sampleSource], settings: { theme: 'auto', deviceType: 'mobile' } }
+    expect(importBackup(JSON.stringify(file))).toBe(true)
+    expect(storage.get<Settings>(STORAGE_KEYS.settings, { theme: 'light', deviceType: 'mobile' })).toEqual(sampleSettings)
   })
 })

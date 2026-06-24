@@ -4,7 +4,7 @@ import type { Settings } from '../types/settings'
 import type { VideoSource } from '../types/source'
 import { STORAGE_KEYS, storage } from './storage'
 
-const defaultSettings: Settings = { theme: 'auto', deviceType: 'mobile' }
+const defaultSettings: Settings = { theme: 'light', deviceType: 'mobile' }
 
 /**
  * 用户数据备份文件结构
@@ -44,7 +44,7 @@ function isValidHistory(item: unknown): item is HistoryItem {
 function isValidSettings(value: unknown): value is Settings {
   const it = value as Partial<Settings> | undefined
   if (!it) return false
-  const themes: Settings['theme'][] = ['light', 'dark', 'auto']
+  const themes: Settings['theme'][] = ['light', 'dark']
   const devices: Settings['deviceType'][] = ['mobile', 'desktop', 'tablet']
   return (
     themes.includes(it.theme as Settings['theme']) &&

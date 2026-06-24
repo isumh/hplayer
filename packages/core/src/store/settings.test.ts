@@ -44,9 +44,9 @@ describe('useSettingsStore', () => {
     setActivePinia(createPinia())
   })
 
-  it('默认主题为 auto，设备类型为 mobile', () => {
+  it('默认主题为 light，设备类型为 mobile', () => {
     const s = useSettingsStore()
-    expect(s.settings.theme).toBe('auto')
+    expect(s.settings.theme).toBe('light')
     expect(s.settings.deviceType).toBe('mobile')
   })
 
@@ -72,5 +72,21 @@ describe('useSettingsStore', () => {
     const s = useSettingsStore()
     expect(s.settings.theme).toBe('light')
     expect(s.settings.deviceType).toBe('tablet')
+  })
+
+  it('读取旧版存储的 theme="auto" 时回退为 light', () => {
+    localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify({ theme: 'auto', deviceType: 'mobile' }))
+    const s = useSettingsStore()
+    expect(s.settings.theme).toBe('light')
+  })
+
+  it('applyTheme 根据 settings.theme 切换 documentElement.dark class', () => {
+    const s = useSettingsStore()
+    s.setTheme('dark')
+    s.applyTheme()
+    expect(document.documentElement.classList.contains('dark')).toBe(true)
+    s.setTheme('light')
+    s.applyTheme()
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
 })

@@ -36,7 +36,7 @@ describe('storage', () => {
 
   it('get 不存在返回 fallback', () => {
     expect(storage.get(STORAGE_KEYS.history, [])).toEqual([])
-    expect(storage.get(STORAGE_KEYS.settings, { theme: 'auto' })).toEqual({ theme: 'auto' })
+    expect(storage.get(STORAGE_KEYS.settings, { theme: 'light' })).toEqual({ theme: 'light' })
   })
 
   it('get 非法 JSON 返回 fallback', () => {

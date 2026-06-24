@@ -1,4 +1,4 @@
-export type Theme = 'light' | 'dark' | 'auto'
+export type Theme = 'light' | 'dark'
 
 export type DeviceType = 'mobile' | 'desktop' | 'tablet'
 

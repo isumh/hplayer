@@ -35,7 +35,7 @@ const favoriteStore = useFavoriteStore()
 const historyStore = useHistoryStore()
 
 const fileInput = ref<HTMLInputElement | null>(null)
-const defaultSettings: Settings = { theme: 'auto', deviceType: 'mobile' }
+const defaultSettings: Settings = { theme: 'light', deviceType: 'mobile' }
 
 const sources = computed(() => sourceStore.list.slice().sort((a, b) => a.order - b.order))
 
@@ -47,8 +47,12 @@ function editSource(id: string) {
   router.push(`/settings/source/edit/${id}`)
 }
 
-function setTheme(theme: 'light' | 'dark' | 'auto') {
+function setTheme(theme: 'light' | 'dark') {
   settingsStore.setTheme(theme)
+}
+
+function toggleTheme() {
+  setTheme(settingsStore.settings.theme === 'dark' ? 'light' : 'dark')
 }
 
 async function checkUpdate() {
@@ -98,14 +102,7 @@ function applyImportedData() {
   historyStore.items = storage.get<HistoryItem[]>(STORAGE_KEYS.history, [])
 }
 
-const showThemePicker = ref(false)
 const showDevicePicker = ref(false)
-
-const themeColumns = [
-  { text: '亮色', value: 'light' },
-  { text: '暗色', value: 'dark' },
-  { text: '跟随系统', value: 'auto' },
-]
 
 const deviceColumns = [
   { text: '移动端', value: 'mobile', label: 'iPhone / Android（推荐）' },
@@ -113,19 +110,9 @@ const deviceColumns = [
   { text: '平板', value: 'tablet', label: 'iPad / Android Tablet' },
 ]
 
-const themeResult = computed(() => {
-  const item = themeColumns.find((c) => c.value === settingsStore.settings.theme)
-  return item?.text ?? '跟随系统'
-})
-
 const deviceResult = computed(() => {
   const item = deviceColumns.find((c) => c.value === settingsStore.settings.deviceType)
   return item?.text ?? '移动端'
-})
-
-const themePickerValue = computed(() => {
-  const value = settingsStore.settings.theme
-  return themeColumns.some((c) => c.value === value) ? [value] : ['auto']
 })
 
 const devicePickerValue = computed(() => {
@@ -133,11 +120,7 @@ const devicePickerValue = computed(() => {
   return deviceColumns.some((c) => c.value === value) ? [value] : ['mobile']
 })
 
-function onThemeConfirm({ selectedValues }: { selectedValues: (string | number)[] }) {
-  const value = selectedValues[0] as 'light' | 'dark' | 'auto'
-  setTheme(value)
-  showThemePicker.value = false
-}
+const themeResult = computed(() => (settingsStore.settings.theme === 'dark' ? '暗色' : '亮色'))
 
 function onDeviceConfirm({ selectedValues }: { selectedValues: (string | number)[] }) {
   const value = selectedValues[0] as 'mobile' | 'desktop' | 'tablet'
@@ -305,25 +288,8 @@ function handleImport(e: Event) {
     </div>
 
     <CellGroup inset title="其他" class="section">
-      <Field
-        :model-value="themeResult"
-        is-link
-        readonly
-        input-align="right"
-        name="theme"
-        label="主题"
-        placeholder="点击选择主题"
-        @click="showThemePicker = true"
-      />
-      <Popup v-model:show="showThemePicker" destroy-on-close position="bottom" lock-scroll>
-        <Picker
-          :columns="themeColumns"
-          :model-value="themePickerValue"
-          @confirm="onThemeConfirm"
-          @cancel="showThemePicker = false"
-        />
-      </Popup>
-
+      <!-- 主题：点击 Cell 直接在「亮色 / 暗色」间切换（不再使用 Picker 弹窗） -->
+      <Cell title="主题" clickable :value="themeResult" @click="toggleTheme" />
       <Field
         :model-value="deviceResult"
         is-link

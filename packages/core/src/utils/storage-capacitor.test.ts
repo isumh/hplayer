@@ -53,7 +53,7 @@ describe('storage-capacitor', () => {
 
     await initCapacitorStorage()
 
-    expect(capacitorStorageAdapter.get('hplayer:settings', { theme: 'auto' })).toEqual({ theme: 'dark' })
+    expect(capacitorStorageAdapter.get('hplayer:settings', { theme: 'light' })).toEqual({ theme: 'dark' })
     expect(capacitorStorageAdapter.get('hplayer:sources', [])).toEqual([{ id: 's1' }])
   })
 
