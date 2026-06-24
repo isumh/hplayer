@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Capacitor } from '@capacitor/core'
 import type { VideoSource } from '@hplayer/core'
-import { clampPageSize, useSourceStore } from '@hplayer/core'
+import { clampPageSize, parseReservedCategories, useSourceStore } from '@hplayer/core'
 import {
   Button,
   CellGroup,
@@ -21,7 +21,9 @@ const props = defineProps<{ sourceId?: string }>()
 const router = useRouter()
 const store = useSourceStore()
 
-const form = ref<Omit<VideoSource, 'id' | 'createdAt' | 'order'>>({
+// 表单内部用字符串承载 reservedCategories，便于编辑；
+// 提交时通过 parseReservedCategories 转成 string[]
+const form = ref<Omit<VideoSource, 'id' | 'createdAt' | 'order'> & { reservedCategoriesText: string }>({
   name: '',
   type: 't1_json',
   baseUrl: '',
@@ -29,6 +31,7 @@ const form = ref<Omit<VideoSource, 'id' | 'createdAt' | 'order'>>({
   enabled: true,
   remark: '',
   forceHttpsImage: false,
+  reservedCategoriesText: '',
 })
 
 watch(
@@ -37,13 +40,16 @@ watch(
     if (id) {
       const s = store.list.find((x) => x.id === id)
       if (s) {
-        const next: Omit<VideoSource, 'id' | 'createdAt' | 'order'> = {
+        const next: Omit<VideoSource, 'id' | 'createdAt' | 'order'> & {
+          reservedCategoriesText: string
+        } = {
           name: s.name,
           type: s.type,
           baseUrl: s.baseUrl,
           pageSize: s.pageSize ?? 20,
           enabled: s.enabled,
           forceHttpsImage: s.forceHttpsImage ?? false,
+          reservedCategoriesText: (s.reservedCategories ?? []).join(' '),
         }
         form.value = next
       }
@@ -69,11 +75,16 @@ async function probeCors(url: string): Promise<boolean> {
 async function submit() {
   if (!form.value.baseUrl.trim()) return showToast('请输入接口地址')
   if (!form.value.name.trim()) return showToast('请输入名称')
+  const reserved = parseReservedCategories(form.value.reservedCategoriesText)
+  const { reservedCategoriesText: _omit, ...rest } = form.value
+  void _omit
+  // exactOptionalPropertyTypes 下，只有非空时才写入 reservedCategories 字段
   const cleaned: Omit<VideoSource, 'id' | 'createdAt' | 'order'> = {
-    ...form.value,
-    name: form.value.name.trim(),
-    baseUrl: form.value.baseUrl.trim().replace(/\/+$/, ''),
-    pageSize: clampPageSize(form.value.pageSize, 20),
+    ...rest,
+    name: rest.name.trim(),
+    baseUrl: rest.baseUrl.trim().replace(/\/+$/, ''),
+    pageSize: clampPageSize(rest.pageSize, 20),
+    ...(reserved.length > 0 ? { reservedCategories: reserved } : {}),
   }
   // 非原生环境下探测源站 CORS，失败时提示用户仍要保存
   const corsOk = await probeCors(cleaned.baseUrl)
@@ -128,6 +139,12 @@ async function remove() {
           </RadioGroup>
         </template>
       </Field>
+      <!-- 保留分类：限定首页分类栏；用空格分隔多个名称，例如"电影 足球"；为空则显示所有分类 -->
+      <Field
+        v-model="form.reservedCategoriesText"
+        label="保留分类"
+        placeholder="用空格分隔，例如：电影 足球"
+      />
       <Field name="pageSize" label="每页条数">
         <template #input>
           <Stepper v-model="form.pageSize as number" :min="1" :max="100" />

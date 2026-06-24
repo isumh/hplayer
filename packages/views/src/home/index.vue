@@ -2,6 +2,7 @@
 import {
   adapterProxy,
   type Category,
+  filterCategoriesByReserved,
   usePlayerStore,
   useSourceStore,
   type VodDetail,
@@ -45,7 +46,9 @@ async function loadCategories() {
   }
   error.value = null
   try {
-    const list = await adapterProxy.getCategories(sourceStore.activeSource)
+    const all = await adapterProxy.getCategories(sourceStore.activeSource)
+    // 按视频源配置的"保留分类"过滤（按名称不区分大小写精确匹配）
+    const list = filterCategoriesByReserved(all, sourceStore.activeSource.reservedCategories)
     categories.value = list
     if (list.length) {
       // 有分类：默认选中第一个（如已选过，保持现状并同步对象）

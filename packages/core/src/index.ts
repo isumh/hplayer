@@ -24,6 +24,7 @@ export * from './types/source'
 export * from './types/vod'
 // utils
 export * from './utils/backup'
+export * from './utils/category-filter'
 export * from './utils/image-url'
 export * from './utils/lru'
 export * from './utils/migrate'
