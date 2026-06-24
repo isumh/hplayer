@@ -68,6 +68,20 @@ describe('sourceStore', () => {
     expect(updated?.createdAt).toBe(originalCreated)
   })
 
+  // 表单"清空保留分类"路径：
+  // - 修复前：SourceForm 用 "key 缺失" 表达清除，spread 不删除字段 → 旧值被保留
+  // - 修复后：表单始终传 reservedCategories: []，update 后 list 里能拿到 []
+  // 契约：update 的 patch 中包含的 key 一定会覆盖 current 上的同 key
+  it('update 时 patch 中显式包含的 key 会覆盖 current 旧值（含空数组）', () => {
+    const store = useSourceStore()
+    const s = store.add({ ...makeInput('orig'), reservedCategories: ['电影', '足球'] })
+    expect(s.reservedCategories).toEqual(['电影', '足球'])
+    // 表单清空字段后传入的 payload：reservedCategories 显式为 []
+    store.update(s.id, { reservedCategories: [] })
+    const updated = store.list[0]
+    expect(updated?.reservedCategories).toEqual([])
+  })
+
   it('reorder 按给定 id 顺序重排 order', () => {
     const store = useSourceStore()
     const a = store.add(makeInput('a'))

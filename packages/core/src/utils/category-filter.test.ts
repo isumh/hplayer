@@ -50,9 +50,16 @@ describe('filterCategoriesByReserved', () => {
     expect(result.map((c) => c.id)).toEqual(['1', '3'])
   })
 
-  it('保留输入列表中的分类顺序', () => {
-    const result = filterCategoriesByReserved(cats, ['足球', '电影'])
-    expect(result.map((c) => c.name)).toEqual(['电影', '足球'])
+  it('按 reserved 列表顺序输出（覆盖源分类顺序）', () => {
+    // 源中 电影 在前、篮球 在后；reserved 顺序反过来 → 结果应按 reserved 顺序
+    const result = filterCategoriesByReserved(cats, ['篮球', '电影'])
+    expect(result.map((c) => c.name)).toEqual(['篮球', '电影'])
+  })
+
+  it('reserved 中部分名称在源中不存在时仅返回命中项，按 reserved 顺序', () => {
+    // 源里没有"动作片"和"也没有"；仅"足球"命中
+    const result = filterCategoriesByReserved(cats, ['动作片', '足球', '也没有'])
+    expect(result.map((c) => c.name)).toEqual(['足球'])
   })
 
   it('reserved 中没有匹配项时返回空数组（交由调用方走"全部"分支）', () => {
@@ -66,6 +73,16 @@ describe('filterCategoriesByReserved', () => {
 
   it('reserved 中的大小写不影响匹配', () => {
     const result = filterCategoriesByReserved(cats, ['MOVIE', '电影'])
-    expect(result.map((c) => c.id)).toEqual(['1', '5'])
+    expect(result.map((c) => c.id)).toEqual(['5', '1'])
+  })
+
+  it('源中同名重复时结果只取首个', () => {
+    const duped: Category[] = [
+      { id: 'a', name: '电影', sourceId: 's1' },
+      { id: 'b', name: '电影', sourceId: 's1' },
+      { id: 'c', name: '足球', sourceId: 's1' },
+    ]
+    const result = filterCategoriesByReserved(duped, ['电影', '足球'])
+    expect(result.map((c) => c.id)).toEqual(['a', 'c'])
   })
 })

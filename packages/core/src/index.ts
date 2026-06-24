@@ -12,6 +12,7 @@ export * from './store/favorite'
 export * from './store/history'
 export * from './store/player'
 export * from './store/preview'
+export * from './store/scroll-snapshot'
 export * from './store/search-history'
 export * from './store/settings'
 // store

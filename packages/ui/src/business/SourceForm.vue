@@ -78,13 +78,16 @@ async function submit() {
   const reserved = parseReservedCategories(form.value.reservedCategoriesText)
   const { reservedCategoriesText: _omit, ...rest } = form.value
   void _omit
-  // exactOptionalPropertyTypes 下，只有非空时才写入 reservedCategories 字段
+  // 注意：必须始终写入 reservedCategories（清空时传 []），不能用"key 缺失"表达清除。
+  // 因为 sourceStore.update 走的是 { ...current, ...patch }，spread 不会删除 current 上的字段，
+  // 缺 key 会导致旧值被保留，首页继续按旧保留分类过滤。
+  // [] 与 undefined 对 filterCategoriesByReserved 等价（都显示所有分类）。
   const cleaned: Omit<VideoSource, 'id' | 'createdAt' | 'order'> = {
     ...rest,
     name: rest.name.trim(),
     baseUrl: rest.baseUrl.trim().replace(/\/+$/, ''),
     pageSize: clampPageSize(rest.pageSize, 20),
-    ...(reserved.length > 0 ? { reservedCategories: reserved } : {}),
+    reservedCategories: reserved,
   }
   // 非原生环境下探测源站 CORS，失败时提示用户仍要保存
   const corsOk = await probeCors(cleaned.baseUrl)

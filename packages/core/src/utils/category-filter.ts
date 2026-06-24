@@ -23,14 +23,34 @@ export function parseReservedCategories(input: string | undefined | null): strin
 }
 
 /**
- * 按"保留分类"过滤分类列表（按名称不区分大小写精确匹配）。
- * reserved 为空 / 未配置时返回原列表（保持现有行为）。
+ * 按"保留分类"过滤分类列表。
+ *
+ * 行为：
+ * - reserved 为空 / 未配置时返回原列表（保持现有行为）。
+ * - 否则按 **reserved 数组的顺序** 输出，源分类列表中不存在（按名称不区分大小写）的项被跳过。
+ * - 源中同一名称重复出现时，结果中只取首个（避免重复条目）。
  */
 export function filterCategoriesByReserved(
   categories: Category[],
   reserved: string[] | undefined | null,
 ): Category[] {
   if (!reserved || reserved.length === 0) return categories
-  const set = new Set(reserved.map((n) => n.toLowerCase()))
-  return categories.filter((c) => set.has(c.name.toLowerCase()))
+  // 用 Map<小写名, Category>：源中同名重复时只保留首个
+  const byKey = new Map<string, Category>()
+  for (const c of categories) {
+    const key = c.name.toLowerCase()
+    if (!byKey.has(key)) byKey.set(key, c)
+  }
+  // 沿 reserved 顺序查找；parseReservedCategories 已去重，此处 seen 仅作防御
+  const result: Category[] = []
+  const seen = new Set<string>()
+  for (const name of reserved) {
+    const key = name.toLowerCase()
+    if (seen.has(key)) continue
+    const cat = byKey.get(key)
+    if (!cat) continue
+    seen.add(key)
+    result.push(cat)
+  }
+  return result
 }
